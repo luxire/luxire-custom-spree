@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Luxire Style Masters</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Default values</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @luxire_style_masters.each do |luxire_style_master| %>
+      <tr>
+        <td><%= luxire_style_master.name %></td>
+        <td><%= luxire_style_master.default_values %></td>
+        <td><%= link_to 'Show', luxire_style_master %></td>
+        <td><%= link_to 'Edit', edit_luxire_style_master_path(luxire_style_master) %></td>
+        <td><%= link_to 'Destroy', luxire_style_master, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Luxire style master', new_luxire_style_master_path %>

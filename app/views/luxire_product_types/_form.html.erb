@@ -1,0 +1,25 @@
+<%= form_for(@luxire_product_type) do |f| %>
+  <% if @luxire_product_type.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@luxire_product_type.errors.count, "error") %> prohibited this luxire_product_type from being saved:</h2>
+
+      <ul>
+      <% @luxire_product_type.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :product_type %><br>
+    <%= f.text_field :product_type %>
+  </div>
+  <div class="field">
+    <%= f.label :description %><br>
+    <%= f.text_field :description %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

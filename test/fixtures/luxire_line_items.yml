@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  fulfillment_status: MyString
+  line_item_id: 1
+
+two:
+  fulfillment_status: MyString
+  line_item_id: 1

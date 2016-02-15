@@ -1,0 +1,2 @@
+module CustomizedActiveShippingSettingsHelper
+end

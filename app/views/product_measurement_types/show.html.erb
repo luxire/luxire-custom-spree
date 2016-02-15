@@ -1,0 +1,14 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Luxire product type:</strong>
+  <%= @product_measurement_type.luxire_product_type_id %>
+</p>
+
+<p>
+  <strong>Measurement type:</strong>
+  <%= @product_measurement_type.measurement_type_id %>
+</p>
+
+<%= link_to 'Edit', edit_product_measurement_type_path(@product_measurement_type) %> |
+<%= link_to 'Back', product_measurement_types_path %>

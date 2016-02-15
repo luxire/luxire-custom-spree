@@ -1,0 +1,2 @@
+module CustomizedResourceHelper
+end

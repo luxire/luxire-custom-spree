@@ -1,0 +1,51 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  fulfillment_status: MyString
+  fulfilled_at: 2015-12-31 11:40:41
+  fulfilled_at_zone: MyString
+  accepts_marketing: false
+  discount_code: MyString
+  vendor: MyString
+  order_id: 1
+  tags: MyString
+  source: MyString
+  tax1_name: MyString
+  tax1_value: 1.5
+  tax2_name: MyString
+  tax2_value: 1.5
+  tax3_name: MyString
+  tax3_value: 1.5
+  tax4_name: MyString
+  tax4_value: 1.5
+  tax5_name: MyString
+  tax5_value: 1.5
+  customized_data: 
+  personalize_data: 
+  measurement_data: 
+  notes_attributes: MyString
+
+two:
+  fulfillment_status: MyString
+  fulfilled_at: 2015-12-31 11:40:41
+  fulfilled_at_zone: MyString
+  accepts_marketing: false
+  discount_code: MyString
+  vendor: MyString
+  order_id: 1
+  tags: MyString
+  source: MyString
+  tax1_name: MyString
+  tax1_value: 1.5
+  tax2_name: MyString
+  tax2_value: 1.5
+  tax3_name: MyString
+  tax3_value: 1.5
+  tax4_name: MyString
+  tax4_value: 1.5
+  tax5_name: MyString
+  tax5_value: 1.5
+  customized_data: 
+  personalize_data: 
+  measurement_data: 
+  notes_attributes: MyString

@@ -1,0 +1,2 @@
+module LuxireStyleMastersHelper
+end

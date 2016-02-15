@@ -1,0 +1,18 @@
+
+
+Dear <%=
+            if (!@user.nil?)
+              if(@user.luxire_user.first_name != "" || @user.luxire_user.first_name.nil?)
+                "Customer"
+              else
+                @user.luxire_user.first_name
+              end
+            end
+%>,
+This is to confirm that your account for the shop Luxire Custom Clothing is now active.
+
+The next time you shop at Luxire Custom Clothing, you can save time at checkout by logging into your account. This will prefill your address information at the checkout.
+
+Thank you,
+
+Luxire Custom Clothing

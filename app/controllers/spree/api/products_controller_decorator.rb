@@ -1,0 +1,45 @@
+Spree::Api::ProductsController.class_eval do
+
+  # product_params method whitelist all the parameter for mass assignment
+    def show
+     @product = find_product(params[:id])
+     expires_in 15.minutes, :public => true
+     headers['Surrogate-Control'] = "max-age=#{15.minutes}"
+     headers['Surrogate-Key'] = "product_id=1"
+     @luxire_product_type =  @product.luxire_product_type
+     if @luxire_product_type
+       @luxire_product_type_attributes = @luxire_product_type.measurement_types
+       if @luxire_product_type_attributes
+          @luxire_product_type_attributes_customize = @luxire_product_type_attributes.where(category: "customize")
+          @luxire_product_type_attributes_personalize = @luxire_product_type_attributes.where(category: "personalize")
+          @luxire_product_type_attributes_measurement = @luxire_product_type_attributes.where(category: "measurement")
+          @luxire_product_type_attributes_measuement_std = @luxire_product_type_attributes.where(sub_category: "std")
+          @luxire_product_type_attributes_measuement_body = @luxire_product_type_attributes.where(sub_category: "body")
+	end
+     end
+    end
+private
+  def product_params
+    # Get all the column names from luxire_product model. Model.column return an array
+    # Strings, where Strings are the model attributes
+    luxire_product_permitted_attributes = LuxireProduct.column_names
+    # Get all the column names from luxire_stock model. Model.column return an array
+    # Strings, where Strings are the model attributes
+    luxire_stock_permitted_attributes = LuxireStock.column_names
+    # Converting the array of Strings to array of symbols
+    luxire_product_permitted_attributes = luxire_product_permitted_attributes.map &:to_sym
+    luxire_stock_permitted_attributes = luxire_stock_permitted_attributes.map &:to_sym
+    # Creating hash of luxire_stock_attributes
+    luxire_stock_permitted_array = {luxire_stock_attributes: luxire_stock_permitted_attributes}
+    # adding luxire_stock_attributes to luxire_product_permitted_attributes
+    luxire_product_permitted_attributes << luxire_stock_permitted_array
+    # Creating the final luxire_product_permitted_array
+    luxire_product_permitted_array = [luxire_product_attributes: luxire_product_permitted_attributes]
+    # Creating the final permitted array
+    permitted_array = permitted_attributes.product_attributes + [
+       product_properties_attributes: permitted_product_properties_attributes
+          ] + luxire_product_permitted_array
+    params.require(:product).permit(permitted_array)
+  end
+
+end

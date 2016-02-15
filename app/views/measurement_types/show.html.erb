@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @measurement_type.name %>
+</p>
+
+<p>
+  <strong>Value:</strong>
+  <%= @measurement_type.value %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @measurement_type.description %>
+</p>
+
+<%= link_to 'Edit', edit_measurement_type_path(@measurement_type) %> |
+<%= link_to 'Back', measurement_types_path %>

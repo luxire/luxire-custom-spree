@@ -1,0 +1,2 @@
+module LuxireStocksHelper
+end

@@ -1,0 +1,2 @@
+module CustomizedShippingMethodsHelper
+end

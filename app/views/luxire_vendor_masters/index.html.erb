@@ -1,0 +1,27 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Luxire Vendor Masters</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @luxire_vendor_masters.each do |luxire_vendor_master| %>
+      <tr>
+        <td><%= luxire_vendor_master.name %></td>
+        <td><%= link_to 'Show', luxire_vendor_master %></td>
+        <td><%= link_to 'Edit', edit_luxire_vendor_master_path(luxire_vendor_master) %></td>
+        <td><%= link_to 'Destroy', luxire_vendor_master, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Luxire vendor master', new_luxire_vendor_master_path %>

@@ -1,0 +1,49 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Stock location:</strong>
+  <%= @luxire_stock.stock_location_id %>
+</p>
+
+<p>
+  <strong>Parent sku:</strong>
+  <%= @luxire_stock.parent_sku %>
+</p>
+
+<p>
+  <strong>Virtual count on hands:</strong>
+  <%= @luxire_stock.virtual_count_on_hands %>
+</p>
+
+<p>
+  <strong>Physical count on hands:</strong>
+  <%= @luxire_stock.physical_count_on_hands %>
+</p>
+
+<p>
+  <strong>Measuring unit:</strong>
+  <%= @luxire_stock.measuring_unit %>
+</p>
+
+<p>
+  <strong>Backorderable:</strong>
+  <%= @luxire_stock.backorderable %>
+</p>
+
+<p>
+  <strong>Deleted at:</strong>
+  <%= @luxire_stock.deleted_at %>
+</p>
+
+<p>
+  <strong>Rack:</strong>
+  <%= @luxire_stock.rack %>
+</p>
+
+<p>
+  <strong>Threshold:</strong>
+  <%= @luxire_stock.threshold %>
+</p>
+
+<%= link_to 'Edit', edit_luxire_stock_path(@luxire_stock) %> |
+<%= link_to 'Back', luxire_stocks_path %>

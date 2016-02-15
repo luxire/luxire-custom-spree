@@ -1,0 +1,53 @@
+<%= form_for(@luxire_stock) do |f| %>
+  <% if @luxire_stock.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@luxire_stock.errors.count, "error") %> prohibited this luxire_stock from being saved:</h2>
+
+      <ul>
+      <% @luxire_stock.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :stock_location_id %><br>
+    <%= f.number_field :stock_location_id %>
+  </div>
+  <div class="field">
+    <%= f.label :parent_sku %><br>
+    <%= f.text_field :parent_sku %>
+  </div>
+  <div class="field">
+    <%= f.label :virtual_count_on_hands %><br>
+    <%= f.number_field :virtual_count_on_hands %>
+  </div>
+  <div class="field">
+    <%= f.label :physical_count_on_hands %><br>
+    <%= f.number_field :physical_count_on_hands %>
+  </div>
+  <div class="field">
+    <%= f.label :measuring_unit %><br>
+    <%= f.text_field :measuring_unit %>
+  </div>
+  <div class="field">
+    <%= f.label :backorderable %><br>
+    <%= f.check_box :backorderable %>
+  </div>
+  <div class="field">
+    <%= f.label :deleted_at %><br>
+    <%= f.datetime_select :deleted_at %>
+  </div>
+  <div class="field">
+    <%= f.label :rack %><br>
+    <%= f.text_field :rack %>
+  </div>
+  <div class="field">
+    <%= f.label :threshold %><br>
+    <%= f.number_field :threshold %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

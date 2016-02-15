@@ -1,0 +1,2 @@
+module CustomizedPromotionsHelper
+end

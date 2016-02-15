@@ -1,0 +1,2 @@
+module LuxireVendorMastersHelper
+end
