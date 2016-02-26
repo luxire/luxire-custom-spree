@@ -5,6 +5,13 @@ class MeasurementTypesController < Spree::Api::BaseController
   # GET /measurement_types.json
   def index
     @measurement_types = MeasurementType.all
+    # if measurement_type exists segrigate it in customize, personalize, body measurement and standard measurement
+    if @measurement_types
+      @measurement_type_customize = @measurement_types.where(category: "customize")
+      @measurement_type_personalize = @measurement_types.where(category: "personalize")
+      @measurement_type_body_measurement = @measurement_types.where(category: "measurement").where(sub_category: "body")
+      @measurement_type_std_measurement = @measurement_types.where(category: "measurement").where(sub_category: "std")
+    end
   end
 
   # GET /measurement_types/1
@@ -72,4 +79,3 @@ class MeasurementTypesController < Spree::Api::BaseController
       params.require(:measurement_type).permit!
     end
 end
-

@@ -1,3 +1,4 @@
+
 object @order
 extends "spree/api/orders/order"
 
@@ -30,8 +31,7 @@ child :payments => :payments do
   child :payment_method => :payment_method do
     attributes :id, :name
   end
-
-  child :source => :source do
+child :source => :source do
     if @current_user_roles.include?('admin')
       attributes *payment_source_attributes + [:gateway_customer_profile_id, :gateway_payment_profile_id]
     else

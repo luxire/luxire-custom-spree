@@ -12,25 +12,26 @@ class LuxireProductTypesController < Spree::Api::BaseController
   # GET /luxire_product_types/1.json
   def show
     logger.debug "params in show #{params}"
-    @luxire_product_type = LuxireProductType.find(params[:id]).attributes
-    @luxire_product_type[:mnt] = Hash.new
-    @luxire_product_type[:mnt][:customize] = LuxireProductType.find(params[:id]).measurement_types.where(category: "customize")
+     @luxire_product_type = LuxireProductType.find(params[:id])
+
+#    @luxire_product_type = LuxireProductType.find(params[:id]).attributes
+#    @luxire_product_type[:mnt] = Hash.new
+ #   @luxire_product_type[:mnt][:customize] = LuxireProductType.find(params[:id]).measurement_types.where(category: "customize")
 
 
-	@luxire_p_t =  OpenStruct.new(@luxire_product_type)
-@luxire_product_type = @luxire_p_t 
-=begin
+#	@luxire_p_t =  OpenStruct.new(@luxire_product_type)
+#@luxire_product_type = @luxire_p_t
     @luxire_product_type_attributes = @luxire_product_type.measurement_types
+    @luxire_product_type_attributes_ids = @luxire_product_type.measurement_types.ids
     @luxire_product_type_attributes_customize = @luxire_product_type_attributes.where(category: "customize")
     @luxire_product_type_attributes_personalize = @luxire_product_type_attributes.where(category: "personalize")
     @luxire_product_type_attributes_measurement = @luxire_product_type_attributes.where(category: "measurement")
     @luxire_product_type_attributes_measuement_std = @luxire_product_type_attributes.where(sub_category: "std")
-    @luxire_product_type_attributes_measuement_body = @luxire_product_type_attributes.where(sub_category: "body")   
+    @luxire_product_type_attributes_measuement_body = @luxire_product_type_attributes.where(sub_category: "body")
 
-    @luxire_custom = { id: @luxire_product_type.id,product_type: @luxire_product_type.product_type, description: @luxire_product_type.description, measurement_types: @luxire_product_type_attributes, luxire_product_attributes: {customize: @luxire_product_type_attributes_customize, personalize:  @luxire_product_type_attributes_personalize,std_measurement: @luxire_product_type_attributes_measuement_std, body_measurement: @luxire_product_type_attributes_measuement_body}}
+    @luxire_custom = { id: @luxire_product_type.id,product_type: @luxire_product_type.product_type, description: @luxire_product_type.description, measurement_types: @luxire_product_type_attributes, luxire_product_attributes_ids: @luxire_product_type_attributes_ids,luxire_product_attributes: {customization_attributes: @luxire_product_type_attributes_customize, personalization_attributes:  @luxire_product_type_attributes_personalize,standard_measurement_attributes: @luxire_product_type_attributes_measuement_std, body_measurement_attributes: @luxire_product_type_attributes_measuement_body}}
 
     render json: @luxire_custom.to_json
-=end
   end
 
   # GET /luxire_product_types/new

@@ -6,6 +6,8 @@ Spree::Api::ProductsController.class_eval do
      expires_in 15.minutes, :public => true
      headers['Surrogate-Control'] = "max-age=#{15.minutes}"
      headers['Surrogate-Key'] = "product_id=1"
+     @product_type = LuxireProductType.all
+     @luxire_vendor = LuxireVendorMaster.all
      @luxire_product_type =  @product.luxire_product_type
      if @luxire_product_type
        @luxire_product_type_attributes = @luxire_product_type.measurement_types

@@ -1,5 +1,12 @@
 Rails.application.routes.draw do
- 
+
+  resources :measurement_type_prototypes
+  get 'get_order', to: 'custom_orders#get_order', defaults: {format: :json}
+  post 'luxire_product_data/imports', to: 'luxire_product_data_imports#import', as: :luxire_product_data_imports
+  get 'luxire_product_data_imports', to: 'luxire_product_data_imports#index'
+  post '/my_account', to: 'luxire_user_my_account#index',  defaults: {format: :json}
+  get '/my_account/:id', to: 'luxire_user_my_account#show',  defaults: {format: :json}
+  # post 'receive_ebs_responses/ebs_response'
   post 'luxire_stocks/validate_stocks_sku', to: 'luxire_stocks#validate_stocks_sku',  defaults: {format: :json}
   post 'luxire_stocks/set_stocks',  defaults: {format: :json}
   post 'luxire_stocks/add_stocks',  defaults: {format: :json}

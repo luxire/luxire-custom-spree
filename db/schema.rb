@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160212100437) do
+ActiveRecord::Schema.define(version: 20160226081035) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -49,6 +49,9 @@ ActiveRecord::Schema.define(version: 20160212100437) do
     t.integer  "line_item_id"
     t.datetime "created_at",         null: false
     t.datetime "updated_at",         null: false
+    t.json     "customized_data"
+    t.json     "personalize_data"
+    t.json     "measurement_data"
   end
 
   create_table "luxire_orders", force: :cascade do |t|
@@ -71,9 +74,6 @@ ActiveRecord::Schema.define(version: 20160212100437) do
     t.float    "tax4_value"
     t.string   "tax5_name"
     t.float    "tax5_value"
-    t.json     "customized_data"
-    t.json     "personalize_data"
-    t.json     "measurement_data"
     t.string   "notes_attributes"
     t.datetime "created_at",         null: false
     t.datetime "updated_at",         null: false
@@ -149,6 +149,10 @@ ActiveRecord::Schema.define(version: 20160212100437) do
     t.datetime "created_at",                       null: false
     t.datetime "updated_at",                       null: false
     t.integer  "luxire_stock_id"
+    t.string   "global_upc"
+    t.string   "global_isbn"
+    t.string   "global_jan"
+    t.string   "global_ean"
   end
 
   create_table "luxire_stocks", force: :cascade do |t|
@@ -175,6 +179,13 @@ ActiveRecord::Schema.define(version: 20160212100437) do
 
   create_table "luxire_vendor_masters", force: :cascade do |t|
     t.string   "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "measurement_type_prototypes", force: :cascade do |t|
+    t.string   "name"
+    t.string   "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
