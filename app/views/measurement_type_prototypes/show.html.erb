@@ -1,0 +1,14 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @measurement_type_prototype.name %>
+</p>
+
+<p>
+  <strong>Value:</strong>
+  <%= @measurement_type_prototype.value %>
+</p>
+
+<%= link_to 'Edit', edit_measurement_type_prototype_path(@measurement_type_prototype) %> |
+<%= link_to 'Back', measurement_type_prototypes_path %>

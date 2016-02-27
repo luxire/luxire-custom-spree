@@ -1,0 +1,2 @@
+module LuxireUserMyAccountHelper
+end
