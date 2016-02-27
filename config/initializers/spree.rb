@@ -17,3 +17,5 @@ end
 
 Spree.user_class = "Spree::User"
 Rails.application.config.spree.payment_methods << Spree::Gateway::Ebsin
+
+Spree::Api::Config[:requires_authentication] = false
