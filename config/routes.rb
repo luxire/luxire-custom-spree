@@ -1,5 +1,39 @@
 Rails.application.routes.draw do
 
+# routing for customized taxon controller
+  resources :taxonomies do
+    collection do
+      post :update_positions
+    end
+    resources :customized_taxons
+  end
+
+  resources :customized_taxons, only: [:index, :show] do
+    collection do
+      get :search
+    end
+  end
+
+# routing for customizedImage controller
+resources :products, defaults: {format: :json} do
+    resources :customized_images do
+      collection do
+        post :update_positions
+      end
+    end
+    member do
+      get :clone
+      get :stock
+    end
+    resources :variants do
+      collection do
+        post :update_positions
+      end
+    end
+    resources :variants_including_master, only: [:update]
+  end
+
+
   resources :measurement_type_prototypes
   get 'get_order', to: 'custom_orders#get_order', defaults: {format: :json}
   post 'luxire_product_data/imports', to: 'luxire_product_data_imports#import', as: :luxire_product_data_imports
