@@ -90,8 +90,7 @@ module Spree
 
       @@payment_attributes = [
         :id, :source_type, :source_id, :amount, :display_amount,
-        :payment_method_id, :response_code, :state, :avs_response, :created_at,
-        :updated_at
+        :payment_method_id, :response_code, :state, :avs_response, :number
       ]
 
       @@payment_method_attributes = [:id, :name, :description]
@@ -102,9 +101,9 @@ module Spree
 
       @@taxon_attributes = [
         :id, :name, :description, :products, :pretty_name, :permalink, :parent_id,
-        :taxonomy_id
+        :taxonomy_id, :icon
       ]
-      
+
       @@inventory_unit_attributes = [
         :id, :lock_version, :state, :variant_id, :shipment_id,
         :return_authorization_id
@@ -193,7 +192,7 @@ module Spree
 :id, :handle, :product_tags, :product_compare_at_price, :parent_sku, :product_barcode, :product_visibility, :product_publish_flag, :product_publish_date, :product_publish_time, :product_charge_taxes_flag, :product_shipping_weight_unit, :product_can_oversell, :product_seo_page_title, :product_seo_meta_description, :product_seo_url, :product_color, :product_weave_type, :thread_count, :material, :composition, :pattern, :transparency, :wrinkle_resistance, :thickness, :construction, :suitable_climates, :made_in, :search_tags, :inventory_tracker, :product_inventory_policy, :product_fullfillment_service, :product_requires_shipping, :product_image_src, :product_img_alteration_text, :gift_card_flag, :luxire_product_type_id, :luxire_vendor_master_id, :google_shopping_product_category, :google_shopping_gender, :google_shopping_age_group, :google_shopping_MPN, :google_shopping_adwords_grouping, :google_shopping_adwords_labels, :google_shopping_condition, :google_shopping_custom_product, :google_shopping_custom_label0, :google_shopping_custom_label1, :google_shopping_custom_label2, :google_shopping_custom_label3, :google_shopping_custom_label4, :deleted_at, :product_id, :created_at, :updated_at, :luxire_stock_id
 	]
 
-      
+
 
 def variant_attributes
         if @current_user_roles && @current_user_roles.include?("admin")
