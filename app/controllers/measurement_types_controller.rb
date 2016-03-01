@@ -4,15 +4,17 @@ class MeasurementTypesController < Spree::Api::BaseController
   # GET /measurement_types
   # GET /measurement_types.json
   def index
-    @measurement_types = MeasurementType.all
-    # if measurement_type exists segrigate it in customize, personalize, body measurement and standard measurement
-    if @measurement_types
-      @measurement_type_customize = @measurement_types.where(category: "customize")
-      @measurement_type_personalize = @measurement_types.where(category: "personalize")
-      @measurement_type_body_measurement = @measurement_types.where(category: "measurement").where(sub_category: "body")
-      @measurement_type_std_measurement = @measurement_types.where(category: "measurement").where(sub_category: "std")
-    end
+  @measurement_types = MeasurementType.all
+  # if measurement_type exists segrigate it in customize, personalize, body measurement and standard measurement
+  if @measurement_types
+    @measurement_type_customize = @measurement_types.where(category: "customize")
+    @measurement_type_personalize = @measurement_types.where(category: "personalize")
+    @measurement_type_body_measurement = @measurement_types.where(category: "measurement").where(sub_category: "body")
+    @measurement_type_std_measurement = @measurement_types.where(category: "measurement").where(sub_category: "std")
+    @resp = {customization_attributes: @measurement_type_customize, personalization_attributes: @measurement_type_personalize, standard_measurement_attributes: @measurement_type_std_measurement, body_measurement_attributes: @measurement_type_body_measurement }
+    render json: @resp.to_json, status: "200"
   end
+end
 
   # GET /measurement_types/1
   # GET /measurement_types/1.json
