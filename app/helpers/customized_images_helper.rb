@@ -1,0 +1,2 @@
+module CustomizedImagesHelper
+end
