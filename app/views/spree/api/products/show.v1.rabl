@@ -88,3 +88,11 @@ end
 child @product_type => :luxire_product_type do
 attributes *LuxireProductType.column_names - ["created_at", "updated_at"]
 end
+
+child :luxire_properties => :luxire_properties do
+  attributes *LuxireProperty.column_names
+end
+
+child :standard_sizes => :standard_sizes do
+  attributes *StandardSize.column_names
+end
