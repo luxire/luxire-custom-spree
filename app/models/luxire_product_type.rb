@@ -6,6 +6,8 @@ class LuxireProductType < ActiveRecord::Base
   has_many :products, class_name: 'Spree::Product', through: :luxire_products
   has_many :product_measurement_types, class_name: "ProductMeasurementType"
   has_many :measurement_types, through: :product_measurement_types
+  has_many :standard_sizes, class_name: "StandardSize"
+  has_many :luxire_properties, class_name: "LuxireProperty" 
 
   has_attached_file :image,  styles: { small: "64x64" },
                           default_style: :small,
