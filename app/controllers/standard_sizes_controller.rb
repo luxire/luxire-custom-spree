@@ -61,6 +61,12 @@ class StandardSizesController < ApplicationController
     end
   end
 
+# Get Standard Size object based on fit type, neck and sleeve length
+  def get_standard_size
+    standard_size = StandardSize.where(fit_type: params[:fit_type]).where(neck: params[:neck]).where(shirt_length: params[:shirt_length])
+    render json: standard_size.to_json, status: "200"
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_standard_size
