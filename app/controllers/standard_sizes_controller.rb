@@ -75,6 +75,6 @@ class StandardSizesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def standard_size_params
-      params.require(:standard_size).permit(:fit_type, :neck, :chest, :waist, :bottom, :yoke, :biceps, :wrist, :shirt_length, :product_type_id)
+      params.require(:standard_size).permit(:fit_type, :neck, :chest, :waist, :bottom, :yoke, :biceps, :wrist, :shirt_length, :luxire_product_type_id)
     end
 end
