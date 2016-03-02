@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   post 'populate_currency', to: 'currencies#populate_currency'
   get 'get_standard_size', to: 'standard_sizes#get_standard_size', defaults: {format: :json}
   resources :currencies, defaults: {format: :json}
-  resources :standard_sizes, defaults: {format: :json}
+  resources :standard_sizes
 # routing for customized taxon controller
   resources :taxonomies, defaults: {format: :json} do
     collection do
