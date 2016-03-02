@@ -11,10 +11,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160302064907) do
+ActiveRecord::Schema.define(version: 20160302142422) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "currencies", primary_key: "fetched_date", force: :cascade do |t|
+    t.json     "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "custom_images", force: :cascade do |t|
+    t.string   "source"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+    t.string   "image_file_name"
+    t.string   "image_content_type"
+    t.integer  "image_file_size"
+    t.datetime "image_updated_at"
+  end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
     t.string   "slug",                      null: false
@@ -157,6 +173,14 @@ ActiveRecord::Schema.define(version: 20160302064907) do
     t.string   "global_isbn"
     t.string   "global_jan"
     t.string   "global_ean"
+  end
+
+  create_table "luxire_properties", force: :cascade do |t|
+    t.string   "name"
+    t.string   "value"
+    t.integer  "luxire_product_type_id"
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
   create_table "luxire_stocks", force: :cascade do |t|
@@ -1205,9 +1229,9 @@ ActiveRecord::Schema.define(version: 20160302064907) do
     t.integer  "biceps"
     t.integer  "wrist"
     t.integer  "shirt_length"
-    t.integer  "product_type_id"
-    t.datetime "created_at",      null: false
-    t.datetime "updated_at",      null: false
+    t.integer  "luxire_product_type_id"
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
 end
