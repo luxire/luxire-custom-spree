@@ -1,15 +1,18 @@
 class ReceiveEbsResponsesController < ApplicationController
+respond_to :html, :json
+
 INVALID_NUMBER = "Invalid number"
 ERROR = "Error while saving data"
 SUCCESS = "Data populated Successfully"
 
   def ebs_response
-    byebug
     number = params[:number]
-    payment = Spree::Payment.find_by_number(number)
+    # payment = Spree::Payment.find_by_number(number)
+    order = Spree::Order.find_by_number(number)
+    payment = order.payments.first
     if number && payment
     payment_method = payment.payment_method
-    order = payment.order
+    # order = payment.order
     response_code = params[:ResponseCode]
     response_msg = params[:ResponseMessage]
     date = DateTime.parse(params[:DateCreated])
@@ -42,7 +45,8 @@ SUCCESS = "Data populated Successfully"
   end
 
   response = {msg: SUCCESS}
-  render json: response.to_json, status: "200"
+  @order = order
+  respond_with(@order, default_template: 'Spree::Api::Orders::show', status: 200)
 end
 
 end
