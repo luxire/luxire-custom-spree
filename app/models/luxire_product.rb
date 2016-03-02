@@ -6,6 +6,7 @@ class LuxireProduct < ActiveRecord::Base
 
   belongs_to :luxire_stock, class_name: "LuxireStock"
   has_many :luxire_properties, class_name: "LuxireProperty", through: :luxire_product_type
+  has_many :standard_sizes, class_name: "StandardSize", through: :luxire_product_type
 
   validates :parent_sku, presence: true
   accepts_nested_attributes_for :luxire_stock
