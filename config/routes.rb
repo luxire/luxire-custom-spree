@@ -1,40 +1,28 @@
 Rails.application.routes.draw do
 
+  resources :luxire_properties
+  resources :custom_images, defaults: {format: :json}
+  post 'populate_currency', to: 'currencies#populate_currency'
+  get 'get_standard_size', to: 'standard_sizes#get_standard_size', defaults: {format: :json}
+  resources :currencies, defaults: {format: :json}
+  resources :standard_sizes, defaults: {format: :json}
 # routing for customized taxon controller
-  resources :taxonomies do
+  resources :taxonomies, defaults: {format: :json} do
     collection do
       post :update_positions
     end
     resources :customized_taxons
   end
 
-  resources :customized_taxons, only: [:index, :show] do
+  resources :customized_taxons, only: [:index, :show], defaults: {format: :json} do
     collection do
       get :search
     end
   end
 
-# routing for customizedImage controller
-resources :products, defaults: {format: :json} do
-    resources :customized_images do
-      collection do
-        post :update_positions
-      end
-    end
-    member do
-      get :clone
-      get :stock
-    end
-    resources :variants do
-      collection do
-        post :update_positions
-      end
-    end
-    resources :variants_including_master, only: [:update]
-  end
+  resources :customized_images, defaults: {format: :json}
 
-
-  resources :measurement_type_prototypes
+  resources :measurement_type_prototypes, defaults: {format: :json}
   get 'get_order', to: 'custom_orders#get_order', defaults: {format: :json}
   post 'luxire_product_data/imports', to: 'luxire_product_data_imports#import', as: :luxire_product_data_imports
   get 'luxire_product_data_imports', to: 'luxire_product_data_imports#index'
@@ -80,6 +68,7 @@ resources :products, defaults: {format: :json} do
   post '/luxire-users/forgot_password' => 'luxire_users#forgot_password'
   get '/password_reset/:token' => 'luxire_users#reset_password_token_validation'
   post '/password_reset/:token' => 'luxire_users#change_password_with_reset_token'
+    resources :luxire_product_type_style_masters
 
   # This line mounts Spree's routes at the root of your application.
   # This means, any requests to URLs such as /products, will go to Spree::ProductsController.
@@ -87,7 +76,7 @@ resources :products, defaults: {format: :json} do
   #
   # We ask that you don't use the :as option here, as Spree relies on it being the default of "spree"
   mount Spree::Core::Engine, :at => '/'
-          resources :luxire_product_type_style_masters
+
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
