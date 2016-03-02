@@ -5,7 +5,6 @@ class LuxireProduct < ActiveRecord::Base
   has_many :luxire_style_masters, class_name: "LuxireStyleMaster" , through: :luxire_product_type
 
   belongs_to :luxire_stock, class_name: "LuxireStock"
-  has_many :luxire_properties, class_name: "LuxireProperty", through: :luxire_product_type
   has_many :standard_sizes, class_name: "StandardSize", through: :luxire_product_type
 
   validates :parent_sku, presence: true
