@@ -69,6 +69,6 @@ class LuxirePropertiesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def luxire_property_params
-      params.require(:luxire_property).permit(:name, :value, :luxire_product_type_id)
+      params.require(:luxire_property).permit(:name, :value)
     end
 end
