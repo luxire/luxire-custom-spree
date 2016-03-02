@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160229094830) do
+ActiveRecord::Schema.define(version: 20160302064907) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -1194,5 +1194,20 @@ ActiveRecord::Schema.define(version: 20160229094830) do
 
   add_index "spree_zones", ["default_tax"], name: "index_spree_zones_on_default_tax", using: :btree
   add_index "spree_zones", ["kind"], name: "index_spree_zones_on_kind", using: :btree
+
+  create_table "standard_sizes", force: :cascade do |t|
+    t.string   "fit_type"
+    t.integer  "neck"
+    t.integer  "chest"
+    t.integer  "waist"
+    t.integer  "bottom"
+    t.integer  "yoke"
+    t.integer  "biceps"
+    t.integer  "wrist"
+    t.integer  "shirt_length"
+    t.integer  "product_type_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
 
 end
