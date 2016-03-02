@@ -1,6 +1,6 @@
 class LuxireProductTypesController < Spree::Api::BaseController
   wrap_parameters format: [:json, :xml, :url_encoded_form, :multipart_form]
-  wrap_parameters :luxire_product_type, include: [:product_type, :description, :measurement_type_ids, :image]
+  wrap_parameters :luxire_product_type, include: [:id, :product_type, :description, :measurement_type_ids, :image]
 
   before_action :set_luxire_product_type, only: [:show, :edit, :update, :destroy]
   require 'ostruct'

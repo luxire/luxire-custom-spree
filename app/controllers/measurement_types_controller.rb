@@ -1,4 +1,6 @@
 class MeasurementTypesController < Spree::Api::BaseController
+  wrap_parameters format: [:json, :xml, :url_encoded_form, :multipart_form]
+  wrap_parameters :measurement_type, include: [:id, :name, :value, :description,:category, :sub_category, :image]
   before_action :set_measurement_type, only: [:show, :edit, :update, :destroy]
 
   # GET /measurement_types

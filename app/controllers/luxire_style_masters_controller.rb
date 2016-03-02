@@ -1,4 +1,7 @@
 class LuxireStyleMastersController < Spree::Api::BaseController
+  wrap_parameters format: [:json, :xml, :url_encoded_form, :multipart_form]
+  wrap_parameters :luxire_style_master, include: [ :id, :name, :default_values, :luxire_product_type_id, :image]
+
   before_action :set_luxire_style_master, only: [:show, :edit, :update, :destroy]
 
   # GET /luxire_style_masters
