@@ -1,0 +1,45 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Standard Sizes</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Fit type</th>
+      <th>Neck</th>
+      <th>Chest</th>
+      <th>Waist</th>
+      <th>Bottom</th>
+      <th>Yoke</th>
+      <th>Biceps</th>
+      <th>Wrist</th>
+      <th>Shirt length</th>
+      <th>Product type</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @standard_sizes.each do |standard_size| %>
+      <tr>
+        <td><%= standard_size.fit_type %></td>
+        <td><%= standard_size.neck %></td>
+        <td><%= standard_size.chest %></td>
+        <td><%= standard_size.waist %></td>
+        <td><%= standard_size.bottom %></td>
+        <td><%= standard_size.yoke %></td>
+        <td><%= standard_size.biceps %></td>
+        <td><%= standard_size.wrist %></td>
+        <td><%= standard_size.shirt_length %></td>
+        <td><%= standard_size.product_type_id %></td>
+        <td><%= link_to 'Show', standard_size %></td>
+        <td><%= link_to 'Edit', edit_standard_size_path(standard_size) %></td>
+        <td><%= link_to 'Destroy', standard_size, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Standard size', new_standard_size_path %>

@@ -1,0 +1,57 @@
+<%= form_for(@standard_size) do |f| %>
+  <% if @standard_size.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@standard_size.errors.count, "error") %> prohibited this standard_size from being saved:</h2>
+
+      <ul>
+      <% @standard_size.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :fit_type %><br>
+    <%= f.text_field :fit_type %>
+  </div>
+  <div class="field">
+    <%= f.label :neck %><br>
+    <%= f.number_field :neck %>
+  </div>
+  <div class="field">
+    <%= f.label :chest %><br>
+    <%= f.number_field :chest %>
+  </div>
+  <div class="field">
+    <%= f.label :waist %><br>
+    <%= f.number_field :waist %>
+  </div>
+  <div class="field">
+    <%= f.label :bottom %><br>
+    <%= f.number_field :bottom %>
+  </div>
+  <div class="field">
+    <%= f.label :yoke %><br>
+    <%= f.number_field :yoke %>
+  </div>
+  <div class="field">
+    <%= f.label :biceps %><br>
+    <%= f.number_field :biceps %>
+  </div>
+  <div class="field">
+    <%= f.label :wrist %><br>
+    <%= f.number_field :wrist %>
+  </div>
+  <div class="field">
+    <%= f.label :shirt_length %><br>
+    <%= f.number_field :shirt_length %>
+  </div>
+  <div class="field">
+    <%= f.label :product_type_id %><br>
+    <%= f.number_field :product_type_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
