@@ -21,7 +21,9 @@ class LuxireProductDataImportsController < ApplicationController
              end
              @luxire_product.save!
              set_up_options
+             create_swatch_variant
             end
+
           rescue Exception => exception
              name = row["Handle"]
              @buggy_record[name] = exception.message
@@ -137,5 +139,16 @@ class LuxireProductDataImportsController < ApplicationController
                     end
                 end
     end
+
+    def create_swatch_variant
+      price = 1
+      sku = "SWT_#{@product.sku}"
+      @swatch_variant = Spree::Variant.new
+      @swatch_variant[:product_id] = @product.id
+      @swatch_variant[:sku] = sku
+      @swatch_variant[:price] = row["Variant Price"]
+      @swatch_variant.save!
+    end
+
 
 end
