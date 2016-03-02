@@ -1,0 +1,21 @@
+<%= form_for(@custom_image) do |f| %>
+  <% if @custom_image.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@custom_image.errors.count, "error") %> prohibited this custom_image from being saved:</h2>
+
+      <ul>
+      <% @custom_image.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :source %><br>
+    <%= f.text_field :source %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

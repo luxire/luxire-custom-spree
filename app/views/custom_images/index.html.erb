@@ -1,0 +1,27 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Custom Images</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Source</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @custom_images.each do |custom_image| %>
+      <tr>
+        <td><%= custom_image.source %></td>
+        <td><%= link_to 'Show', custom_image %></td>
+        <td><%= link_to 'Edit', edit_custom_image_path(custom_image) %></td>
+        <td><%= link_to 'Destroy', custom_image, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Custom image', new_custom_image_path %>

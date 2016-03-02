@@ -1,0 +1,31 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Luxire Properties</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Value</th>
+      <th>Product type</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @luxire_properties.each do |luxire_property| %>
+      <tr>
+        <td><%= luxire_property.name %></td>
+        <td><%= luxire_property.value %></td>
+        <td><%= luxire_property.product_type_id %></td>
+        <td><%= link_to 'Show', luxire_property %></td>
+        <td><%= link_to 'Edit', edit_luxire_property_path(luxire_property) %></td>
+        <td><%= link_to 'Destroy', luxire_property, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Luxire property', new_luxire_property_path %>

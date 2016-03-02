@@ -1,0 +1,2 @@
+module LuxirePropertiesHelper
+end

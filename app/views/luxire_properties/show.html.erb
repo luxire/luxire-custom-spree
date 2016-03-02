@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @luxire_property.name %>
+</p>
+
+<p>
+  <strong>Value:</strong>
+  <%= @luxire_property.value %>
+</p>
+
+<p>
+  <strong>Product type:</strong>
+  <%= @luxire_property.product_type_id %>
+</p>
+
+<%= link_to 'Edit', edit_luxire_property_path(@luxire_property) %> |
+<%= link_to 'Back', luxire_properties_path %>

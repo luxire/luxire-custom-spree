@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  fetched_date: 2016-03-02
+  value: 
+
+two:
+  fetched_date: 2016-03-02
+  value: 
