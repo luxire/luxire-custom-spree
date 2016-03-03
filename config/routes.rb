@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   resources :luxire_properties, defaults: {format: :json}
   resources :custom_images, defaults: {format: :json}
   post 'populate_currency', to: 'currencies#populate_currency'
+  get 'get_currency_multiplier', to: 'currencies#get_currency_multiplier'
   get 'get_standard_size', to: 'standard_sizes#get_standard_size', defaults: {format: :json}
   resources :currencies, defaults: {format: :json}
   resources :standard_sizes
