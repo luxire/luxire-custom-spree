@@ -5,4 +5,7 @@ class CustomImage < ActiveRecord::Base
                           path: ':rails_root/public/luxire/custom_images/:id/:style/:basename.:extension',
                           convert_options: { all: '-strip -auto-orient -colorspace sRGB' }
 
+    validates_attachment :image,
+                          content_type: { content_type: ["image/jpeg", "image/gif", "image/png"] }
+
 end

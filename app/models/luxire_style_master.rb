@@ -10,4 +10,8 @@ class LuxireStyleMaster < ActiveRecord::Base
                              url: '/luxire/style_master/:id/:style/:basename.:extension',
                              path: ':rails_root/public/luxire/style_master/:id/:style/:basename.:extension',
                              convert_options: { all: '-strip -auto-orient -colorspace sRGB' }
+
+                             validates_attachment :image,
+                                                content_type: { content_type: ["image/jpeg", "image/gif", "image/png"] }
+                                                                             
 end

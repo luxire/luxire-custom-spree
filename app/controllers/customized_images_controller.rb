@@ -1,5 +1,4 @@
-class CustomizedImagesController < ApplicationController
-  class CustomizedImagesController < CustomizedResourceController
+class CustomizedImagesController < CustomizedResourceController
   before_action :load_edit_data, except: :index
   before_action :load_index_data, only: :index
 
@@ -51,5 +50,4 @@ class CustomizedImagesController < ApplicationController
       variants_including_master: { option_values: :option_type, images: :viewable }
     ]
   end
-end
 end

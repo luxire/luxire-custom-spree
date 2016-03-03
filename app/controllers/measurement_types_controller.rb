@@ -15,6 +15,7 @@ class MeasurementTypesController < Spree::Api::BaseController
     @measurement_type_std_measurement = @measurement_types.where(category: "measurement").where(sub_category: "std")
     @resp = {customization_attributes: @measurement_type_customize, personalization_attributes: @measurement_type_personalize, standard_measurement_attributes: @measurement_type_std_measurement, body_measurement_attributes: @measurement_type_body_measurement }
     render json: @resp.to_json, status: "200"
+    # render 'index.json.rabl'
   end
 end
 
