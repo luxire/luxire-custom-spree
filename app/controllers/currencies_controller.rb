@@ -63,7 +63,7 @@ class CurrenciesController < ApplicationController
 
 # Get current date currency multiplier and populate the database
   def populate_currency
-    url = URI.parse('http://apilayer.net/api/live?access_key=a917a3d6244742e74dacea1ec2e29940&currencies=EUR,AUD,SGD,NOK,DKK,SEK,CHF,FIM,INR&source=USD&format=1')
+    url = URI.parse('http://apilayer.net/api/live?access_key=a917a3d6244742e74dacea1ec2e29940&currencies=EUR,AUD,SGD,NOK,DKK,SEK,CHF,FIM,INR,DBP&source=USD&format=1')
     req = Net::HTTP::Get.new(url.to_s)
     res = Net::HTTP.start(url.host, url.port) { |http|
     http.request(req)
