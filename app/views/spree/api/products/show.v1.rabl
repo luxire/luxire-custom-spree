@@ -60,10 +60,6 @@ child :luxire_style_masters => :luxire_style_masters do
 attributes *LuxireStyleMaster.column_names
 end
 
-child :luxire_vendor_master => :luxire_vendor_master do
-  attributes *luxire_vendor_master_attributes
-end
-
 child :classifications => :classifications do
   attributes :taxon_id, :position
 
@@ -89,10 +85,14 @@ child @product_type => :luxire_product_type do
 attributes *LuxireProductType.column_names - ["created_at", "updated_at"]
 end
 
-child :luxire_properties => :luxire_properties do
-  attributes *LuxireProperty.column_names
-end
-
 child :standard_sizes => :standard_sizes do
   attributes *StandardSize.column_names
+end
+
+child :luxire_vendor_master => :vendor_master do
+attributes :name
+end
+
+child :luxire_product_type => :product_type do
+attributes :product_type
 end
