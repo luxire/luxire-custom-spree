@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160302183522) do
+ActiveRecord::Schema.define(version: 20160303074904) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -166,13 +166,22 @@ ActiveRecord::Schema.define(version: 20160302183522) do
     t.string   "google_shopping_custom_label4"
     t.datetime "deleted_at"
     t.integer  "product_id"
-    t.datetime "created_at",                       null: false
-    t.datetime "updated_at",                       null: false
+    t.datetime "created_at",                                               null: false
+    t.datetime "updated_at",                                               null: false
     t.integer  "luxire_stock_id"
     t.string   "global_upc"
     t.string   "global_isbn"
     t.string   "global_jan"
     t.string   "global_ean"
+    t.decimal  "stiffness",                        precision: 5, scale: 2
+    t.string   "stiffness_unit"
+    t.string   "barcode"
+    t.string   "collection"
+    t.integer  "no_of_color"
+    t.string   "wash_care"
+    t.integer  "gsm"
+    t.decimal  "shrinkage",                        precision: 5, scale: 2
+    t.string   "pitch_sales"
   end
 
   create_table "luxire_properties", force: :cascade do |t|
@@ -1220,17 +1229,17 @@ ActiveRecord::Schema.define(version: 20160302183522) do
 
   create_table "standard_sizes", force: :cascade do |t|
     t.string   "fit_type"
-    t.integer  "neck"
-    t.integer  "chest"
-    t.integer  "waist"
-    t.integer  "bottom"
-    t.integer  "yoke"
-    t.integer  "biceps"
-    t.integer  "wrist"
-    t.integer  "shirt_length"
+    t.decimal  "neck",                   precision: 5, scale: 2
+    t.decimal  "chest",                  precision: 5, scale: 2
+    t.decimal  "waist",                  precision: 5, scale: 2
+    t.decimal  "bottom",                 precision: 5, scale: 2
+    t.decimal  "yoke",                   precision: 5, scale: 2
+    t.decimal  "biceps",                 precision: 5, scale: 2
+    t.decimal  "wrist",                  precision: 5, scale: 2
+    t.decimal  "shirt_length",           precision: 5, scale: 2
     t.integer  "luxire_product_type_id"
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+    t.datetime "created_at",                                     null: false
+    t.datetime "updated_at",                                     null: false
   end
 
 end
