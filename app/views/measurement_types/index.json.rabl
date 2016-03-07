@@ -1,17 +1,17 @@
 object false
 
-child @measurement_type_customize => :measurement_type_customize do
+child @measurement_type_customize => :customization_attributes do
   attributes :id, :name, :value, :description, :category , :sub_category, :image, :help, :help_url
 end
 
-child @measurement_type_personalize => :measurement_type_personalize do
+child @measurement_type_personalize => :personalization_attributes do
   attributes :id, :name, :value, :description, :category , :sub_category, :image, :help, :help_url
 end
 
-child @measurement_type_body_measurement => :measurement_type_body_measurement do
+child @measurement_type_body_measurement => :body_measurement_attributes do
   attributes :id, :name, :value, :description, :category , :sub_category, :image, :help, :help_url
 end
 
-child @measurement_type_std_measurement => :measurement_type_std_measurement do
+child @measurement_type_std_measurement => :std_measurement_attributes do
   attributes :id, :name, :value, :description, :category , :sub_category, :image, :help, :help_url
 end
