@@ -65,7 +65,7 @@ class LuxireStocksController < Spree::Api::BaseController
 # add_stocks method allows admin to add a product to inventory
   def add_stocks
     get_luxire_stock
-    
+
     @luxire_stock.virtual_count_on_hands += params[:luxire_stock][:count].to_i
     @luxire_stock.physical_count_on_hands += params[:luxire_stock][:count].to_i
     @luxire_stock.save
@@ -105,11 +105,11 @@ end
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def luxire_stock_params
-      params.require(:luxire_stock).permit(:stock_location_id, :parent_sku, :virtual_count_on_hands, :physical_count_on_hands, :measuring_unit, :backorderable, :deleted_at, :rack, :threshold)
+      params.require(:luxire_stock).permit(:stock_location_id, :parent_sku, :virtual_count_on_hands, :physical_count_on_hands, :measuring_unit, :backorderable, :deleted_at, :rack, :threshold, :in_house)
     end
 
 # get_luxire_stock method gets luxire_stock based on parent_sku
-    def get_luxire_stock     
+    def get_luxire_stock
      sku = params[:luxire_stock][:parent_sku]
      @luxire_stock = LuxireStock.where(parent_sku: sku).first
    end
