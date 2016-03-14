@@ -8,8 +8,12 @@ class LuxireStyleMastersController < Spree::Api::BaseController
   # GET /luxire_style_masters.json
   def index
     logger.debug "params #{params[:product_type_id]}"
-    if params[:product_type_id]
+    if params[:product_type_id] && params[:user_id]
+      @luxire_style_masters = LuxireStyleMaster.where(luxire_product_type_id: params[:product_type_id]).where(user_id: [nil, params[:user_id]])
+    elsif params[:product_type_id]
       @luxire_style_masters = LuxireStyleMaster.where(luxire_product_type_id: params[:product_type_id])
+    elsif params[:user_id]
+      @luxire_style_masters = LuxireStyleMaster.where(user_id: [nil, params[:user_id]])
     else
       @luxire_style_masters = LuxireStyleMaster.all
     end
