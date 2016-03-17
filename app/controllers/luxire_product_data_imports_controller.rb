@@ -270,7 +270,11 @@ NOT_AVAILABLE = "NA"
           else
             raise "#{collection_hierarchy} collection does not exist"
           end
-          id = @taxon.id
+          if collection_hierarchy.length == 1
+            id = taxonomy.id
+          else
+            id = @taxon.id
+          end
           ids << id
         end
         @product.taxon_ids = ids
