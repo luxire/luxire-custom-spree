@@ -261,15 +261,16 @@ NOT_AVAILABLE = "NA"
         collections.each do |collection|
           collection_hierarchy = collection.split("->").map(&:strip)
           taxonomy = Spree::Taxonomy.where('lower(name) = ?', collection_hierarchy.first.downcase).first
+
           if taxonomy
             collection_hierarchy.drop(1).each_with_index do |hierarchy, count|
-              taxon = taxonomy.taxons.where('lower(name) = ?', hierarchy.downcase).where(depth: count+1).first
-              raise "#{taxon} collection does not exist" unless taxon
+              @taxon = taxonomy.taxons.where('lower(name) = ?', hierarchy.downcase).where(depth: count+1).first
+              raise "#{@taxon} collection does not exist" unless @taxon
             end
           else
             raise "#{collection_hierarchy} collection does not exist"
           end
-          id = Spree::Taxon.where('lower(name) = ?', collection_hierarchy.last.downcase).first.id
+          id = @taxon.id
           ids << id
         end
         @product.taxon_ids = ids
