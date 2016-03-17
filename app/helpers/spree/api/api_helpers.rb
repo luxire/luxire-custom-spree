@@ -100,7 +100,7 @@ module Spree
       @@taxonomy_attributes = [:id, :name]
 
       @@taxon_attributes = [
-        :id, :name, :description, :products, :pretty_name, :permalink, :parent_id,
+        :id, :name, :description, :pretty_name, :permalink, :parent_id,
         :taxonomy_id, :icon
       ]
 

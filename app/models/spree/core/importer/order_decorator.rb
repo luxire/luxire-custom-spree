@@ -1,5 +1,5 @@
 Spree::Core::Importer::Order.class_eval do
-  def self.import(user, params)
+  def self.import(user, params, token)
             begin
               ensure_country_id_from_params params[:ship_address_attributes]
               ensure_state_id_from_params params[:ship_address_attributes]
@@ -7,6 +7,9 @@ Spree::Core::Importer::Order.class_eval do
               ensure_state_id_from_params params[:bill_address_attributes]
 
               create_params = params.slice :currency
+              if token
+                create_params[:guest_token] = token
+              end
               order = Spree::Order.create! create_params
               order.associate_user!(user)
 
@@ -25,6 +28,7 @@ Spree::Core::Importer::Order.class_eval do
 
               order.update_attributes!(params)
 
+              byebug
               order.create_proposed_shipments unless shipments_attrs.present?
 
               # Really ensure that the order totals & states are correct
@@ -37,6 +41,7 @@ Spree::Core::Importer::Order.class_eval do
               order.reload
             rescue Exception => e
               order.destroy if order && order.persisted?
+	      byebug
               raise e.message
             end
           end
@@ -91,18 +96,21 @@ Spree::Core::Importer::Order.class_eval do
               end
             when Array
               line_items.each do |line_item|
+                byebug
                 begin
                   extra_params = line_item.except(:variant_id, :quantity, :sku)
                   line_item = ensure_variant_id_from_params(line_item)
                   variant = Spree::Variant.find(line_item[:variant_id])
-                  line_item = order.contents.add(variant, line_item[:quantity], {}, line_item["luxire_line_item_attributes"])
+                  line_item = order.contents.add(variant, line_item[:quantity], {}, line_item["luxire_line_item"])
                   # Raise any errors with saving to prevent import succeeding with line items
                   # failing silently.
-                  if extra_params.present?
-                    line_item.update_attributes!(extra_params)
-                  else
-                    line_item.save!
-                  end
+
+                  #  Line number 109-113 is comented by Manish
+                  # if extra_params.present?
+                  #   line_item.update_attributes!(extra_params)
+                  # else
+                  #   line_item.save!
+                  # end
                 rescue Exception => e
                   raise "Order import line items: #{e.message} #{line_item}"
                 end

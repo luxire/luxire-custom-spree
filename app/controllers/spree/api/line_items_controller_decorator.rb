@@ -6,7 +6,7 @@ Spree::Api::LineItemsController.class_eval do
         variant,
         params[:line_item][:quantity] || 1,
         line_item_params[:options] || {},
-        params[:line_item][:luxire_line_item_attributes] || {}
+        params[:line_item][:luxire_line_item] || {}
     )
 
     if @line_item.errors.empty?

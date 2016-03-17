@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160303114947) do
+ActiveRecord::Schema.define(version: 20160317114436) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -117,22 +117,9 @@ ActiveRecord::Schema.define(version: 20160303114947) do
     t.string   "handle"
     t.string   "product_tags"
     t.float    "product_compare_at_price"
-    t.string   "parent_sku"
-    t.string   "product_barcode"
-    t.string   "product_visibility"
-    t.boolean  "product_publish_flag"
-    t.string   "product_publish_date"
-    t.string   "product_publish_time"
-    t.boolean  "product_charge_taxes_flag"
-    t.string   "product_shipping_weight_unit"
-    t.boolean  "product_can_oversell"
-    t.string   "product_seo_page_title"
-    t.string   "product_seo_meta_description"
-    t.string   "product_seo_url"
     t.string   "product_color"
     t.string   "product_weave_type"
     t.integer  "thread_count"
-    t.string   "material"
     t.string   "composition"
     t.string   "pattern"
     t.string   "transparency"
@@ -140,48 +127,29 @@ ActiveRecord::Schema.define(version: 20160303114947) do
     t.string   "thickness"
     t.string   "construction"
     t.string   "suitable_climates"
-    t.string   "made_in"
-    t.string   "search_tags"
-    t.string   "inventory_tracker"
-    t.string   "product_inventory_policy"
-    t.string   "product_fullfillment_service"
-    t.boolean  "product_requires_shipping"
-    t.string   "product_image_src"
-    t.string   "product_img_alteration_text"
     t.boolean  "gift_card_flag"
     t.integer  "luxire_product_type_id"
     t.integer  "luxire_vendor_master_id"
-    t.string   "google_shopping_product_category"
-    t.string   "google_shopping_gender"
-    t.string   "google_shopping_age_group"
-    t.string   "google_shopping_MPN"
-    t.string   "google_shopping_adwords_grouping"
-    t.string   "google_shopping_adwords_labels"
-    t.string   "google_shopping_condition"
-    t.string   "google_shopping_custom_product"
-    t.string   "google_shopping_custom_label0"
-    t.string   "google_shopping_custom_label1"
-    t.string   "google_shopping_custom_label2"
-    t.string   "google_shopping_custom_label3"
-    t.string   "google_shopping_custom_label4"
     t.datetime "deleted_at"
     t.integer  "product_id"
-    t.datetime "created_at",                                               null: false
-    t.datetime "updated_at",                                               null: false
+    t.datetime "created_at",                                       null: false
+    t.datetime "updated_at",                                       null: false
     t.integer  "luxire_stock_id"
-    t.string   "global_upc"
-    t.string   "global_isbn"
-    t.string   "global_jan"
-    t.string   "global_ean"
-    t.decimal  "stiffness",                        precision: 5, scale: 2
+    t.decimal  "stiffness",                precision: 5, scale: 2
     t.string   "stiffness_unit"
     t.string   "barcode"
-    t.string   "collection"
     t.integer  "no_of_color"
     t.string   "wash_care"
     t.integer  "gsm"
-    t.decimal  "shrinkage",                        precision: 5, scale: 2
-    t.string   "pitch_sales"
+    t.decimal  "shrinkage",                precision: 5, scale: 2
+    t.string   "sales_pitch"
+    t.decimal  "length_required",          precision: 8, scale: 2
+    t.string   "usage"
+    t.string   "mill"
+    t.string   "country_of_origin"
+    t.decimal  "glm",                      precision: 8, scale: 2
+    t.string   "technical_description"
+    t.string   "related_fabric"
   end
 
   create_table "luxire_properties", force: :cascade do |t|
@@ -201,8 +169,10 @@ ActiveRecord::Schema.define(version: 20160303114947) do
     t.datetime "deleted_at"
     t.string   "rack"
     t.integer  "threshold"
-    t.datetime "created_at",              null: false
-    t.datetime "updated_at",              null: false
+    t.datetime "created_at",                                      null: false
+    t.datetime "updated_at",                                      null: false
+    t.boolean  "in_house"
+    t.decimal  "fabric_width",            precision: 8, scale: 2
   end
 
   create_table "luxire_style_masters", force: :cascade do |t|
@@ -216,6 +186,7 @@ ActiveRecord::Schema.define(version: 20160303114947) do
     t.integer  "image_file_size"
     t.datetime "image_updated_at"
     t.string   "help"
+    t.integer  "user_id"
   end
 
   create_table "luxire_vendor_masters", force: :cascade do |t|
@@ -245,6 +216,13 @@ ActiveRecord::Schema.define(version: 20160303114947) do
     t.datetime "image_updated_at"
     t.string   "help"
     t.string   "help_url"
+  end
+
+  create_table "paypal_token_orders", force: :cascade do |t|
+    t.string   "token"
+    t.integer  "order_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "product_measurement_types", force: :cascade do |t|
@@ -567,6 +545,19 @@ ActiveRecord::Schema.define(version: 20160303114947) do
   add_index "spree_payments", ["order_id"], name: "index_spree_payments_on_order_id", using: :btree
   add_index "spree_payments", ["payment_method_id"], name: "index_spree_payments_on_payment_method_id", using: :btree
   add_index "spree_payments", ["source_id", "source_type"], name: "index_spree_payments_on_source_id_and_source_type", using: :btree
+
+  create_table "spree_paypal_express_checkouts", force: :cascade do |t|
+    t.string   "token"
+    t.string   "payer_id"
+    t.string   "transaction_id"
+    t.string   "state",                 default: "complete"
+    t.string   "refund_transaction_id"
+    t.datetime "refunded_at"
+    t.string   "refund_type"
+    t.datetime "created_at"
+  end
+
+  add_index "spree_paypal_express_checkouts", ["transaction_id"], name: "index_spree_paypal_express_checkouts_on_transaction_id", using: :btree
 
   create_table "spree_preferences", force: :cascade do |t|
     t.text     "value"

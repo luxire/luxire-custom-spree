@@ -1,13 +1,13 @@
 Spree::OrderContents.class_eval do
 
-  def add(variant, quantity = 1, options = {}, luxire_line_item_attributes)
+  def add(variant, quantity = 1, options = {}, luxire_line_item)
         timestamp = Time.now
-        line_item = add_to_line_item(variant, quantity, options, luxire_line_item_attributes)
+        line_item = add_to_line_item(variant, quantity, options, luxire_line_item)
         options[:line_item_created] = true if timestamp <= line_item.created_at
         after_add_or_remove(line_item, options)
       end
 
-  def add_to_line_item(variant, quantity, options = {}, luxire_line_item_attributes)
+  def add_to_line_item(variant, quantity, options = {}, luxire_line_item)
      line_item = grab_line_item_by_variant(variant, false, options)
 
      if line_item
@@ -24,11 +24,11 @@ Spree::OrderContents.class_eval do
     #  Creating a transaction for line item and luxire line item
      Spree::LineItem.transaction do
        line_item.save!
-       unless luxire_line_item_attributes.empty?
+       unless luxire_line_item.empty?
           #  Created LuxireLineItem
-           luxire_line_item = LuxireLineItem.create!(luxire_line_item_attributes)
+           lux_line_item = LuxireLineItem.create!(luxire_line_item)
           #  Created the association
-           line_item.luxire_line_item = luxire_line_item
+           line_item.luxire_line_item = lux_line_item
            line_item.save!
          end
       end

@@ -1,4 +1,23 @@
 Spree::Api::OrdersController.class_eval do
+  def create
+    byebug
+    authorize! :create, Spree::Order
+    order_user = if @current_user_roles.include?('admin') && order_params[:user_id]
+      Spree.user_class.find(order_params[:user_id])
+    else
+      current_api_user
+    end
+
+    import_params = if @current_user_roles.include?("admin")
+      params[:order].present? ? params[:order].permit! : {}
+    else
+      order_params
+    end
+
+    @order = Spree::Core::Importer::Order.import(order_user, import_params, cookies.signed[:guest_token])
+    respond_with(@order, default_template: :show, status: 201)
+  end
+
 private
   def order_params
     if params[:order]
