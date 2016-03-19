@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
 
+  get 'customized_taxons/get_taxon_details'
+
   resources :luxire_properties, defaults: {format: :json}
   resources :custom_images, defaults: {format: :json}
   post 'populate_currency', to: 'currencies#populate_currency'
