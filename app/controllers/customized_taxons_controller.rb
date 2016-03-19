@@ -74,6 +74,30 @@ class CustomizedTaxonsController < Spree::Api::BaseController
           respond_with(@taxon) { |format| format.json { render :json => '' } }
         end
 
+        def get_taxon_details
+          if !params[:permalink].empty?
+              params[:permalink].gsub!("-"," ")
+              collection_hierarchy = params[:permalink].split("/")
+              @taxonomy = Spree::Taxonomy.where('lower(name) = ?', collection_hierarchy.first.downcase).first
+
+              if @taxonomy
+                collection_hierarchy.drop(1).each_with_index do |hierarchy, count|
+                    @taxon = @taxonomy.taxons.where('lower(name) = ?', hierarchy.downcase).where(depth: count+1).first
+                    unless @taxon
+                        response =  {msg: "#{hierarchy} collection does not exist"}
+                        render json: response.to_json, status: "200"
+                        return
+                    end
+                 end
+              else
+                response =  {msg: "#{collection_hierarchy.first} collection does not exist"}
+                render json: response.to_json, status: "200"
+                return
+              end
+          end
+          render "get_taxon_details"
+        end
+
         private
 
         def taxon_params
