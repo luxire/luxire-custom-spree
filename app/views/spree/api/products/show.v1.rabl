@@ -29,11 +29,11 @@ end
 #end
 
 child @luxire_product_type_attributes_customize => :customization_attributes do
-  attributes :id, :name, :value
+  attributes :id, :name, :value, :description, :image, :help, :help_url
  end
 
  child @luxire_product_type_attributes_personalize => :personalization_attributes do
-  attributes :id, :name, :value
+   attributes :id, :name, :value, :description, :image, :help, :help_url
  end
 
 # node @luxire_product_type_attributes_measurement => :luxire_product_attributes do |m|
@@ -43,11 +43,11 @@ child @luxire_product_type_attributes_customize => :customization_attributes do
 
 
   child @luxire_product_type_attributes_measuement_std => :standard_measurement_attributes do
-   attributes :id, :name, :value
+    attributes :id, :name, :value, :description, :image, :help, :help_url
   end
 
   child @luxire_product_type_attributes_measuement_body => :body_measurement_attributes do
-   attributes :id, :name, :value
+    attributes :id, :name, :value, :description, :image, :help, :help_url
   end
 
 
@@ -57,7 +57,7 @@ child :luxire_style_masters => :luxire_style_masters do
 #  style_attributes = LuxireStyleMaster.column_names
 #  style_attributes.map! {|style| style.to_sym}
 #  attributes style_attributes
-attributes *LuxireStyleMaster.column_names
+attributes :id, :name, :default_values, :image, :help
 end
 
 child :classifications => :classifications do
