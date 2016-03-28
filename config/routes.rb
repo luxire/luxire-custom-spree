@@ -1,5 +1,10 @@
 Rails.application.routes.draw do
 
+
+  get 'get_customer_attr',to: 'retrive_attribute_info#get_customer_attr'
+  get 'get_order_attr',to: 'retrive_attribute_info#get_order_attr'
+  get 'get_shipping_attr',to: 'retrive_attribute_info#get_shipping_attr'
+  resources :mail_templates
   get 'customized_taxons/get_taxon_details'
 
   resources :luxire_properties, defaults: {format: :json}
