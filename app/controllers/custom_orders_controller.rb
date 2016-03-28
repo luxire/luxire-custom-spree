@@ -1,9 +1,10 @@
-class CustomOrdersController < ApplicationController
+class CustomOrdersController < Spree::Api::BaseController
 
   def get_order
       guest_token = cookies.signed[:guest_token]
-      orders = Spree::Order.where(guest_token: guest_token).where(completed_at: nil)
-      render json: orders.last.to_json, status: "200"
+      @order = Spree::Order.where(guest_token: guest_token).where(completed_at: nil).last
+      # render json: orders.to_json, status: "200"
+       render "spree/api/orders/show.v1.rabl"
   end
 
 end
