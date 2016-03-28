@@ -45,8 +45,8 @@
             return
           end
           redirect_url = provider.express_checkout_url(pp_response, :useraction => 'commit', num: @encrypted_data)
-          redirect_to provider.express_checkout_url(pp_response, :useraction => 'commit')
-          # render text: redirect_url, status: "200"
+          # redirect_to provider.express_checkout_url(pp_response, :useraction => 'commit')
+          render text: redirect_url, status: "200"
         else
           # flash[:error] = Spree.t('flash.generic_error', :scope => 'paypal', :reasons => pp_response.errors.map(&:long_message).join(" "))
           # redirect_to checkout_state_path(:payment)
@@ -83,7 +83,8 @@
       })
       order.next
       if order.complete?
-      return_url = "http://test.luxire.com:9000/#/invoice/#{order[:number]}?token=#{order[:guest_token]}"
+      # return_url = "http://test.luxire.com:9000/#/invoice/#{order[:number]}?token=#{order[:guest_token]}"
+      return_url = "http://104.215.252.45/#/invoice/#{order[:number]}?token=#{order[:guest_token]}"
         # flash.notice = Spree.t(:order_processed_successfully)
         # flash[:order_completed] = true
         session[:order_id] = nil
