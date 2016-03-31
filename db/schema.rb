@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160328104020) do
+ActiveRecord::Schema.define(version: 20160329080636) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -132,24 +132,28 @@ ActiveRecord::Schema.define(version: 20160328104020) do
     t.integer  "luxire_vendor_master_id"
     t.datetime "deleted_at"
     t.integer  "product_id"
-    t.datetime "created_at",                                       null: false
-    t.datetime "updated_at",                                       null: false
+    t.datetime "created_at",                                          null: false
+    t.datetime "updated_at",                                          null: false
     t.integer  "luxire_stock_id"
-    t.decimal  "stiffness",                precision: 5, scale: 2
+    t.decimal  "stiffness",                   precision: 5, scale: 2
     t.string   "stiffness_unit"
     t.string   "barcode"
     t.integer  "no_of_color"
     t.string   "wash_care"
     t.integer  "gsm"
-    t.decimal  "shrinkage",                precision: 5, scale: 2
+    t.decimal  "shrinkage",                   precision: 5, scale: 2
     t.string   "sales_pitch"
-    t.decimal  "length_required",          precision: 8, scale: 2
+    t.decimal  "length_required",             precision: 8, scale: 2
     t.string   "usage"
     t.string   "mill"
     t.string   "country_of_origin"
-    t.decimal  "glm",                      precision: 8, scale: 2
+    t.decimal  "glm",                         precision: 8, scale: 2
     t.string   "technical_description"
     t.string   "related_fabric"
+    t.boolean  "variant_taxable"
+    t.boolean  "variant_require_shipping"
+    t.string   "variant_fulfillment_service"
+    t.string   "inventory_tracked_by"
   end
 
   create_table "luxire_properties", force: :cascade do |t|
@@ -162,8 +166,8 @@ ActiveRecord::Schema.define(version: 20160328104020) do
   create_table "luxire_stocks", force: :cascade do |t|
     t.integer  "stock_location_id"
     t.string   "parent_sku"
-    t.integer  "virtual_count_on_hands"
-    t.integer  "physical_count_on_hands"
+    t.decimal  "virtual_count_on_hands",  precision: 8, scale: 2
+    t.decimal  "physical_count_on_hands", precision: 8, scale: 2
     t.string   "measuring_unit"
     t.boolean  "backorderable"
     t.datetime "deleted_at"
