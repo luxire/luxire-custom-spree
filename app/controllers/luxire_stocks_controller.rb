@@ -105,7 +105,7 @@ end
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def luxire_stock_params
-      params.require(:luxire_stock).permit(:stock_location_id, :parent_sku, :virtual_count_on_hands, :physical_count_on_hands, :measuring_unit, :backorderable, :deleted_at, :rack, :threshold, :in_house)
+      params.require(:luxire_stock).permit(:stock_location_id, :parent_sku, :virtual_count_on_hands, :physical_count_on_hands, :measuring_unit, :backorderable, :deleted_at, :rack, :threshold, :in_house, :fabric_width)
     end
 
 # get_luxire_stock method gets luxire_stock based on parent_sku
