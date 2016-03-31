@@ -29,7 +29,13 @@ class LuxireUserMyAccountController < Spree::Api::BaseController
 # Method show get specific order for a specific customer
  def show
       @order = Spree::Order.find_by_number(params[:id])
-      @payment_methods = @order.payments.first.payment_method
+      # @payment_methods = @order.payments.first.payment_method
+      if(@order)
+        render 'spree/api/orders/show.v1.rabl'
+      else
+        response = {msg: "No order exist"}
+        render json: response.to_json, status: "200"
+      end
  end
 
  # get_users get all the user based on token key
