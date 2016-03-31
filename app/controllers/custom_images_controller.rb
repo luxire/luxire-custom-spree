@@ -1,6 +1,6 @@
 class CustomImagesController < ApplicationController
   wrap_parameters format: [:json, :xml, :url_encoded_form, :multipart_form]
-  wrap_parameters :custom_image, include: [:id, :source, :image]
+  wrap_parameters :custom_image, include: [:id, :source, :image, :size]
   before_action :set_custom_image, only: [:show, :edit, :update, :destroy]
 
   # GET /custom_images
@@ -26,16 +26,27 @@ class CustomImagesController < ApplicationController
   # POST /custom_images
   # POST /custom_images.json
   def create
-    @custom_image = CustomImage.new(custom_image_params)
 
-    respond_to do |format|
-      if @custom_image.save
-        format.html { redirect_to @custom_image, notice: 'Custom image was successfully created.' }
-        format.json { render :show, status: :created, location: @custom_image }
-      else
-        format.html { render :new }
-        format.json { render json: @custom_image.errors, status: :unprocessable_entity }
-      end
+      # @custom_image.size = params[:size] || "64x64#{}"
+      @custom_image = CustomImage.new()
+      @custom_image.size = params[:custom_image][:size]  || "64x64#"
+      @custom_image.source = params[:custom_image][:source]
+      @custom_image.image = params[:custom_image][:image]
+
+      respond_to do |format|
+        if @custom_image.save
+          format.html { redirect_to @custom_image, notice: 'Custom image was successfully created.' }
+          format.json { render :show, status: :created, location: @custom_image }
+        else
+          format.html { render :new }
+          format.json { render json: @custom_image.errors, status: :unprocessable_entity }
+        end
+    # else
+    #   response = {msg: "Please specify size"}
+    #   respond_to do |format|
+    #     format.html { render html: 'Please specify size' }
+    #     format.json { render json: response.to_html, status: "422"}
+    #     end
     end
   end
 
