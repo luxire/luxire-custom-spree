@@ -21,7 +21,7 @@ class LuxireUserMyAccountController < Spree::Api::BaseController
         res = {msg: NO_ORDER}
         render json: res.to_json, status: "200"
       else
-        render json: @orders.to_json, status: "200"
+        render 'index.v1.rabl'
       end
     end
  end
