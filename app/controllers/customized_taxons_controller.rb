@@ -3,6 +3,9 @@ class CustomizedTaxonsController < Spree::Api::BaseController
         before_action :load_taxon, only: [:edit, :update]
         respond_to :html, :json, :js
 
+        wrap_parameters format: [:json, :xml, :url_encoded_form, :multipart_form]
+        wrap_parameters :taxon, include: [ :id, :parent_id, :icon]
+
         def initialize
           @path = 'spree/admin/taxons'
           @name = 'taxons'
@@ -75,26 +78,40 @@ class CustomizedTaxonsController < Spree::Api::BaseController
         end
 
         def get_taxon_details
-          if !params[:permalink].empty?
-              params[:permalink].gsub!("-"," ")
-              collection_hierarchy = params[:permalink].split("/")
+          unless params[:permalink].empty?
+            # removing dash from the link since the taxon name doesnot contains -, only the permalink contains
+              collection_hierarchy = params[:permalink].gsub("-"," ").split("/")
               @taxonomy = Spree::Taxonomy.where('lower(name) = ?', collection_hierarchy.first.downcase).first
-
               if @taxonomy
                 collection_hierarchy.drop(1).each_with_index do |hierarchy, count|
                     @taxon = @taxonomy.taxons.where('lower(name) = ?', hierarchy.downcase).where(depth: count+1).first
                     unless @taxon
                         response =  {msg: "#{hierarchy} collection does not exist"}
-                        render json: response.to_json, status: "200"
+                        render json: response.to_json, status: "422"
                         return
                     end
                  end
               else
                 response =  {msg: "#{collection_hierarchy.first} collection does not exist"}
-                render json: response.to_json, status: "200"
+                render json: response.to_json, status: "422"
                 return
               end
+          else
+            response =  {msg: "params[:permalink] can not be empty?"}
+            render json: response.to_json, status: "422"
+            return
           end
+          taxon_ids = []
+          permalink  = "#{params[:permalink]}%"
+          Spree::Taxon.where('lower(permalink) like (?)',permalink.downcase).each do |taxon|
+            taxon_ids << taxon.id
+          end
+          classifications =  Spree::Classification.where('taxon_id IN (?)', taxon_ids)
+          product_ids = []
+          classifications.each do |classification|
+            product_ids << classification.product_id
+          end
+          @products = Spree::Product.find(product_ids)
           render "get_taxon_details"
         end
 
