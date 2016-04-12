@@ -52,3 +52,6 @@ gem 'spree_auth_devise', github: 'spree/spree_auth_devise', branch: '3-0-stable'
 gem 'spree_active_shipping', :git => "git://github.com/spree/spree_active_shipping", :branch => "3-0-stable"
 gem 'razorpay'
 gem 'spree_paypal_express', github: 'spree-contrib/better_spree_paypal_express', branch: "3-0-stable"
+gem 'redis'
+gem "redis-rails"
+gem 'aws-sdk', '< 2.0'
