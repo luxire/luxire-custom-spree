@@ -1,98 +1,65 @@
 object @product
 cache [I18n.locale, @current_user_roles.include?('admin'), current_currency, root_object]
 
-attributes *product_attributes
+# attributes *product_attributes
 
 node(:display_price) { |p| p.display_price.to_s }
-node(:has_variants) { |p| p.has_variants? }
-node(:taxon_ids) { |p| p.taxon_ids }
+
 
 child :master => :master do
-  extends "spree/api/variants/small"
+  # attributes *Master.column_names  - ["height", "width", "depth"]
+  # attributes :images
+  # attributes :images
+  attributes :name, :price, :slug
+  extends "spree/api/variants/small.v1.rabl"
+
 end
 
 child :variants => :variants do
-  extends "spree/api/variants/small"
+  # attributes :slug
+  extends "spree/api/variants/small.v1.rabl"
 end
 
-#child :option_types => :option_types do
- # attributes *option_type_attributes
-#end
 
-#child :product_properties => :product_properties do
- # attributes *product_property_attributes
-#end
-
-#child :luxire_product => :luxire_product do
-#attributes *luxire_product_attributes
-
-#end
 
 child @luxire_product_type_attributes_customize => :customization_attributes do
-  attributes :id, :name, :value, :description, :image, :help, :help_url
+  attributes  :name, :value, :description, :image, :help, :help_url
  end
 
  child @luxire_product_type_attributes_personalize => :personalization_attributes do
-   attributes :id, :name, :value, :description, :image, :help, :help_url
+   attributes  :name, :value, :description, :image, :help, :help_url
  end
-
-# node @luxire_product_type_attributes_measurement => :luxire_product_attributes do |m|
-  #attributes :id, :name, :value
-#  Rails.logger.debug "value check #{m}"
-# end
 
 
   child @luxire_product_type_attributes_measuement_std => :standard_measurement_attributes do
-    attributes :id, :name, :value, :description, :image, :help, :help_url
+    attributes  :name, :value, :description, :image, :help, :help_url
   end
 
   child @luxire_product_type_attributes_measuement_body => :body_measurement_attributes do
-    attributes :id, :name, :value, :description, :image, :help, :help_url
+    attributes  :name, :value, :description, :image, :help, :help_url
+  end
+
+  child :luxire_style_masters => :luxire_style_masters do
+    attributes  :name, :default_values, :image, :help
+  end
+
+  child :classifications => :classifications do
+    attributes :taxon_id, :position
+    child(:taxon) do
+      extends "spree/api/taxons/show"
+    end
+  end
+
+  child :luxire_stock => :luxire_stock do
+    attributes  :virtual_count_on_hands
+  end
+
+  child :luxire_product => :luxire_product do
+    attributes *LuxireProduct.column_names - ["created_at", "updated_at"]
   end
 
 
 
-
-child :luxire_style_masters => :luxire_style_masters do
-#  style_attributes = LuxireStyleMaster.column_names
-#  style_attributes.map! {|style| style.to_sym}
-#  attributes style_attributes
-attributes :id, :name, :default_values, :image, :help
-end
-
-child :classifications => :classifications do
-  attributes :taxon_id, :position
-
-  child(:taxon) do
-    extends "spree/api/taxons/show"
+  child :luxire_vendor_master => :vendor_master do
+    attributes :name
   end
-end
-
-child :luxire_stock => :luxire_stock do
-attributes :id, :stock_location_id, :parent_sku, :virtual_count_on_hands, :physical_count_on_hands, :measuring_unit, :backorderable, :deleted_at, :rack, :threshold
-end
-
-child :luxire_product => :luxire_product do
-attributes *LuxireProduct.column_names
-end
-
-
-child @luxire_vendor => :luxire_vendor_master do
-attributes *LuxireVendorMaster.column_names
-end
-
-child @product_type => :luxire_product_type do
-attributes *LuxireProductType.column_names - ["created_at", "updated_at"]
-end
-
-child :standard_sizes => :standard_sizes do
-  attributes *StandardSize.column_names
-end
-
-child :luxire_vendor_master => :vendor_master do
-attributes :name
-end
-
-child :luxire_product_type => :product_type do
-attributes :product_type
-end
