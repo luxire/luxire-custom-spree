@@ -2,8 +2,9 @@ object @product
 cache [I18n.locale, @current_user_roles.include?('admin'), current_currency, root_object]
 
 # attributes *product_attributes
+node(:name) { |p| p.name }
 
-node(:display_price) { |p| p.display_price.to_s }
+node(:display_price) { |p| p.display_price}
 
 
 child :master => :master do

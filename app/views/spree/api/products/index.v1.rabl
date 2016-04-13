@@ -4,6 +4,8 @@ object @products
 #   extends "spree/api/products/show.v2.rabl"
 # end
 
+node(:name) { |p| p.name }
+node(:display_price) { |p| p.display_price }
 
 child :master => :master do
   attributes :images
