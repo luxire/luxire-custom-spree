@@ -11,7 +11,7 @@ child :master => :master do
   # attributes *Master.column_names  - ["height", "width", "depth"]
   # attributes :images
   # attributes :images
-  attributes :name, :price, :slug
+  attributes :id, :name, :price, :slug
   extends "spree/api/variants/small.v1.rabl"
 
 end
@@ -42,13 +42,6 @@ child @luxire_product_type_attributes_customize => :customization_attributes do
 
   child :luxire_style_masters => :luxire_style_masters do
     attributes  :name, :default_values, :image, :help
-  end
-
-  child :classifications => :classifications do
-    attributes :taxon_id, :position
-    child(:taxon) do
-      extends "spree/api/taxons/show"
-    end
   end
 
   child :luxire_stock => :luxire_stock do

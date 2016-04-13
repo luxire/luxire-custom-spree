@@ -1,9 +1,9 @@
 cache [I18n.locale, @current_user_roles.include?('admin'), 'small_variant', root_object]
 
 # attributes *variant_attributes
-# attributes :name, :price, :slug
+attributes :id
 
-node(:display_price) { |p| p.display_price.to_s }
+node(:display_price) { |p| p.display_price}
 # node(:is_backorderable) { |v| v.is_backorderable? }
 # node(:total_on_hand) { |v| v.total_on_hand }
 
