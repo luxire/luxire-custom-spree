@@ -1,5 +1,5 @@
 Spree::Api::ProductsController.class_eval do
-
+respond_to :html, :json
   # product_params method whitelist all the parameter for mass assignment
     def show
      @product = find_product(params[:id])
@@ -17,9 +17,26 @@ Spree::Api::ProductsController.class_eval do
           @luxire_product_type_attributes_measurement = @luxire_product_type_attributes.where(category: "measurement")
           @luxire_product_type_attributes_measuement_std = @luxire_product_type_attributes.where(sub_category: "std")
           @luxire_product_type_attributes_measuement_body = @luxire_product_type_attributes.where(sub_category: "body")
-	end
-     end
+	       end
+       end
     end
+
+    def admin_index
+      @products = Spree::Product.all
+      @products = @products.distinct.page(params[:page]).per(params[:per_page])
+      expires_in 15.minutes, :public => true
+      headers['Surrogate-Control'] = "max-age=#{15.minutes}"
+      respond_with(@products)
+    end
+
+    def admin_show
+      @product = find_product(params[:id])
+      expires_in 15.minutes, :public => true
+      headers['Surrogate-Control'] = "max-age=#{15.minutes}"
+      headers['Surrogate-Key'] = "product_id=1"
+      respond_with(@product)
+    end
+
 private
   def product_params
     # Get all the column names from luxire_product model. Model.column return an array
