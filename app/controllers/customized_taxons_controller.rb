@@ -79,12 +79,27 @@ class CustomizedTaxonsController < Spree::Api::BaseController
 
         def get_taxon_details
           unless params[:permalink].empty?
-            # removing dash from the link since the taxon name doesnot contains -, only the permalink contains
-              collection_hierarchy = params[:permalink].gsub("-"," ").split("/")
-              @taxonomy = Spree::Taxonomy.where('lower(name) = ?', collection_hierarchy.first.downcase).first
+            # We need to check whether the permalink hierarchy is correct or not.
+            # split permalink based on "/"
+              collection_hierarchy = params[:permalink].split("/")
+            # Find the root_taxon. The first word of the permalink specifies the root taxon
+              root_taxon = Spree::Taxon.where('lower(permalink) = ?', collection_hierarchy.first.downcase).first
+            # If root_taxon does not exist respond with root_taxon does not exist
+            # Else find the taxonomy
+              if root_taxon.nil?
+                response =  {msg: "#{collection_hierarchy.first} collection does not exist"}
+                render json: response.to_json, status: "422"
+                return
+              end
+              @taxonomy = root_taxon.taxonomy
+            # Create the full_hierarcy variable and assign it to the first element of the collection_hierarchy array.
+              full_hierarcy = collection_hierarchy.first
               if @taxonomy
+                # Drop the first element of the collection_hierarchy array and iterate over it
+                # And check whether the taxon exist or not
                 collection_hierarchy.drop(1).each_with_index do |hierarchy, count|
-                    @taxon = @taxonomy.taxons.where('lower(name) = ?', hierarchy.downcase).where(depth: count+1).first
+                  full_hierarcy = "#{full_hierarcy}/#{hierarchy}"
+                    @taxon = @taxonomy.taxons.where('lower(permalink) = ?', full_hierarcy.downcase).where(depth: count+1).first
                     unless @taxon
                         response =  {msg: "#{hierarchy} collection does not exist"}
                         render json: response.to_json, status: "422"
@@ -101,15 +116,14 @@ class CustomizedTaxonsController < Spree::Api::BaseController
             render json: response.to_json, status: "422"
             return
           end
-          taxon_ids = []
-          permalink  = "#{params[:permalink]}%"
-          Spree::Taxon.where('lower(permalink) like (?)',permalink.downcase).each do |taxon|
-            taxon_ids << taxon.id
-          end
-          classifications =  Spree::Classification.where('taxon_id IN (?)', taxon_ids)
+          # Created an array product_ids which will hold all the product_id
           product_ids = []
-          classifications.each do |classification|
-            product_ids << classification.product_id
+          # Use the regular expression % at the end which will find all taxon whose permalink starts with
+          # the user inserted permalink(params[:permalink]) and can have any values after it.
+          permalink  = "#{params[:permalink]}%"
+          # Iterate over the Taxon's array of objects and populate the product_ids array
+          Spree::Taxon.where('lower(permalink) like (?)',permalink.downcase).each do |taxon|
+            product_ids += taxon.product_ids
           end
           @products = Spree::Product.find(product_ids)
           render "get_taxon_details"
