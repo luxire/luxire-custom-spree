@@ -15,6 +15,7 @@ Spree::Core::Importer::Order.class_eval do
               order.associate_user!(user)
 
               shipments_attrs = params.delete(:shipments_attributes)
+              # byebug
               create_line_items_from_params(params.delete(:line_items_attributes),order)
               create_shipments_from_params(shipments_attrs, order)
               create_adjustments_from_params(params.delete(:adjustments_attributes), order)
