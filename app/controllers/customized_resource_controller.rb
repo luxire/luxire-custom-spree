@@ -55,7 +55,6 @@ class CustomizedResourceController < Spree::Api::BaseController
   end
 
   def create
-    byebug
     invoke_callbacks(:create, :before)
     @object.attributes = permitted_resource_params
     if @object.save
