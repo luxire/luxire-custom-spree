@@ -21,7 +21,7 @@ gem 'turbolinks'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.0'
 # bundle exec rake doc:rails generates the API under doc/api.
-gem 'sdoc', '~> 0.4.0', group: :doc
+gem 'sdoc', '~> 0.4.0'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
@@ -54,4 +54,6 @@ gem 'razorpay'
 gem 'spree_paypal_express', github: 'spree-contrib/better_spree_paypal_express', branch: "3-0-stable"
 gem 'redis'
 gem "redis-rails"
-gem 'aws-sdk', '< 2.0'
+gem 'spree_gift_card', path: '/home/developer/Developer/Projects/Luxire/NewGemFile/solidus_gift_card-f63004afbdc4'
+# gem 'spree_wishlist', github: 'spree-contrib/spree_wishlist', branch: 'master'
+# gem 'spree_reviews', github: 'spree-contrib/spree_reviews', branch: '3-0-stable'
