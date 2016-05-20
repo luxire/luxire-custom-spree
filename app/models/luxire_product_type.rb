@@ -9,7 +9,7 @@ class LuxireProductType < ActiveRecord::Base
   has_many :standard_sizes, class_name: "StandardSize", :dependent => :destroy
 
 
-  has_attached_file :image,  styles: { small: "64x64" },
+   has_attached_file :image,  styles: { small: "128x128" },
                           default_style: :small,
                           url: '/luxire/product_type/:id/:style/:basename.:extension',
                           path: ':rails_root/public/luxire/product_type/:id/:style/:basename.:extension',
@@ -19,5 +19,6 @@ class LuxireProductType < ActiveRecord::Base
                      content_type: { content_type: ["image/jpeg", "image/gif", "image/png"] }
 
   validates :product_type, presence: true, uniqueness: true
+  validates_presence_of :length_required
 
 end
