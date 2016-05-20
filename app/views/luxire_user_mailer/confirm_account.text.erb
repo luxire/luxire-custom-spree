@@ -1,11 +1,10 @@
 
-
 Dear <%=
             if (!@user.nil?)
-              if(@user.luxire_user.first_name != "" || @user.luxire_user.first_name.nil?)
+              if(@user.luxire_customer.first_name == "" || @user.luxire_customer.first_name.nil?)
                 "Customer"
               else
-                @user.luxire_user.first_name
+                @user.luxire_customer.first_name
               end
             end
 %>,

@@ -1,7 +1,12 @@
 # object @products
 object false
-node(:count) {@products.count}
-node(:total_count) {@products.total_count}
+node(:count) { @products.count }
+node(:total_count) { @products.total_count }
+node(:current_page) { params[:page] ? params[:page].to_i : 1 }
+node(:per_page) { params[:per_page] || Kaminari.config.default_per_page }
+node(:pages) { @products.num_pages }
+
+
 
 
 child(@products => :products) do
@@ -10,7 +15,7 @@ child(@products => :products) do
   node(:name) { |p| p.name}
 
 child :master => :master do
-  attributes :id, :images
+  attributes :id
   extends "spree/api/variants/small.v1_admin.rabl"
 end
 

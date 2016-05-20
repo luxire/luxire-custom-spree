@@ -2,7 +2,8 @@ object @product
 cache [I18n.locale, @current_user_roles.include?('admin'), current_currency, root_object]
 
 
-# node(:id) { |p| p.id.to_s }
+ node(:id) { |p| p.id.to_s }
+
 node(:name) { |p| p.name }
 node(:price) { |p| p.price }
 node(:display_price) { |p| p.display_price }
