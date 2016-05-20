@@ -22,7 +22,12 @@ respond_to :html, :json
     end
 
     def admin_index
-      @products = Spree::Product.all
+      if params[:q]
+        @products = Spree::Product.ransack(params[:q]).result
+      else
+        @products = Spree::Product.all
+      end
+      #@products = Spree::Product.all
       @products = @products.distinct.page(params[:page]).per(params[:per_page])
       expires_in 15.minutes, :public => true
       headers['Surrogate-Control'] = "max-age=#{15.minutes}"
@@ -36,7 +41,23 @@ respond_to :html, :json
       headers['Surrogate-Key'] = "product_id=1"
       respond_with(@product)
     end
+    def index
+     if params[:ids]
+        @products = product_scope.where(id: params[:ids].split(",").flatten)
+     else
+        @products = product_scope.ransack(params[:q]).result
+     end
 
+     @products = @products.distinct.page(params[:page]).per(params[:per_page])
+     expires_in 15.minutes, :public => true
+     headers['Surrogate-Control'] = "max-age=#{15.minutes}"
+
+     unless params[:q].nil? || params[:q].empty?
+        render 'search.v1.rabl'
+     else
+        render 'index.v1.rabl'
+     end
+    end
 private
   def product_params
     # Get all the column names from luxire_product model. Model.column return an array
