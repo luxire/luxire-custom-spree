@@ -1,6 +1,8 @@
 Spree::Api::OrdersController.class_eval do
+  skip_before_action :find_order, only: :apply_gift_code
+
   def create
-    byebug
+    # byebug
     authorize! :create, Spree::Order
     order_user = if @current_user_roles.include?('admin') && order_params[:user_id]
       Spree.user_class.find(order_params[:user_id])
@@ -15,10 +17,42 @@ Spree::Api::OrdersController.class_eval do
     end
 
     @order = Spree::Core::Importer::Order.import(order_user, import_params, cookies.signed[:guest_token])
+    LuxireOrder.create!(order_id: @order.id)
     respond_with(@order, default_template: :show, status: 201)
   end
 
+
+  # Method apply_gift_code is used to apply gift card coupon
+    def apply_gift_code
+      guest_token = cookies.signed[:guest_token]
+      @order = Spree::Order.where(guest_token: guest_token).where(completed_at: nil).last
+      if !@order.nil? && params[:order][:gift_code]
+        @order.gift_code = params[:order][:gift_code]
+        # @order.coupon_code = params[:order][:gift_code]
+      else
+        response={msg: 'Gift card code is missing or the order is empty'}
+        render json: response.to_json, status: '422'
+        return
+      end
+      if gift_card = Spree::GiftCard.find_by_code(@order.gift_code) and gift_card.order_activatable?(@order)
+        gift_card.apply(@order)
+        response={msg: 'Gift card is successfully applied', order: @order}
+        render json: response.to_json, status: '200'
+      else
+        gift_card = Spree::GiftCard.find_by_code(@order.gift_code)
+        response={msg: 'Gift card cannot be applied'}
+        if gift_card.nil?
+        response[:reason] = "Invalid Gift Card"
+        else
+          response[:reason] = gift_card.find_reason(@order)
+        end
+        render json: response.to_json, status: '422'
+      end
+  end
+
+
 private
+
   def order_params
     if params[:order]
       normalize_params
