@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  put 'api/change_order_status', to: 'custom_orders#change_order_status', defaults: {format: :json}
   get '/api/admin/products' => 'spree/api/products#admin_index'
   get '/api/admin/products/:id' => 'spree/api/products#admin_show'
 
