@@ -125,7 +125,9 @@ class CustomizedTaxonsController < Spree::Api::BaseController
           Spree::Taxon.where('lower(permalink) like (?)',permalink.downcase).each do |taxon|
             product_ids += taxon.product_ids
           end
-          @products = Spree::Product.find(product_ids)
+            @products = Spree::Product.find(product_ids)
+            # @products = product_scope.where(id: product_ids.split(",").flatten)
+            # @products = @products.distinct.page(params[:page]).per(params[:per_page])
           render "get_taxon_details"
         end
 
