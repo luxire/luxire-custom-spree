@@ -1,5 +1,6 @@
 class ReceiveEbsResponsesController < ApplicationController
 respond_to :html, :json
+rescue_from Exception, with: exception_handler
 
 INVALID_NUMBER = "Invalid number"
 ERROR = "Error while saving data"
@@ -33,12 +34,46 @@ SUCCESS = "Data populated Successfully"
                 payment.state = "pending"
                 order.payment_state ="balance_due"
                 order.transaction do
-                  order.save
-                  payment.save
+                  order.save!
+                  payment.save!
+                  if order.luxire_product.is_inventory_deducted
+                      order.line_items.each do |line_item|
+                        product = line_item.product
+                        luxire_product = product.luxire_product
+                        stock = luxire_product.luxire_stock
+                        stock.virtual_count_on_hands -= luxire_product.length_required
+                        if(stock.threshold >= stock.virtual_count_on_hands)
+                          # send an email
+                          Spree::OrderMailer.send_mail_for_backorder(product).deliver_later
+                        end
+                        stock.save!
+                  end
+                  luxire_order = order.luxire_order
+                  luxire_order.is_inventory_deducted = true;
+                  luxire_order.save!
+                end
+              end
+                if(@exp)
+                  response = {msg: "Exception raised during updating records"}
+                  render json: response.to_json, status: "422"
+                  return
                 end
               end
           else
-
+              log = Spree::LogEntry.new
+              log.source = payment
+              log.details =
+              payment.state = "failed"
+              payment.response_code = params[:PaymentID]
+              payment.transaction do
+                log.save!
+                payment.save!
+              end
+              if(@exp)
+                response = {msg: "Exception raised during updating records"}
+                render json: response.to_json, status: "422"
+                return
+              end
           end
       else
         response = {msg: INVALID_NUMBER}
@@ -54,5 +89,10 @@ SUCCESS = "Data populated Successfully"
   @order = order
   respond_with(@order, default_template: 'Spree::Api::Orders::show', status: 200)
 end
+
+def exception_handler
+  @exp = true;
+end
+
 
 end
