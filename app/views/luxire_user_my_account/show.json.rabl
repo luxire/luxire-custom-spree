@@ -49,3 +49,7 @@ end
 child :valid_credit_cards => :credit_cards do
   extends "spree/api/credit_cards/show"
 end
+
+child :luxire_order => :luxire_order do
+  attributes :fulfillment_status, :fulfilled_at, :fulfilled_at_zone
+end
