@@ -4,9 +4,6 @@ class LuxireUsersController < ApplicationController
   #curl command: curl -d "user[email]=spree@example.com&user[password]=spree123" -X POST http://localhost:3000/luxire-users/login
   ###
   def login
-    logger.debug "params start"
-    logger.debug params
-    logger.debug "params end"
     user = luxire_auth(params[:user][:email], params[:user][:password])
     if user
       @User = user
@@ -19,7 +16,25 @@ class LuxireUsersController < ApplicationController
       @User.current_sign_in_ip  = new_current
       @User.sign_in_count ||= 0
       @User.sign_in_count += 1
-      @User.save()
+     if @User.save() && !(defined?request.cookies["guest_token"]).nil?
+       guest_token = Base64.decode64(request.cookies["guest_token"].split('--')[0])[1..22]
+       @guest_order = Spree::Order.where(guest_token: guest_token).where(completed_at: nil).last
+=begin
+       @order = Spree::Order.where(user_id: @User.id).where(completed_at: nil).last
+       unless(@order.nil? && @guest_order.nil?)
+	@order.line_items.each do |line_item|
+          line_item.order_id = @guest_order.id
+          line_item.save!
+        end
+        @order.completed_at = Time.now
+        @order.user_id = nil
+        @order.save!
+       end
+=end
+       if @guest_order && @guest_order.ship_address.nil?
+         @guest_order.associate_user!(Spree::User.find(user.id))
+       end
+     end
     else
       logger.debug "Login Failed"
     end
@@ -40,9 +55,9 @@ class LuxireUsersController < ApplicationController
                                             :password => params[:user][:password],
                                             :password_confirmation =>params[:user][:password_confirmation],
                                             :spree_role_ids => (params[:user][:spree_role_ids] && params[:user][:spree_role_ids].length > 0) ? params[:user][:spree_role_ids] : [2])
-        user_created.build_luxire_user
-        user_created.luxire_user.first_name = params[:user][:first_name] if params[:user][:first_name]
-        user_created.luxire_user.last_name = params[:user][:last_name] if params[:user][:last_name]
+        user_created.build_luxire_customer
+        user_created.luxire_customer.first_name = params[:user][:first_name] if params[:user][:first_name]
+        user_created.luxire_customer.last_name = params[:user][:last_name] if params[:user][:last_name]
         if user_created.save
           user_created.generate_spree_api_key!
           logger.debug "User created with ID"
@@ -56,7 +71,7 @@ class LuxireUsersController < ApplicationController
           @user_creation_failed = {"statusCode" => "500","statusText" => "User creation failed"}
         end
       else
-        @unprocessible_entity = {"statusCode" => "422","statusText" => "Unprocessible entity"}
+        @unprocessible_entity = {"statusCode" => "422","statusText" => "Password Mismatch"}
       end
     end
   end
