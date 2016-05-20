@@ -6,4 +6,3 @@ Spree::Image.class_eval do
                      path: ':rails_root/public/spree/products/:id/:style/:basename.:extension',
                      convert_options: { all: '-strip -auto-orient -colorspace sRGB -depth 300' }
 end
-
