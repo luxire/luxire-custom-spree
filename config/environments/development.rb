@@ -36,6 +36,10 @@ Rails.application.configure do
   # Raises helpful error messages.
   config.assets.raise_runtime_errors = true
 
+ # Precompilation of images
+  config.assets.compile = false
+  config.assets.precompile =  ['*.js', '*.css', '*.css.erb']
+
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
   config.action_mailer.default_url_options = { :host => 'localhost:3000' }
