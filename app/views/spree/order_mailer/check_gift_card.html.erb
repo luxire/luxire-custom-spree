@@ -1,0 +1,10 @@
+<p> "Dear Customer" </p>
+
+  <p>This is in reference of your order number <%= @order.number %> and item name is <%= @line_item.name %> .Please find the details of your gift card</p>
+  <div>
+    Gift Card Code: <%= @gift_card.code %> <br/>
+    Gift Card Value: <%= @gift_card.original_value %> <br/>
+    Gift Card Expire Date: <%= @gift_card.expiry_date.to_date - 1 %> <br/>
+  </div>
+
+    <p>Thank you for your business. </p>

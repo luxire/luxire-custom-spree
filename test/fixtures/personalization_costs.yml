@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  cost: 
+  line_item_id: 1
+
+two:
+  cost: 
+  line_item_id: 1
