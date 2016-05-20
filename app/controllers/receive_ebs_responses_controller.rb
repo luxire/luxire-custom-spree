@@ -1,6 +1,6 @@
 class ReceiveEbsResponsesController < ApplicationController
 respond_to :html, :json
-rescue_from Exception, with: exception_handler
+rescue_from Exception, with: :exception_handler
 
 INVALID_NUMBER = "Invalid number"
 ERROR = "Error while saving data"
