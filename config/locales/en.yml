@@ -21,3 +21,6 @@
 
 en:
   hello: "Hello world"
+  spree:
+    personalization_cost: "Personalization Cost"
+    personalization_cost_calculator: 'Personalization Cost Calculator'
