@@ -29,7 +29,7 @@ NOT_AVAILABLE = "NA"
               if( !(row["Type"].casecmp(NOT_AVAILABLE) == 0) && !row["Type"].blank?)
                   product_types = LuxireProductType.where('lower(product_type) = ?', row["Type"].downcase)
                   if product_types.empty?
-                    raise 'product_type does not exist'
+                    raise "#{row['Type']} product_type does not exist"
                   else
                      @product_type = product_types.first
                      @luxire_product[:luxire_product_type_id] = @product_type.id
@@ -121,6 +121,8 @@ NOT_AVAILABLE = "NA"
       product_hash = {name: row["Title"], available_on: available_date, price: row["Variant Price"], description: row["Body (HTML) Leave Blank"], shipping_category_id: 1}
       @product = Spree::Product.new(product_hash)
       @luxire_product = LuxireProduct.new
+      # Set the req_validation to true to set the validation
+      @luxire_product.req_validation = true
       @option_arr = []
 
 =begin
@@ -151,13 +153,6 @@ NOT_AVAILABLE = "NA"
       @luxire_product[:product_tags] = row["Tag"]
       @luxire_product[:product_compare_at_price] = row["Variant Compare At Price"]
       @luxire_product[:barcode] = row["Variant Barcode"]
-      # if (row["Gift Card"].casecmp "no") == 0
-      #   @luxire_product[:gift_card_flag] = false
-      # elsif (row["Gift Card"].casecmp "yes") == 0
-      #   @luxire_product[:gift_card_flag] = true
-      # else
-      #   raise ''
-      # end
       @luxire_product[:gift_card_flag] = row["Gift Card"]
       @luxire_product[:product_weave_type] = row["Types of weave"]
       @luxire_product[:no_of_color] = row["No. of colors"]
@@ -170,7 +165,7 @@ NOT_AVAILABLE = "NA"
       @luxire_product[:construction] = row["construction (Number of threads in warp and weft)"]
       @luxire_product[:thread_count] = row["Count (Thickness of thread used like 40s, 120/2 etc)"]
       @luxire_product[:thickness] = row["Thickness"]
-      @luxire_product[:stiffness] = row["Stiffness"]
+      @luxire_product[:stiffness] = row["Stiffness"].to_f
       @luxire_product[:gsm] = row["GSM"]
       @luxire_product[:glm] = row["GLM"]
       @luxire_product[:wash_care] = row["Wash Care"]
@@ -184,7 +179,13 @@ NOT_AVAILABLE = "NA"
       @luxire_product[:wrinkle_resistance] = row["Wrinkle Resistance"]
       @luxire_product[:wash_care]  = row["Wash Care"]
       @luxire_product[:stiffness]  = row["Stiffness"]
-      @luxire_product[:stiffness_unit]  = row["Stiffness Unit"]
+      @luxire_product[:stiffness_unit]  = row["Stiffness"].gsub(row["Stiffness"].to_f.to_s,"")
+
+      @luxire_product[:variant_taxable] = row["Variant Taxable"]
+      @luxire_product[:variant_require_shipping] = row["Variant Requires Shipping"]
+      @luxire_product[:variant_fulfillment_service] = row["Variant Fulfillment Service"]
+      # @luxire_product[:material] = row[""]
+      @luxire_product[:inventory_tracked_by] = row["Variant Inventory Tracker"]
 
       # Luxire_stock[:virtual_count_on_hands], Luxire_stock[:physical_count_on_hands] = row["Variant Inventory Qty"]
 
@@ -235,16 +236,17 @@ NOT_AVAILABLE = "NA"
       if ((row["Inventory in meters if Inhouse"].casecmp(NOT_AVAILABLE) == 0 || row["Inventory in meters if Inhouse"].empty?)  && (row["If Mill Sourced, Current Luxire Stock"].casecmp(NOT_AVAILABLE) == 0 || row["If Mill Sourced, Current Luxire Stock"].empty?))
         raise 'Inventory not defined'
       elsif( !(row["Inventory in meters if Inhouse"].casecmp(NOT_AVAILABLE) == 0) && ( !row["Inventory in meters if Inhouse"].empty?))
-        @luxire_stock.virtual_count_on_hands = row["Inventory in meters if Inhouse"]
-        @luxire_stock.physical_count_on_hands = row["Inventory in meters if Inhouse"]
+        @luxire_stock.virtual_count_on_hands = row["Inventory in meters if Inhouse"].to_f
+        @luxire_stock.physical_count_on_hands = row["Inventory in meters if Inhouse"].to_f
         @luxire_stock.in_house = true
       elsif( !(row["If Mill Sourced, Current Luxire Stock"].casecmp(NOT_AVAILABLE) == 0) && !row["If Mill Sourced, Current Luxire Stock"].empty?)
         @luxire_stock.in_house = false
-        @luxire_stock.virtual_count_on_hands = row["If Mill Sourced, Current Luxire Stock"]
-        @luxire_stock.physical_count_on_hands = row["If Mill Sourced, Current Luxire Stock"]
+        @luxire_stock.virtual_count_on_hands = row["If Mill Sourced, Current Luxire Stock"].to_f
+        @luxire_stock.physical_count_on_hands = row["If Mill Sourced, Current Luxire Stock"].to_f
       end
       @luxire_stock.threshold = row["Threshold"]
       @luxire_stock.fabric_width = row["Fabric Width"]
+      @luxire_stock.backorderable = row["Variant Inventory Policy"]
       @luxire_stock.measuring_unit = row["Inventory Measuring Unit"]
       @luxire_stock.stock_location_id = 1
       @luxire_stock.rack = row["Inventory Rack"]
@@ -260,18 +262,25 @@ NOT_AVAILABLE = "NA"
         ids = []
         collections.each do |collection|
           collection_hierarchy = collection.split("->").map(&:strip)
+          taxonomy_name = collection_hierarchy.first
           taxonomy = Spree::Taxonomy.where('lower(name) = ?', collection_hierarchy.first.downcase).first
 
           if taxonomy
             collection_hierarchy.drop(1).each_with_index do |hierarchy, count|
               @taxon = taxonomy.taxons.where('lower(name) = ?', hierarchy.downcase).where(depth: count+1).first
-              raise "#{@taxon} collection does not exist" unless @taxon
+              unless @taxon
+                info = collection_hierarchy[0]
+                for i in 1..count
+                  info+= "->"  + collection_hierarchy[i]
+                end
+                raise "#{taxonomy_name} -> #{info} collection does not exist"
+              end
             end
           else
             raise "#{collection_hierarchy} collection does not exist"
           end
-          if collection_hierarchy.length == 1
-            id = taxonomy.id
+          if collection_hierarchy.length == 0
+            id = taxonomy.taxons.first.id
           else
             id = @taxon.id
           end
@@ -281,5 +290,4 @@ NOT_AVAILABLE = "NA"
         @product.save!
       end
     end
-
 end
