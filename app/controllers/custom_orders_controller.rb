@@ -32,4 +32,18 @@ class CustomOrdersController < Spree::Api::BaseController
        render "spree/api/orders/show.v1.rabl"
      end
   end
+
+
+  def change_order_status
+    @order = Spree::Order.find(params[:order][:id])
+    @luxire_order = @order.luxire_order
+    @luxire_order.fulfillment_status = params[:order][:status]
+    if @luxire_order.save
+      response= {msg: "Order status changed successfully"}
+      render json: response.to_json, status: "200"
+    else
+      response= {msg: "Error while saving order status"}
+      render json: response.to_json, status: "422"
+    end
+  end
 end
