@@ -1,6 +1,40 @@
 Rails.application.routes.draw do
+  get '/api/admin/products' => 'spree/api/products#admin_index'
+  get '/api/admin/products/:id' => 'spree/api/products#admin_show'
 
+  get 'template_field_finder/abandoned_checkouts', defaults: {format: :json}
 
+  get 'template_field_finder/contact_customer', defaults: {format: :json}
+
+  get 'template_field_finder/customer_account_invite', defaults: {format: :json}
+
+  get 'template_field_finder/customer_account_welcome', defaults: {format: :json}
+
+  get 'template_field_finder/customer_account_password_reset', defaults: {format: :json}
+
+  get 'template_field_finder/draft_order_invoice', defaults: {format: :json}
+
+  get 'template_field_finder/fulfilment_request', defaults: {format: :json}
+
+  get 'template_field_finder/gift_cards_created', defaults: {format: :json}
+
+  get 'template_field_finder/new_order', defaults: {format: :json}
+
+  get 'template_field_finder/order_cancelled', defaults: {format: :json}
+
+  get 'template_field_finder/order_confirmation', defaults: {format: :json}
+
+  get 'template_field_finder/order_refund', defaults: {format: :json}
+
+  get 'template_field_finder/shipping_confirmation', defaults: {format: :json}
+
+  get 'template_field_finder/shipping_update', defaults: {format: :json}
+
+   get 'api/checkouts/apply_gift_code', to: 'spree/api/orders#apply_gift_code',  defaults: {format: :json}
+   get 'api/admin/products',to: 'spree/api/products#admin_index'
+   get 'api/admin/products/:id',to: 'spree/api/products#admin_show'
+
+  resources :standard_sizes, defaults: {format: :json}
   get 'get_customer_attr',to: 'retrive_attribute_info#get_customer_attr'
   get 'get_order_attr',to: 'retrive_attribute_info#get_order_attr'
   get 'get_shipping_attr',to: 'retrive_attribute_info#get_shipping_attr'
@@ -13,7 +47,6 @@ Rails.application.routes.draw do
   get 'get_currency_multiplier', to: 'currencies#get_currency_multiplier'
   get 'get_standard_size', to: 'standard_sizes#get_standard_size', defaults: {format: :json}
   resources :currencies, defaults: {format: :json}
-  resources :standard_sizes
 # routing for customized taxon controller
   resources :taxonomies, defaults: {format: :json} do
     collection do
