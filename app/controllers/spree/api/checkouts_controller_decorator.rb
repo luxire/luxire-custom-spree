@@ -6,9 +6,14 @@ Spree::Api::CheckoutsController.class_eval do
     # Check if the gift_card is present in params
     def gift_card_present
       # !params[:order][:gift_code].nil? && !params[:order][:gift_code].empty?
-      guest_token = cookies.signed[:guest_token]
-      @order = Spree::Order.where(guest_token: guest_token).where(completed_at: nil).last
-      gift_card = @order.adjustments.where(source_type: 'Spree::GiftCard').take
+ 	# guest_token = cookies.signed[:guest_token]
+	# byebug
+      @order = Spree::Order.where(number: params[:id]).where(completed_at: nil).last
+      unless  @order.nil?
+         gift_card = @order.adjustments.where(source_type: 'Spree::GiftCard').take
+      else
+	return false
+      end
     end
 
     # Method apply_gift_code is used to apply gift card coupon
