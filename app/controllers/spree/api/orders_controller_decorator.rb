@@ -24,8 +24,10 @@ Spree::Api::OrdersController.class_eval do
 
   # Method apply_gift_code is used to apply gift card coupon
     def apply_gift_code
-      guest_token = cookies.signed[:guest_token]
-      @order = Spree::Order.where(guest_token: guest_token).where(completed_at: nil).last
+#	byebug
+ #     guest_token = cookies.signed[:guest_token]
+  #    @order = Spree::Order.where(guest_token: guest_token).where(completed_at: nil).last
+    @order = Spree::Order.where(number: params[:order][:number]).where(completed_at: nil).last
       if !@order.nil? && params[:order][:gift_code]
         @order.gift_code = params[:order][:gift_code]
         # @order.coupon_code = params[:order][:gift_code]
