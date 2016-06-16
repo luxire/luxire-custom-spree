@@ -1,5 +1,9 @@
 class MailTemplatesController < ApplicationController
   before_action :set_mail_template, only: [:show, :edit, :update, :destroy]
+  rescue_from Exception do |exception|
+    response = {msg: exception.message}
+    render json: response.to_json, status: 401
+  end
 
   # GET /mail_templates
   # GET /mail_templates.json
