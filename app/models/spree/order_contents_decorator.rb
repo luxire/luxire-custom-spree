@@ -24,7 +24,6 @@ Spree::OrderContents.class_eval do
      line_item.target_shipment = options[:shipment] if options.has_key? :shipment
     #  Creating a transaction for line item and luxire line item
      Spree::LineItem.transaction do
-      # byebug
        line_item.save!
        unless luxire_line_item.empty?
           #  Create LuxireLineItem
