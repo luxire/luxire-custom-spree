@@ -15,23 +15,12 @@ class LuxireUsersController < ApplicationController
       @User.last_sign_in_ip     = old_current || new_current
       @User.current_sign_in_ip  = new_current
       @User.sign_in_count ||= 0
-      @User.sign_in_count += 1
-     if @User.save() && !(defined?request.cookies["guest_token"]).nil?
-       guest_token = Base64.decode64(request.cookies["guest_token"].split('--')[0])[1..22]
+      @User.sign_in_count +=1
+	if @User.save()
+	   guest_token = Base64.decode64(request.cookies["guest_token"].split('--')[0])[1..22]
+	 # guest_token = cookies.signed[:guest_token]
        @guest_order = Spree::Order.where(guest_token: guest_token).where(completed_at: nil).last
-=begin
-       @order = Spree::Order.where(user_id: @User.id).where(completed_at: nil).last
-       unless(@order.nil? && @guest_order.nil?)
-	@order.line_items.each do |line_item|
-          line_item.order_id = @guest_order.id
-          line_item.save!
-        end
-        @order.completed_at = Time.now
-        @order.user_id = nil
-        @order.save!
-       end
-=end
-       if @guest_order && @guest_order.ship_address.nil?
+       if @guest_order
          @guest_order.associate_user!(Spree::User.find(user.id))
        end
      end
@@ -149,7 +138,7 @@ class LuxireUsersController < ApplicationController
         user.reset_password_token = enc
         user.reset_password_sent_at = Time.now.utc
         user.save!
-        LuxireUserMailer.password_reset(user, raw_token).deliver_now
+        LuxireUserMailer.password_reset(user, raw_token, request).deliver_now
     else
       @user_does_not_exist =true
     end
