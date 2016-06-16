@@ -5,7 +5,7 @@ class LuxireUserMyAccountController < Spree::Api::BaseController
   NO_ORDER = "user has no order"
 
 
-# Method index get all the orders for a specific customer
+# Method index get all the orders for a specific customer which is not fulfilled
   def index
     get_users
     if(@users.length > 1)
@@ -16,8 +16,13 @@ class LuxireUserMyAccountController < Spree::Api::BaseController
       render json: res.to_json, status: "422"
     else
       @user = @users.first
-      @orders = @user.orders.complete.order('completed_at desc')
-      if(@orders.empty?)
+      @luxire_orders = @user.luxire_orders.where("fulfillment_status != ? and fulfillment_status is not ?","Delivered", nil)
+      unless @luxire_orders.nil?
+        ids = @luxire_orders.pluck(:order_id)
+        @orders = Spree::Order.find(ids)
+      end
+      # @orders = @user.orders.complete.order('completed_at desc')
+      if(@orders.nil?)
         res = {msg: NO_ORDER}
         render json: res.to_json, status: "200"
       else
@@ -36,6 +41,32 @@ class LuxireUserMyAccountController < Spree::Api::BaseController
         response = {msg: "No order exist"}
         render json: response.to_json, status: "200"
       end
+ end
+
+# Get previous order of customer which is already fulfilled
+ def old_order
+   get_users
+   if(@users.length > 1)
+   res = {msg: MULTIPLE_USER }
+   render json: res.to_json, status: "422"
+   elsif(@users.empty?)
+     res = {msg: NO_USER}
+     render json: res.to_json, status: "422"
+   else
+     @user = @users.first
+     @luxire_orders = @user.luxire_orders.where(fulfillment_status: "Delivered")
+     unless @luxire_orders.nil?
+       ids = @luxire_orders.pluck(:order_id)
+       @orders = Spree::Order.find(ids)
+     end
+     # @orders = @user.orders.complete.order('completed_at desc')
+     if(@orders.nil?)
+       res = {msg: NO_ORDER}
+       render json: res.to_json, status: "200"
+     else
+       render 'index.v1.rabl'
+     end
+   end
  end
 
  # get_users get all the user based on token key
