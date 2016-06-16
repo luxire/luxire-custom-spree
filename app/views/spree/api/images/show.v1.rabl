@@ -5,3 +5,4 @@ Spree::Image.attachment_definitions[:attachment][:styles].each do |k,v|
     node(url_name) { |i| i.attachment.url(k) }
   # end
 end
+node("original_url") { |i| i.attachment.url("original") }

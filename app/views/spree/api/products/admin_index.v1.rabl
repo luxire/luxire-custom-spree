@@ -13,6 +13,7 @@ child(@products => :products) do
 
   node(:id) { |p| p.id.to_s }
   node(:name) { |p| p.name}
+  node(:is_gift_card) { |p| p.is_gift_card }
 
 child :master => :master do
   attributes :id

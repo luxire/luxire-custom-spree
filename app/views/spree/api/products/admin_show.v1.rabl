@@ -9,9 +9,11 @@ node(:price) { |p| p.price }
 node(:display_price) { |p| p.display_price }
 node(:slug) { |p| p.slug }
 node(:description) { |p| p.description }
+node(:available_on) { |p| p.available_on }
+
+node(:is_gift_card) { |p| p.is_gift_card }
 node(:shipping_category_id) { |p| p.shipping_category_id }
 node(:taxon_ids) { |p| p.taxon_ids }
-
 
 
 
@@ -22,7 +24,7 @@ child :master => :master do
 end
 
 child :variants => :variants do
-  attributes :sku
+  attributes :sku, :price
   extends "spree/api/variants/small.v1_admin.rabl"
 end
 

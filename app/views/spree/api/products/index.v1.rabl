@@ -17,7 +17,7 @@ node(:name) { |p| p.name }
 node(:display_price) { |p| p.display_price }
 node(:slug) { |p| p.slug }
 node(:available_on) { |p| p.available_on }
-
+node(:is_gift_card) { |p| p.is_gift_card }
 child :master => :master do
 #  attributes :images
   extends "spree/api/variants/small.v1.rabl"

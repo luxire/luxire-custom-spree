@@ -7,7 +7,8 @@ node(:id) { |p| p.id }
 node(:slug) { |p| p.slug }
 
 node(:display_price) { |p| p.display_price}
-
+node(:available_on) { |p| p.available_on }
+node(:is_gift_card) { |p| p.is_gift_card }
 
 child :master => :master do
   # attributes *Master.column_names  - ["height", "width", "depth"]
@@ -49,7 +50,15 @@ child @luxire_product_type_attributes_customize => :customization_attributes do
   end
 
   child :luxire_style_masters => :luxire_style_masters do
-    attributes  :name, :default_values, :image, :help
+    attributes  :name, :default_values, :help
+    child :image => :images do
+	urls = ["small","medium","large"]
+	#Spree::Image.attachment_definitions[:attachment][:styles].each do |k,v|
+  	urls.each do |k|
+  		url_name = "#{k}_url"
+  		node(url_name) { |i| i.url(k) }
+	end
+    end
   end
 
   child :luxire_stock => :luxire_stock do
@@ -60,7 +69,9 @@ child @luxire_product_type_attributes_customize => :customization_attributes do
     attributes *LuxireProduct.column_names - ["created_at", "updated_at"]
   end
 
-
+child :taxons => :taxons do
+    attributes :name,:permalink
+  end
 
   child :luxire_vendor_master => :vendor_master do
     attributes :name

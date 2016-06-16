@@ -1,10 +1,25 @@
-<p> "Dear Customer" </p>
+<h1>Your gift card is now available!</h1>
+<p> Hi <%=  if @order.user && @order.user.luxire_user
+                @order.user.luxire_customer.first_name
+              else
+                "customer"
+              end
+  %>, here is your Rs. <%= @gift_card.original_value %> gift card. Treat yourself, or send it someone else as a gift. </p>
 
-  <p>This is in reference of your order number <%= @order.number %> and item name is <%= @line_item.name %> .Please find the details of your gift card</p>
-  <div>
-    Gift Card Code: <%= @gift_card.code %> <br/>
-    Gift Card Value: <%= @gift_card.original_value %> <br/>
-    Gift Card Expire Date: <%= @gift_card.expiry_date.to_date - 1 %> <br/>
+  <div style="border: 15px solid #34aadc; font-family: "Montserrat", sans-serif ">
+    <h4 style="border-bottom: 1px solid #f2f2f2; padding: .75em; display: block; overflow: hidden; position: relative; ">Here's your gift card!</h4>
+    <div style="height: 100%; width: 100%; overflow: hidden; position: relative">
+      <img src="http://104.215.254.150:3000//spree/products/632/original/gift_card.png?1464765171" style="margin: 0 2% 0 2%; width: 80%;">
+      <div style="position: absolute;top: 0;right: 0;font-size: 1em;color: #fff;padding: .4em .5em;">
+          <strong>Rs. <%= @gift_card.original_value %></strong>
+      </div>
+      <div style="position: absolute;bottom: 1em;text-align: center;width: 100%;">
+                    <div style="display: inline-block;vertical-align: baseline;zoom: 1;background-color: #fff;padding: .5em;border-radius: 4px;max-width: 450px;box-shadow: 0 0 0 1px rgba(0,0,0,0.1);" >
+                      <strong style="font-weight: 400;font-size: 1.875em;text-transform: uppercase;border-radius: 2px;border: 1px dashed #e5e5e5;padding: .4em .5em;display: inline-block;vertical-align: baseline;zoom: 1;color: #777;line-height: 1;" ><%= @gift_card.code %></strong>
+                    </div>
+                  </div>
+    </div>
+
+    <p style="font-family: "Montserrat", sans-serif"> Use this code at checkout to redeem your gift card</p>
+  <p style="font-family: "Montserrat", sans-serif">Your gift card is valid till <%= @gift_card.expiry_date.to_date - 1 %></p>
   </div>
-
-    <p>Thank you for your business. </p>
