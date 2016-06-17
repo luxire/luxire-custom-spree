@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   put 'api/change_order_status', to: 'custom_orders#change_order_status', defaults: {format: :json}
   get '/api/admin/products' => 'spree/api/products#admin_index'
   get '/api/admin/products/:id' => 'spree/api/products#admin_show'
+  post '/my_account/old_order', to: 'luxire_user_my_account#old_order',  defaults: {format: :json}
 
   get 'template_field_finder/abandoned_checkouts', defaults: {format: :json}
 
@@ -39,7 +40,7 @@ Rails.application.routes.draw do
   get 'get_customer_attr',to: 'retrive_attribute_info#get_customer_attr'
   get 'get_order_attr',to: 'retrive_attribute_info#get_order_attr'
   get 'get_shipping_attr',to: 'retrive_attribute_info#get_shipping_attr'
-  resources :mail_templates
+  resources :mail_templates,  defaults: {format: :json}
   get 'customized_taxons/get_taxon_details'
 
   resources :luxire_properties, defaults: {format: :json}
