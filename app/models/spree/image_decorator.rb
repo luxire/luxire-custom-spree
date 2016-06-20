@@ -1,6 +1,6 @@
 Spree::Image.class_eval do
        has_attached_file :attachment,
-	styles: { mini: '100x100>', small: '240x240>', product: '480X480#', large: '' },
+	styles: { mini: '100x100>', small: '240x240>', product: '540X540', large: '' },
                      default_style: :product,
                      url: '/spree/products/:id/:style/:basename.:extension',
                      path: ':rails_root/public/spree/products/:id/:style/:basename.:extension',
