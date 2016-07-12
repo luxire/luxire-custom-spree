@@ -1,0 +1,33 @@
+<%= form_for(@luxire_style_master_image) do |f| %>
+  <% if @luxire_style_master_image.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@luxire_style_master_image.errors.count, "error") %> prohibited this luxire_style_master_image from being saved:</h2>
+
+      <ul>
+      <% @luxire_style_master_image.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :category %><br>
+    <%= f.text_field :category %>
+  </div>
+  <div class="field">
+    <%= f.label :luxire_style_master_id %><br>
+    <%= f.number_field :luxire_style_master_id %>
+  </div>
+  <div class="field">
+    <%= f.label :alternate_text %><br>
+    <%= f.text_field :alternate_text %>
+  </div>
+  <div class="field">
+    <%= f.label :image %><br>
+    <%= f.text_field :image %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

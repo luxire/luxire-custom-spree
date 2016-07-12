@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Luxire Taxonomies</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mega menu template</th>
+      <th>Spree taxonomy</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @luxire_taxonomies.each do |luxire_taxonomy| %>
+      <tr>
+        <td><%= luxire_taxonomy.mega_menu_template %></td>
+        <td><%= luxire_taxonomy.spree_taxonomy_id %></td>
+        <td><%= link_to 'Show', luxire_taxonomy %></td>
+        <td><%= link_to 'Edit', edit_luxire_taxonomy_path(luxire_taxonomy) %></td>
+        <td><%= link_to 'Destroy', luxire_taxonomy, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Luxire taxonomy', new_luxire_taxonomy_path %>

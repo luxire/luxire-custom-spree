@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Luxire Style Master Images</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Luxire style master</th>
+      <th>Alternate text</th>
+      <th>Image</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @luxire_style_master_images.each do |luxire_style_master_image| %>
+      <tr>
+        <td><%= luxire_style_master_image.category %></td>
+        <td><%= luxire_style_master_image.luxire_style_master_id %></td>
+        <td><%= luxire_style_master_image.alternate_text %></td>
+        <td><%= luxire_style_master_image.image %></td>
+        <td><%= link_to 'Show', luxire_style_master_image %></td>
+        <td><%= link_to 'Edit', edit_luxire_style_master_image_path(luxire_style_master_image) %></td>
+        <td><%= link_to 'Destroy', luxire_style_master_image, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Luxire style master image', new_luxire_style_master_image_path %>

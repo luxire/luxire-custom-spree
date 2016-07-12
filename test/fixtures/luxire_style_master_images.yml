@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  category: MyString
+  luxire_style_master_id: 1
+  alternate_text: MyString
+  image: 
+
+two:
+  category: MyString
+  luxire_style_master_id: 1
+  alternate_text: MyString
+  image: 

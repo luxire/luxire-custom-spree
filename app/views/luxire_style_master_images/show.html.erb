@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Category:</strong>
+  <%= @luxire_style_master_image.category %>
+</p>
+
+<p>
+  <strong>Luxire style master:</strong>
+  <%= @luxire_style_master_image.luxire_style_master_id %>
+</p>
+
+<p>
+  <strong>Alternate text:</strong>
+  <%= @luxire_style_master_image.alternate_text %>
+</p>
+
+<p>
+  <strong>Image:</strong>
+  <%= @luxire_style_master_image.image %>
+</p>
+
+<%= link_to 'Edit', edit_luxire_style_master_image_path(@luxire_style_master_image) %> |
+<%= link_to 'Back', luxire_style_master_images_path %>
