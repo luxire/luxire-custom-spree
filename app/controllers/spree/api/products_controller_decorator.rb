@@ -11,6 +11,7 @@ respond_to :html, :json
      @luxire_product_type =  @product.luxire_product_type
      if @luxire_product_type
        @luxire_product_type_attributes = @luxire_product_type.measurement_types
+      @luxire_product_type_attributes = MeasurementType.joins("INNER JOIN product_measurement_types ON product_measurement_types.measurement_type_id = measurement_types.id AND product_measurement_types.luxire_product_type_id = " + @luxire_product_type.id.to_s).order("product_measurement_types.position")
        if @luxire_product_type_attributes
           @luxire_product_type_attributes_customize = @luxire_product_type_attributes.where(category: "customize")
           @luxire_product_type_attributes_personalize = @luxire_product_type_attributes.where(category: "personalize")
