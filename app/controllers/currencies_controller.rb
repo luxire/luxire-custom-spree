@@ -63,15 +63,16 @@ class CurrenciesController < ApplicationController
 
 # Get current date currency multiplier and populate the database
   def populate_currency
+    byebug
     url = URI.parse('http://apilayer.net/api/live?access_key=a917a3d6244742e74dacea1ec2e29940&currencies=EUR,AUD,SGD,NOK,DKK,SEK,CHF,FIM,INR,DBP&source=USD&format=1')
     req = Net::HTTP::Get.new(url.to_s)
     res = Net::HTTP.start(url.host, url.port) { |http|
     http.request(req)
     }
     response_hash =  eval(res.body)
-    currency_hash = {fetched_date: Date.new, value: response_hash[:quotes]}
+    currency_hash = {fetched_date: Date.today, value: response_hash[:quotes]}
     begin
-    @currency = Currency.find(Date.new)
+    @currency = Currency.find(Date.today)
     rescue Exception
      logger.debug "No record available for the day"
     end
@@ -96,7 +97,7 @@ class CurrenciesController < ApplicationController
 # def get the currency multiplier
     def get_currency_multiplier
 # Get the current date
-        date = Date.new
+        date = Date.today
 # Get the current time. This value is only used for logs
         t1 = Time.now
 # Handle the ActiveRecord::NotFound exception
