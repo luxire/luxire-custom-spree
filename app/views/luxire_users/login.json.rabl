@@ -4,6 +4,9 @@ if @User
   child (:spree_roles) do
     attributes :id, :name
   end
+  child (:luxire_customer) do
+    attributes :first_name, :last_name
+  end
 else
   node(:statusCode){ 401}
   node(:statusText){"Login Failed"}
