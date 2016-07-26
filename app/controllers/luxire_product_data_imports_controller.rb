@@ -254,7 +254,7 @@ NOT_AVAILABLE = "NA"
       @swatch_properties = Hash.new
       @swatch_properties[:product_id] = @product.id
       @swatch_properties[:sku] = sku
-      @swatch_properties[:price] = row["Swatch Price"]
+      @swatch_properties[:price] = row["Swatch price"]
       @swatch_properties[:track_inventory] = false
       @swatch_variant = Spree::Variant.new(@swatch_properties)
       @swatch_variant.save!
