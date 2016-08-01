@@ -293,16 +293,18 @@ NOT_AVAILABLE = "NA"
 
     def associate_collection(row)
      # byebug
-	if ( !(row["New Luxire site collection"].casecmp(NOT_AVAILABLE) == 0) && !row["New Luxire site collection"].empty? )
-        collections = row["New Luxire site collection"].split(",").map(&:strip)
+	if ( !(row["Primary Usage"].casecmp(NOT_AVAILABLE) == 0) && !row["Primary Usage"].empty? )
+        collections = row["Primary Usage"].split(",").map(&:strip)
         ids = []
         collections.each do |collection|
           collection_hierarchy = collection.split("->").map(&:strip)
-          taxonomy_name = collection_hierarchy.first
+
+	 taxonomy_name = collection_hierarchy.first
           taxonomy = Spree::Taxonomy.where('lower(name) = ?', collection_hierarchy.first.downcase).first
 
           if taxonomy
-            collection_hierarchy.drop(1).each_with_index do |hierarchy, count|
+	    collection_hierarchy.delete(collection_hierarchy[0])
+            collection_hierarchy.each_with_index do |hierarchy, count|
               @taxon = taxonomy.taxons.where('lower(name) = ?', hierarchy.downcase).where(depth: count+1).first
               unless @taxon
                 info = collection_hierarchy[0]
@@ -313,7 +315,7 @@ NOT_AVAILABLE = "NA"
               end
             end
           else
-            raise "#{collection_hierarchy} collection does not exist"
+            raise "#{collection} collection does not exist"
           end
           if collection_hierarchy.length == 0
             id = taxonomy.taxons.first.id
