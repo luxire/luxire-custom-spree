@@ -41,4 +41,7 @@ child :taxons => :taxons do
     attributes :name,:permalink
   end
 
+child :luxire_product_type => :product_type do
+  attributes :product_type
+end
 end
