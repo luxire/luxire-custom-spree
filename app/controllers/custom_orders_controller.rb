@@ -7,8 +7,7 @@ class CustomOrdersController < Spree::Api::BaseController
          @order = Spree::Order.where(guest_token: guest_token).where(completed_at: nil).where(user_id: nil).last
        else
          user = Spree::User.find_by_spree_api_key(spree_api_token)
-	#byebug
-	@previous_order = Spree::Order.where(user_id: user.id).where(completed_at: nil).offset(1).last
+	      @previous_order = Spree::Order.where(user_id: user.id).where(completed_at: nil).offset(1).last
         @order = Spree::Order.where(user_id: user.id).where(completed_at: nil).last
 
           unless(@previous_order.nil? || @order.nil? || @order.state != "cart")
@@ -27,7 +26,7 @@ class CustomOrdersController < Spree::Api::BaseController
        end
       # render json: orders.to_json, status: "200"
       if @order.nil?
-        response = {msg: "No in complete order exist"}
+        response = {msg: "No incomplete order exist"}
         render json: response.to_json, status: "404"
       else
         @order.update! unless(@previous_order.nil?)
