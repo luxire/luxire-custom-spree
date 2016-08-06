@@ -1,6 +1,9 @@
 class CurrenciesController < ApplicationController
   before_action :set_currency, only: [:show, :edit, :update, :destroy]
 
+  include Spree::Core::ControllerHelpers::Auth
+  helper Spree::Api::ApiHelpers
+
   # GET /currencies
   # GET /currencies.json
   def index
@@ -63,34 +66,34 @@ class CurrenciesController < ApplicationController
 
 # Get current date currency multiplier and populate the database
   def populate_currency
-    byebug
-    url = URI.parse('http://apilayer.net/api/live?access_key=a917a3d6244742e74dacea1ec2e29940&currencies=EUR,AUD,SGD,NOK,DKK,SEK,CHF,FIM,INR,DBP&source=USD&format=1')
-    req = Net::HTTP::Get.new(url.to_s)
-    res = Net::HTTP.start(url.host, url.port) { |http|
-    http.request(req)
-    }
-    response_hash =  eval(res.body)
-    currency_hash = {fetched_date: Date.today, value: response_hash[:quotes]}
-    begin
-    @currency = Currency.find(Date.today)
-    rescue Exception
-     logger.debug "No record available for the day"
-    end
-
-    if @currency
-      @currency.value = response_hash[:quotes]
-    else
-      @currency = Currency.new(currency_hash)
-    end
-
+    @currency = Currency.populate
     respond_to do |format|
-      if @currency.save
+      if @currency
         format.html { redirect_to @currency, notice: 'Currency was successfully created.' }
         format.json { render json: @currency.to_json , status: "200" }
       else
         format.html { render :new }
         format.json { render json: @currency.errors, status: :unprocessable_entity }
       end
+    end
+  end
+
+  def update_order_currency
+    @current_user_roles = ["customer"]
+    order_number = params["order_number"]
+    updated_currency = params["updated_currency"]
+    order = Spree::Order.find_by_number(order_number)
+    if order.guest_token == params["token"]
+      @order = Currency.new.update_order_currency(order, updated_currency)
+      if @order.save
+        @order.update!
+        render "spree/api/orders/show.v1.rabl"
+      else
+        render json: order.errors, status: "422"
+      end
+    else
+      response = {msg: "you are not authorized to perform this task"}
+      render json: response.to_json, status: "401"
     end
   end
 
@@ -124,6 +127,7 @@ class CurrenciesController < ApplicationController
         end
           render json: @currency.to_json, status: "200"
     end
+
 
   private
     # Use callbacks to share common setup or constraints between actions.
