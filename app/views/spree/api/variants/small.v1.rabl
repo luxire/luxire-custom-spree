@@ -11,7 +11,8 @@ node(:name) do |variant|
  end
 end
 
-node(:display_price) { |p| p.display_price}
+  node(:prices) { arrange_price(root_object) }
+
 # node(:is_backorderable) { |v| v.is_backorderable? }
 # node(:total_on_hand) { |v| v.total_on_hand }
 
