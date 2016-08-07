@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  put '/api/luxire_product_type/update_with_position/:id', to: 'luxire_product_types#update_with_position', defaults: {format: :json}
+  post '/api/luxire_product_type/create_with_position', to: 'luxire_product_types#create_with_position', defaults: {format: :json}
+  put '/api/update_order_currency', to: 'currencies#update_order_currency'
   resources :luxire_taxonomies
   resources :luxire_style_master_images
   put 'api/change_order_status', to: 'custom_orders#change_order_status', defaults: {format: :json}
