@@ -3,7 +3,23 @@ has_one :luxire_order, class_name: "LuxireOrder"
 has_many :luxire_line_items, class_name: 'LuxireLineItem', through: :line_items
 # accepts_nested_attributes_for :luxire_order
 
+# Finalizes an in progress order after checkout is complete.
+# Called after transition to complete state when payments will have been processed.
+def finalize_with_gift_card!
+  # finalize_without_gift_card!
+  # Record any gift card redemptions.
+  self.adjustments.where(source_type: 'Spree::GiftCard').each do |adjustment|
+    gift_card = adjustment.source
+    amount = adjustment.amount
+    unless gift_card.line_item.currency == self.currency
+      amount = Currency.new.get_price_for_other_currency(amount, self.currency, gift_card.line_item.currency)
+    end
+    adjustment.source.debit(amount, self)
+  end
+end
+
 def finalize!
+  byebug
   # lock all adjustments (coupon promotions, etc.)
   all_adjustments.each{|a| a.close}
 
