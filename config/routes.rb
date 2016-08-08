@@ -37,7 +37,7 @@ Rails.application.routes.draw do
 
   get 'template_field_finder/shipping_update', defaults: {format: :json}
 
-   get 'api/checkouts/apply_gift_code', to: 'spree/api/orders#apply_gift_code',  defaults: {format: :json}
+   put 'api/checkouts/apply_gift_code', to: 'spree/api/orders#apply_gift_code',  defaults: {format: :json}
    get 'api/admin/products',to: 'spree/api/products#admin_index'
    get 'api/admin/products/:id',to: 'spree/api/products#admin_show'
 
