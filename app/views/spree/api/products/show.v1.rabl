@@ -58,9 +58,9 @@ child @luxire_product_type_attributes_customize => :customization_attributes do
     		url_name = "#{k}_url"
     		node(url_name) { |i| i.url(k) }
   	  end
-      node(:real_images) { |i| real_images(i)}
-      node(:sketch_images) { |i| sketch_images(i)}
     end
+    node(:real_images) { |i| real_images(i)}
+    node(:sketch_images) { |i| sketch_images(i)}
   end
 
   child :luxire_stock => :luxire_stock do
