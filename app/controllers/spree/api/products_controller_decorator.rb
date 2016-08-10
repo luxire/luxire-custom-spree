@@ -1,5 +1,6 @@
 Spree::Api::ProductsController.class_eval do
 respond_to :html, :json
+helper LuxireStyleMastersHelper
   # product_params method whitelist all the parameter for mass assignment
     def show
      @product = find_product(params[:id])
