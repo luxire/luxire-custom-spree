@@ -1,5 +1,5 @@
 Spree::Order.class_eval do
-has_one :luxire_order, class_name: "LuxireOrder"
+has_one :luxire_order, class_name: "LuxireOrder", dependent: :destroy
 has_many :luxire_line_items, class_name: 'LuxireLineItem', through: :line_items
 # accepts_nested_attributes_for :luxire_order
 
@@ -19,7 +19,6 @@ def finalize_with_gift_card!
 end
 
 def finalize!
-  byebug
   # lock all adjustments (coupon promotions, etc.)
   all_adjustments.each{|a| a.close}
 
@@ -41,13 +40,36 @@ def finalize!
       deliver_gift_card_email unless confirmation_delivered?
       deliver_order_confirmation_email unless confirmation_delivered?
   rescue Exception => e
-        puts e
+      logger.error "Exception while sending the email #{e.message}"
   end
- finalize_with_gift_card!
+  finalize_with_gift_card!
+  reduce_inventory
   consider_risk
 
 end
 
+  def reduce_inventory
+    if luxire_order.is_inventory_deducted
+         line_items.each do |line_item|
+            product = line_item.product
+            luxire_product_type = product.luxire_product_type
+            stock = product.luxire_stock
+            stock.virtual_count_on_hands -= luxire_product_type.length_required
+            if(stock.threshold >= stock.virtual_count_on_hands)
+              # send an email
+              Spree::OrderMailer.send_mail_for_backorder(product).deliver_later
+            end
+            begin
+              stock.save!
+            rescue Exception => e
+              logger.error "Exception while updating stock #{e.message}"
+              return
+            end
+          end
+          luxire_order.is_inventory_deducted = true;
+          luxire_order.save!
+    end
+  end
 
   def deliver_gift_card_email
     # Added to Spree functionality
