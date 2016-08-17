@@ -193,7 +193,12 @@ NOT_AVAILABLE = "NA"
       @luxire_product[:usage] = row["Usage"]
       @luxire_product[:pattern] = row["Design: Stripes/Checks/ etc"]
       @luxire_product[:country_of_origin] = row["Country of Origin"]
-      @luxire_product[:mill] = row["Mill"]
+      if row["Mill"].blank? || row["Mill"].casecmp(NOT_AVAILABLE) == 0
+        @luxire_product[:mill] = "Luxire"
+      else
+        @luxire_product[:mill] = row["Mill"]
+      end
+      @luxire_product[:mill] = row["Mill"] || "Luxire"
       @luxire_product[:suitable_climates]  = row["Seasons (Summer, Autumn, Winter, Spring)"]
       @luxire_product[:construction] = row["construction (Number of threads in warp and weft)"]
       @luxire_product[:thread_count] = row["Count (Thickness of thread used like 40s, 120/2 etc)"]
@@ -292,41 +297,44 @@ NOT_AVAILABLE = "NA"
     end
 
     def associate_collection(row)
-     # byebug
-	if ( !(row["Primary Usage"].casecmp(NOT_AVAILABLE) == 0) && !row["Primary Usage"].empty? )
-        collections = row["Primary Usage"].split(",").map(&:strip)
-        ids = []
-        collections.each do |collection|
-          collection_hierarchy = collection.split("->").map(&:strip)
-
-	 taxonomy_name = collection_hierarchy.first
-          taxonomy = Spree::Taxonomy.where('lower(name) = ?', collection_hierarchy.first.downcase).first
-
-          if taxonomy
-	    collection_hierarchy.delete(collection_hierarchy[0])
-            collection_hierarchy.each_with_index do |hierarchy, count|
-              @taxon = taxonomy.taxons.where('lower(name) = ?', hierarchy.downcase).where(depth: count+1).first
-              unless @taxon
-                info = collection_hierarchy[0]
-                for i in 1..count
-                  info+= "->"  + collection_hierarchy[i]
-                end
-                raise "#{taxonomy_name} -> #{info} collection does not exist"
-              end
+      # byebug
+	    if ( !(row["Primary Usage"].casecmp(NOT_AVAILABLE) == 0) && !row["Primary Usage"].empty? )
+          collections = row["Primary Usage"].split(",").map(&:strip)
+          ids = []
+          collections.each do |collection|
+            collection_hierarchy = collection.split("->").map(&:strip)
+            taxonomy_name = collection_hierarchy.first
+            taxonomy = Spree::Taxonomy.where('lower(name) = ?', collection_hierarchy.first.downcase).first
+            if taxonomy
+               super_collection = false
+               collection_hierarchy.delete(collection_hierarchy[0])
+               collection_hierarchy.each_with_index do |hierarchy, count|
+                  @taxon = taxonomy.taxons.where('lower(name) = ?', hierarchy.downcase).where(depth: count+1).first
+                  unless @taxon
+                    # info = collection_hierarchy[0]
+                    # for i in 1..count
+                    #   info+= "->"  + collection_hierarchy[i]
+                    # end
+                    # raise "#{taxonomy_name} -> #{info} collection does not exist"
+                    super_collection = true
+                    break;
+                  end
+               end
+            else
+              raise "#{collection} collection does not exist"
             end
-          else
-            raise "#{collection} collection does not exist"
+            if collection_hierarchy.length == 0 || super_collection
+              id = taxonomy.taxons.first.id
+            else
+              id = @taxon.id
+            end
+            ids << id
           end
-          if collection_hierarchy.length == 0
-            id = taxonomy.taxons.first.id
-          else
-            id = @taxon.id
-          end
-          ids << id
+          @product.taxon_ids = ids
+          @product.save!
+        else
+            raise  "collection can not be empty or NA"
         end
-        @product.taxon_ids = ids
-        @product.save!
-      end
     end
 
     def set_variant_sku(row)
