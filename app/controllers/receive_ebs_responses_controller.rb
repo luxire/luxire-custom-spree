@@ -36,22 +36,6 @@ SUCCESS = "Data populated Successfully"
                 order.transaction do
                   order.save!
                   payment.save!
-                  if order.luxire_product.is_inventory_deducted
-                      order.line_items.each do |line_item|
-                        product = line_item.product
-                        luxire_product = product.luxire_product
-                        stock = luxire_product.luxire_stock
-                        stock.virtual_count_on_hands -= luxire_product.length_required
-                        if(stock.threshold >= stock.virtual_count_on_hands)
-                          # send an email
-                          Spree::OrderMailer.send_mail_for_backorder(product).deliver_later
-                        end
-                        stock.save!
-                  end
-                  luxire_order = order.luxire_order
-                  luxire_order.is_inventory_deducted = true;
-                  luxire_order.save!
-                end
               end
                 if(@exp)
                   response = {msg: "Exception raised during updating records"}
