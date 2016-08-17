@@ -9,7 +9,7 @@ class LuxireProduct < ActiveRecord::Base
   attr_accessor :req_validation
 
   accepts_nested_attributes_for :luxire_stock
-  validates_presence_of (LuxireProduct.column_names - ["id","created_at","updated_at", "deleted_at", "gift_card_flag", "luxire_product_type_id"]), :if => lambda { |product_type| product_type.req_validation.eql? true }
-  validates_inclusion_of :gift_card_flag, in: [true, false], :if => lambda { |product_type| product_type.req_validation.eql? true }
-  validates_presence_of :luxire_product_type_id
+  # validates_presence_of (LuxireProduct.column_names - ["id","created_at","updated_at", "deleted_at", "gift_card_flag", "luxire_product_type_id"]), :if => lambda { |product_type| product_type.req_validation.eql? true }
+  # validates_inclusion_of :gift_card_flag, in: [true, false], :if => lambda { |product_type| product_type.req_validation.eql? true }
+  # validates_presence_of :luxire_product_type_id
 end
