@@ -64,6 +64,18 @@ class CurrenciesController < ApplicationController
     end
   end
 
+# Get currency based on country code
+  def get_currency_based_on_country_code
+    country_code = params[:country_code]
+    if country_code.length == 2
+      currency = ISO3166::Country.find_country_by_alpha2(country_code).currency['code']
+    elsif country_code.length == 3
+      currency = ISO3166::Country.find_country_by_alpha3(country_code).currency['code']
+    end
+    response = {currency: currency}
+    render json: response.to_json, status: "200"
+  end
+
 # Get current date currency multiplier and populate the database
   def populate_currency
     @currency = Currency.populate

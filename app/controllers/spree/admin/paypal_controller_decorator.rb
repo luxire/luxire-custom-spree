@@ -68,7 +68,7 @@ Spree::PaypalController.class_eval do
        @spree_order = Spree::Order.find(paypal_order_token.order_id)
      else
        response = { msg: "No order exist"}
-       render json: response.to_json, status: "422"
+       logger.error "unable to fetch order"
        return
      end
      # order = @spree_order || raise(ActiveRecord::RecordNotFound)
@@ -90,31 +90,11 @@ Spree::PaypalController.class_eval do
        session[:order_id] = nil
        # respond_with(order, default_template: 'Spree::Api::Orders::show', status: 200)
        # redirect_to completion_route(order)
-       if order.luxire_order.is_inventory_deducted
-           order.line_items.each do |line_item|
-               product = line_item.product
-               luxire_product_type = product.luxire_product_type
-               stock = product.luxire_stock
-               stock.virtual_count_on_hands -= luxire_product_type.length_required
-               if(stock.threshold >= stock.virtual_count_on_hands)
-                 # send an email
-                 Spree::OrderMailer.send_mail_for_backorder(product).deliver_later
-               end
-               unless(stock.save)
-                 response = { msg: " Unable to update order "}
-                 render json: response.to_json, status: "422"
-                 return
-               end
-             end
-             luxire_order = order.luxire_order
-             luxire_order.is_inventory_deducted = true;
-             luxire_order.save!
-       end
        redirect_to return_url
      else
        # redirect_to checkout_state_path(order.state)
-       response = { msg: " Unable to complete order "}
-       render json: response.to_json, status: "422"
+       response = { msg: "failed", reason: " Unable to complete order "}
+       redirect_to "#{return_url}?#{response.to_json}"
      end
    end
 

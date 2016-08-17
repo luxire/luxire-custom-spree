@@ -23,6 +23,11 @@ child :line_items => :line_items do
   child :luxire_line_item => :luxire_line_item do
     attributes *luxire_line_item_attributes
   end
+  # if @current_user_roles.include?('admin')
+    child :luxire_stock do
+      attributes :rack
+    end
+  # end
 end
 
 child :payments => :payments do
