@@ -67,7 +67,7 @@ child :valid_credit_cards => :credit_cards do
 end
 
 child :luxire_order => :luxire_order do
-attributes :fulfillment_status, 
+attributes :fulfillment_status
 end
 
 node(:product_types) {|order| get_product_type_details(order)}
