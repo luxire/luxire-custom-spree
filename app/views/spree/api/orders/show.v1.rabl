@@ -20,6 +20,9 @@ end
 
 child :line_items => :line_items do
   extends "spree/api/line_items/show"
+  child :variant do
+    attributes :sku
+  end
   child :luxire_line_item => :luxire_line_item do
     attributes *luxire_line_item_attributes
   end
@@ -64,5 +67,7 @@ child :valid_credit_cards => :credit_cards do
 end
 
 child :luxire_order => :luxire_order do
-attributes :fulfillment_status
+attributes :fulfillment_status, 
 end
+
+node(:product_types) {|order| get_product_type_details(order)}
