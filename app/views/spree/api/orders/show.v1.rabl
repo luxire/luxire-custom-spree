@@ -20,9 +20,6 @@ end
 
 child :line_items => :line_items do
   extends "spree/api/line_items/show"
-  child :variant do
-    attributes :sku
-  end
   child :luxire_line_item => :luxire_line_item do
     attributes *luxire_line_item_attributes
   end

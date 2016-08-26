@@ -3,6 +3,8 @@ Spree::Api::CheckoutsController.class_eval do
   # of the checkout flow.
   before_action :update_gift_code, only: :update, if: :gift_card_present
 
+  helper Spree::Api::OrdersHelper
+
     # Check if the gift_card is present in params
     def gift_card_present
       # !params[:order][:gift_code].nil? && !params[:order][:gift_code].empty?

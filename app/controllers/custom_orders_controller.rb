@@ -1,5 +1,7 @@
 class CustomOrdersController < Spree::Api::BaseController
 
+  helper Spree::Api::OrdersHelper
+
   def get_order
       spree_api_token = request.headers["X-Spree-Token"] || params[:token]
        if spree_api_token.nil? || spree_api_token.empty?

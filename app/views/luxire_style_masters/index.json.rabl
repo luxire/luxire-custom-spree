@@ -1,5 +1,5 @@
 object @luxire_style_masters
-attributes :id, :name, :default_values, :help
+attributes :id, :name, :default_values, :help, :description
 
 child :image => :images do
   urls = ["small","medium","large"]

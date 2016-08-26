@@ -55,6 +55,7 @@ gem 'spree_paypal_express', github: 'spree-contrib/better_spree_paypal_express',
 gem 'redis'
 gem "redis-rails"
 gem 'spree_gift_card', path: '/home/developer/Developer/Projects/Luxire/NewGemFile/solidus_gift_card-f63004afbdc4'
+gem 'spree_braintree_vzero', github: 'spree-contrib/spree_braintree_vzero', branch: '3-0-stable'
 # gem 'spree_wishlist', github: 'spree-contrib/spree_wishlist', branch: 'master'
 # gem 'spree_reviews', github: 'spree-contrib/spree_reviews', branch: '3-0-stable'
 gem 'countries', '~> 1.2', '>= 1.2.5'

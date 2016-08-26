@@ -6,7 +6,7 @@ module Spree
         product_types = Hash.new(0)
         product_types_string = ""
         order.line_items.each do |line_item|
-          pt = line_item.luxire_product_type.to_sym
+          pt = line_item.luxire_product_type.product_type.to_sym
           if product_types[pt].nil?
             product_types[pt] = 1
           else
