@@ -2,7 +2,7 @@ module Spree
   module OrderMailerHelper
     def show_customized_data(luxire_line_item)
       response_string = ""
-      byebug
+     # byebug
       customized_data = luxire_line_item.customized_data
        unless customized_data.blank?
         response_string += "<br /> <br />  <p> Your customization details </p>"
@@ -26,7 +26,7 @@ module Spree
          end
         #  erb = ERB.new(response_string)
         #  @output = erb.result(binding)
-        byebug
+       #byebug
          response_string.html_safe
     end
 
