@@ -6,7 +6,7 @@ node(:display_amount) { |li| li.display_amount.to_s }
 node(:total) { |li| li.total }
 child :variant do
   extends "spree/api/variants/small"
-  attributes :product_id  
+  attributes :product_id, :sku  
   if root_object.images.empty?
     child( root_object.product.master.images => :images) { extends "spree/api/images/show" }
   else
