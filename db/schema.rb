@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160329080636) do
+ActiveRecord::Schema.define(version: 20160826120416) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -63,36 +63,26 @@ ActiveRecord::Schema.define(version: 20160329080636) do
   create_table "luxire_line_items", force: :cascade do |t|
     t.string   "fulfillment_status"
     t.integer  "line_item_id"
-    t.datetime "created_at",         null: false
-    t.datetime "updated_at",         null: false
+    t.datetime "created_at",                                                         null: false
+    t.datetime "updated_at",                                                         null: false
     t.json     "customized_data"
     t.json     "personalize_data"
     t.json     "measurement_data"
+    t.decimal  "total_personalization_cost", precision: 8, scale: 2
+    t.string   "measurement_unit"
+    t.boolean  "send_sample",                                        default: false
   end
 
   create_table "luxire_orders", force: :cascade do |t|
     t.string   "fulfillment_status"
     t.datetime "fulfilled_at"
     t.string   "fulfilled_at_zone"
-    t.boolean  "accepts_marketing"
-    t.string   "discount_code"
-    t.string   "vendor"
     t.integer  "order_id"
-    t.string   "tags"
     t.string   "source"
-    t.string   "tax1_name"
-    t.float    "tax1_value"
-    t.string   "tax2_name"
-    t.float    "tax2_value"
-    t.string   "tax3_name"
-    t.float    "tax3_value"
-    t.string   "tax4_name"
-    t.float    "tax4_value"
-    t.string   "tax5_name"
-    t.float    "tax5_value"
     t.string   "notes_attributes"
-    t.datetime "created_at",         null: false
-    t.datetime "updated_at",         null: false
+    t.datetime "created_at",                            null: false
+    t.datetime "updated_at",                            null: false
+    t.boolean  "is_inventory_deducted", default: false
   end
 
   create_table "luxire_product_type_style_masters", force: :cascade do |t|
@@ -105,12 +95,13 @@ ActiveRecord::Schema.define(version: 20160329080636) do
   create_table "luxire_product_types", force: :cascade do |t|
     t.string   "product_type"
     t.string   "description"
-    t.datetime "created_at",         null: false
-    t.datetime "updated_at",         null: false
+    t.datetime "created_at",                                 null: false
+    t.datetime "updated_at",                                 null: false
     t.string   "image_file_name"
     t.string   "image_content_type"
     t.integer  "image_file_size"
     t.datetime "image_updated_at"
+    t.decimal  "length_required",    precision: 8, scale: 2
   end
 
   create_table "luxire_products", force: :cascade do |t|
@@ -143,7 +134,6 @@ ActiveRecord::Schema.define(version: 20160329080636) do
     t.integer  "gsm"
     t.decimal  "shrinkage",                   precision: 5, scale: 2
     t.string   "sales_pitch"
-    t.decimal  "length_required",             precision: 8, scale: 2
     t.string   "usage"
     t.string   "mill"
     t.string   "country_of_origin"
@@ -154,6 +144,7 @@ ActiveRecord::Schema.define(version: 20160329080636) do
     t.boolean  "variant_require_shipping"
     t.string   "variant_fulfillment_service"
     t.string   "inventory_tracked_by"
+    t.datetime "status_changed_time"
   end
 
   create_table "luxire_properties", force: :cascade do |t|
@@ -179,6 +170,18 @@ ActiveRecord::Schema.define(version: 20160329080636) do
     t.decimal  "fabric_width",            precision: 8, scale: 2
   end
 
+  create_table "luxire_style_master_images", force: :cascade do |t|
+    t.string   "category"
+    t.integer  "luxire_style_master_id"
+    t.string   "alternate_text"
+    t.string   "image_file_name"
+    t.string   "image_content_type"
+    t.integer  "image_file_size"
+    t.datetime "image_updated_at"
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
   create_table "luxire_style_masters", force: :cascade do |t|
     t.string   "name"
     t.json     "default_values"
@@ -191,6 +194,14 @@ ActiveRecord::Schema.define(version: 20160329080636) do
     t.datetime "image_updated_at"
     t.string   "help"
     t.integer  "user_id"
+    t.string   "description"
+  end
+
+  create_table "luxire_taxonomies", force: :cascade do |t|
+    t.string   "mega_menu_template"
+    t.integer  "spree_taxonomy_id"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
   end
 
   create_table "luxire_vendor_masters", force: :cascade do |t|
@@ -237,11 +248,19 @@ ActiveRecord::Schema.define(version: 20160329080636) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "personalization_costs", force: :cascade do |t|
+    t.decimal  "cost",         precision: 5, scale: 2
+    t.integer  "line_item_id"
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+  end
+
   create_table "product_measurement_types", force: :cascade do |t|
     t.integer  "luxire_product_type_id"
     t.integer  "measurement_type_id"
     t.datetime "created_at",             null: false
     t.datetime "updated_at",             null: false
+    t.integer  "position"
   end
 
   create_table "spree_addresses", force: :cascade do |t|
@@ -259,6 +278,7 @@ ActiveRecord::Schema.define(version: 20160329080636) do
     t.integer  "country_id"
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
+    t.string   "braintree_id"
   end
 
   add_index "spree_addresses", ["country_id"], name: "index_spree_addresses_on_country_id", using: :btree
@@ -306,6 +326,23 @@ ActiveRecord::Schema.define(version: 20160329080636) do
 
   add_index "spree_assets", ["viewable_id"], name: "index_assets_on_viewable_id", using: :btree
   add_index "spree_assets", ["viewable_type", "type"], name: "index_assets_on_viewable_type_and_type", using: :btree
+
+  create_table "spree_braintree_checkouts", force: :cascade do |t|
+    t.string   "transaction_id"
+    t.string   "state"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "paypal_email"
+    t.string   "advanced_fraud_data"
+    t.string   "risk_id"
+    t.string   "risk_decision"
+    t.string   "braintree_last_digits", limit: 4
+    t.string   "braintree_card_type"
+    t.boolean  "admin_payment"
+  end
+
+  add_index "spree_braintree_checkouts", ["state"], name: "index_spree_braintree_checkouts_on_state", using: :btree
+  add_index "spree_braintree_checkouts", ["transaction_id"], name: "index_spree_braintree_checkouts_on_transaction_id", using: :btree
 
   create_table "spree_calculators", force: :cascade do |t|
     t.string   "type"
@@ -373,6 +410,31 @@ ActiveRecord::Schema.define(version: 20160329080636) do
 
   add_index "spree_gateways", ["active"], name: "index_spree_gateways_on_active", using: :btree
   add_index "spree_gateways", ["test_mode"], name: "index_spree_gateways_on_test_mode", using: :btree
+
+  create_table "spree_gift_card_transactions", force: :cascade do |t|
+    t.decimal  "amount",       precision: 6, scale: 2
+    t.integer  "gift_card_id"
+    t.integer  "order_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "spree_gift_cards", force: :cascade do |t|
+    t.integer  "variant_id",                                                   null: false
+    t.integer  "line_item_id"
+    t.string   "email",                                                        null: false
+    t.string   "name"
+    t.text     "note"
+    t.string   "code",                                                         null: false
+    t.datetime "sent_at"
+    t.decimal  "current_value",        precision: 8, scale: 2,                 null: false
+    t.decimal  "original_value",       precision: 8, scale: 2,                 null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.datetime "expiry_date"
+    t.boolean  "disable",                                      default: false, null: false
+    t.text     "disable_enable_notes"
+  end
 
   create_table "spree_inventory_units", force: :cascade do |t|
     t.string   "state"
@@ -552,6 +614,8 @@ ActiveRecord::Schema.define(version: 20160329080636) do
     t.string   "number"
     t.string   "cvv_response_code"
     t.string   "cvv_response_message"
+    t.string   "braintree_token"
+    t.string   "braintree_nonce"
   end
 
   add_index "spree_payments", ["order_id"], name: "index_spree_payments_on_order_id", using: :btree
@@ -626,7 +690,7 @@ ActiveRecord::Schema.define(version: 20160329080636) do
   add_index "spree_product_properties", ["property_id"], name: "index_spree_product_properties_on_property_id", using: :btree
 
   create_table "spree_products", force: :cascade do |t|
-    t.string   "name",                 default: "",   null: false
+    t.string   "name",                 default: "",    null: false
     t.text     "description"
     t.datetime "available_on"
     t.datetime "deleted_at"
@@ -635,10 +699,11 @@ ActiveRecord::Schema.define(version: 20160329080636) do
     t.string   "meta_keywords"
     t.integer  "tax_category_id"
     t.integer  "shipping_category_id"
-    t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                          null: false
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
     t.boolean  "promotionable",        default: true
     t.string   "meta_title"
+    t.boolean  "is_gift_card",         default: false, null: false
   end
 
   add_index "spree_products", ["available_on"], name: "index_spree_products_on_available_on", using: :btree

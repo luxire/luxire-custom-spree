@@ -99,4 +99,8 @@ end
       end
   end
 
+  def confirmation_required?
+    false
+  end
+  
 end
