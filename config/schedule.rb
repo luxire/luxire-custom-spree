@@ -24,3 +24,7 @@ set :environment, "development"
 # every 1.day, :at => '02:47 pm' do
 #     runner "Currency.populate", environment => "development"
 # end
+
+every '0 4,10,16,22 * * * *' do
+            rake 'spree_braintree_vzero:update_states'
+          end
