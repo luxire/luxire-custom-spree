@@ -56,13 +56,16 @@ class Currency < ActiveRecord::Base
           variants.each do |variant|
             @usd_price = variant.prices.where(currency: "USD").take.amount
             @currency_multiplier.keys.each do |key|
-              create_variant = Spree::Price.new
-              create_variant.variant = variant
-              create_variant.currency = key
-              # Round off the amount to next 5 and substract .1 from it
-              amount = get_price(key)
-              create_variant.amount = amount
-              create_variant.save!
+              price_exist = variant.prices.where(currency: key).take
+              unless price_exist
+                create_variant = Spree::Price.new
+                create_variant.variant = variant
+                create_variant.currency = key
+                # Round off the amount to next 5 and substract .1 from it
+                amount = get_price(key)
+                create_variant.amount = amount
+                create_variant.save!
+              end
             end
           end
         end
