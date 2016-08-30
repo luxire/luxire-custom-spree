@@ -50,7 +50,7 @@ child @luxire_product_type_attributes_customize => :customization_attributes do
   end
 
   child :luxire_style_masters => :luxire_style_masters do
-    attributes  :name, :default_values, :help
+    attributes  :name, :default_values, :help, :description
     child :image => :images do
 	urls = ["small","medium","large"]
   	#Spree::Image.attachment_definitions[:attachment][:styles].each do |k,v|
