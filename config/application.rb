@@ -57,6 +57,7 @@ module Luxire
                                      password: "3XikIKiGcfuVJc17WBWOBwj3aXQv5uIkicjx3elIraA=",
                                      namespace: "cache",
                                      expires_in: 90.minutes }
+    config.action_controller.default_url_options = {host: "104.215.254.150", port: "3000"}
 
   end
 end
