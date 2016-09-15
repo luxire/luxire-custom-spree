@@ -6,11 +6,11 @@ class CustomOrdersController < Spree::Api::BaseController
       spree_api_token = request.headers["X-Spree-Token"] || params[:token]
        if spree_api_token.nil? || spree_api_token.empty?
          guest_token = cookies.signed[:guest_token]
-         @order = Spree::Order.where(guest_token: guest_token).where(completed_at: nil).where(user_id: nil).last
+         @order = Spree::Order.where(guest_token: guest_token,completed_at: nil,user_id: nil).last
        else
-         user = Spree::User.find_by_spree_api_key(spree_api_token)
-	      @previous_order = Spree::Order.where(user_id: user.id).where(completed_at: nil).offset(1).last
-        @order = Spree::Order.where(user_id: user.id).where(completed_at: nil).last
+        user = Spree::User.find_by_spree_api_key(spree_api_token)
+	      @previous_order = Spree::Order.where(user_id: user.id,completed_at: nil).offset(1).last
+        @order = Spree::Order.where(user_id: user.id,completed_at: nil).last
 
           unless(@previous_order.nil? || @order.nil? || @order.state != "cart")
   	        @previous_order.line_items.each do |line_item|
