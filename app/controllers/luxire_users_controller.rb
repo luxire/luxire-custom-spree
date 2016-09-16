@@ -19,7 +19,7 @@ class LuxireUsersController < ApplicationController
 	if @User.save()
 	   guest_token = Base64.decode64(request.cookies["guest_token"].split('--')[0])[1..22]
 	 # guest_token = cookies.signed[:guest_token]
-       @guest_order = Spree::Order.where(guest_token: guest_token).where(completed_at: nil).last
+       @guest_order = Spree::Order.where(guest_token: guest_token, completed_at: nil, user_id: nil).last
        if @guest_order
          @guest_order.associate_user!(Spree::User.find(user.id))
        end
