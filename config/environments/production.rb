@@ -76,9 +76,22 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
-  config.paperclip_defaults = {
-      storage: :fog,
-      :fog_credentials => "#{Rails.root}/config/gce.yml",
-      :fog_directory => "cloudhop-subscriber-luxire-cdn",
-       }
+  # comented paperclip_defaults temporarily
+  # Should be uncommented before going live
+
+  # config.paperclip_defaults = {
+  #     storage: :fog,
+  #     :fog_credentials => "#{Rails.root}/config/gce.yml",
+  #     :fog_directory => "cloudhop-subscriber-luxire-cdn",
+  #      }
+
+  # SMTP configuration
+  ActionMailer::Base.smtp_settings = {
+     :address => "smtp.gmail.com",
+     :port => 587,
+     :authentication => :plain,
+     :domain => 'gmail.com',
+      :user_name => 'mudassir@azureiken.com',
+      :password => 'mdtj23d12'
+  }
 end
