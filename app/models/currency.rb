@@ -132,7 +132,7 @@ private
 # personalization cost
       def update_personalization_cost(line_item, order)
           luxire_line_item = line_item.luxire_line_item
-          personalization_cost = luxire_line_item.total_perosnalisation_cost_in_currencies[order.currency]
+          personalization_cost = luxire_line_item.total_personalisation_cost_in_currencies[order.currency]
           personalization_adjustment.amount = personalization_cost
           personalization_adjustment.save!
           # Update personalization cost source
