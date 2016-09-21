@@ -1,3 +1,9 @@
+<style>
+  table#inner td {
+	border: 1px solid black;
+	padding: 5px;
+     }
+</style>
 <table>
   <tr>
     <td>
@@ -10,24 +16,24 @@
       <p>
         <%= Spree.t('order_mailer.confirm_email.order_summary') %>
       </p>
-      <table style="width: 100%; border: 1px solid black; border-collapse: collapse;">
+      <table id="inner" style="width: 100%; border: 1px solid black; border-collapse: collapse;">
         <% count = 0 %>
         <% @order.line_items.each do |item| %>
         <% count += 1 %>
-        <b><tr>
-            <td style="width:20%"><%= "#{count} #{item.variant.sku}" %></td>
-            <td style="width:40%" >
+        <tr>
+            <td style="width:20%;font-weight: bold;"><%= "#{count} #{item.variant.sku}" %></td>
+            <td style="width:40%;font-weight: bold;" >
               <%= raw(item.variant.product.name) %>
               <%= raw(item.variant.options_text) -%>
             </td>
-            <td style="width:40%">(<%=item.quantity%>) <%= Spree.t('at_symbol') %> <%= item.single_money %> = <%= item.display_amount %></td>
-          </tr></b>
+            <td style="width:40%;font-weight: bold;">(<%=item.quantity%>) <%= Spree.t('at_symbol') %> <%= item.single_money %> = <%= item.display_amount %></td>
+          </tr>
             <%  luxire_line_item = item.luxire_line_item %>
             <%  unless luxire_line_item.nil? %>
-              <%= render 'customized_data', luxire_line_item: luxire_line_item %>
-              <%= render 'personalize_data', luxire_line_item: luxire_line_item %>
-              <%= render 'std_measurements', luxire_line_item: luxire_line_item %>
-              <%= render 'body_measurements', luxire_line_item: luxire_line_item %>
+              <%= render 'customized_data', luxire_line_item: luxire_line_item  unless luxire_line_item.customized_data.blank? %>
+              <%= render 'personalize_data', luxire_line_item: luxire_line_item unless luxire_line_item.personalize_data.blank? %>
+              <%= render 'std_measurements', luxire_line_item: luxire_line_item unless luxire_line_item.measurement_data["standard_measurement_attributes"].blank? %>
+              <%= render 'body_measurements', luxire_line_item: luxire_line_item unless luxire_line_item.measurement_data["body_measurement_attributes"].blank? %>
             <% end %>
         <% end %>
         <tr>
