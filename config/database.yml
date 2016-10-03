@@ -14,8 +14,8 @@ default: &default
   encoding: utf8
   pool: 5
   username: root
-  password: CloudHop.in@123
-  host: 104.199.161.188
+  password: CloudHop.in!@#
+  host: 104.199.198.114
 
 development:
   <<: *default
