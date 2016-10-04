@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  put '/api/luxire_line_items/update', to: 'luxire_line_items#update',defaults: {format: :json}
+
   get '/api/get_braintree_token', to: 'custom_brain_trees#get_braintree_token', defaults: {format: :json}
   get '/api/get_currency_based_on_country_code', to: 'currencies#get_currency_based_on_country_code'
   put '/api/luxire_product_type/update_with_position/:id', to: 'luxire_product_types#update_with_position', defaults: {format: :json}
