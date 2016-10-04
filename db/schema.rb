@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160826120416) do
+ActiveRecord::Schema.define(version: 20160921074424) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -63,14 +63,15 @@ ActiveRecord::Schema.define(version: 20160826120416) do
   create_table "luxire_line_items", force: :cascade do |t|
     t.string   "fulfillment_status"
     t.integer  "line_item_id"
-    t.datetime "created_at",                                                         null: false
-    t.datetime "updated_at",                                                         null: false
+    t.datetime "created_at",                                                                       null: false
+    t.datetime "updated_at",                                                                       null: false
     t.json     "customized_data"
     t.json     "personalize_data"
     t.json     "measurement_data"
-    t.decimal  "total_personalization_cost", precision: 8, scale: 2
+    t.decimal  "total_personalization_cost",               precision: 8, scale: 2
     t.string   "measurement_unit"
-    t.boolean  "send_sample",                                        default: false
+    t.boolean  "send_sample",                                                      default: false
+    t.json     "total_personalisation_cost_in_currencies"
   end
 
   create_table "luxire_orders", force: :cascade do |t|
