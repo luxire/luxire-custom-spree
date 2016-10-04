@@ -1,10 +1,11 @@
 class ProductMeasurementType < ActiveRecord::Base
   belongs_to :luxire_product_type, class_name: "LuxireProductType"
   belongs_to :measurement_type, class_name: "MeasurementType"
-  validates_presence_of :measurement_type_id, :luxire_product_type_id, :position
+  # Commenting validation of position temporarily
+  # validates_presence_of :measurement_type_id, :luxire_product_type_id, :position
 
-  validate :uniqueness_of_position
-
+  # validate :uniqueness_of_position
+  validates_presence_of :measurement_type_id, :luxire_product_type_id
   def uniqueness_of_position
     if position && measurement_type_id && luxire_product_type_id
       measurement_type = MeasurementType.find(measurement_type_id)

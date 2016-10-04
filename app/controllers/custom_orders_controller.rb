@@ -13,6 +13,10 @@ class CustomOrdersController < Spree::Api::BaseController
         @order = Spree::Order.where(user_id: user.id,completed_at: nil).last
 
           unless(@previous_order.nil? || @order.nil? || @order.state != "cart")
+            if @previous_order.currency != @order.currency
+               @previous_order = Currency.new.update_order_currency(@previous_order, @order.currency)
+               @previous_order.save!
+            end
   	        @previous_order.line_items.each do |line_item|
               line_item.order_id = @order.id
               line_item.save!

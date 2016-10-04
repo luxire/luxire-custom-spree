@@ -1,9 +1,11 @@
 class Currency < ActiveRecord::Base
 
+CURRENCY_MULTIPLIER_FOR_SWATCH = {"EUR"=>1, "AUD"=>2, "SGD"=>2, "NOK"=>10, "DKK"=>10, "SEK"=>10, "CHF"=>1, "INR"=>100, "GBP"=>1, "CAD"=>1}
+
 # populate() is a class method which is used to fetch the value of Currency from Apilayer
 # And populate the currency table.
       def self.populate
-        url = URI.parse('http://apilayer.net/api/live?access_key=a917a3d6244742e74dacea1ec2e29940&currencies=EUR,AUD,SGD,NOK,DKK,SEK,CHF,FIM,INR,DBP&source=USD&format=1')
+        url = URI.parse('http://apilayer.net/api/live?access_key=a917a3d6244742e74dacea1ec2e29940&currencies=EUR,AUD,SGD,NOK,DKK,SEK,CHF,FIM,INR,DBP,GBP,CAD&source=USD&format=1')
         req = Net::HTTP::Get.new(url.to_s)
         res = Net::HTTP.start(url.host, url.port) { |http|
         http.request(req)
@@ -32,7 +34,7 @@ class Currency < ActiveRecord::Base
         # Return if currency is not available
         return if @currency_multiplier.nil?
         # Get all the variant except gift card one.
-        variants = Spree::Variant.joins(:product).where("spree_products.is_gift_card =?", false)
+        variants = Spree::Variant.joins(:product).where("spree_products.is_gift_card =? and spree_variants.sku not like ?", false, "SWT%")
         variants.each do |variant|
           @usd_price = variant.prices.where(currency: "USD").take.amount
           @currency_multiplier.keys.each do |key|
@@ -51,20 +53,21 @@ class Currency < ActiveRecord::Base
           get_currency_multiplier
           # Return if currency is not available
           return if @currency_multiplier.nil?
-          # Get all the variant except gift card one.
-          variants = Spree::Variant.joins(:product).where("spree_products.is_gift_card =?", false)
+          create_swatch_variant_prices_for_all_currency
+          # Get all the variant except gift card and Swatch.
+          variants = Spree::Variant.joins(:product).where("spree_products.is_gift_card =? and spree_variants.sku not like ?", false, "SWT%")
           variants.each do |variant|
             @usd_price = variant.prices.where(currency: "USD").take.amount
             @currency_multiplier.keys.each do |key|
               price_exist = variant.prices.where(currency: key).take
               unless price_exist
-                create_variant = Spree::Price.new
-                create_variant.variant = variant
-                create_variant.currency = key
+                create_variant_price = Spree::Price.new
+                create_variant_price.variant = variant
+                create_variant_price.currency = key
                 # Round off the amount to next 5 and substract .1 from it
                 amount = get_price(key)
-                create_variant.amount = amount
-                create_variant.save!
+                create_variant_price.amount = amount
+                create_variant_price.save!
               end
             end
           end
@@ -121,6 +124,68 @@ class Currency < ActiveRecord::Base
         (price/@currency_multiplier[current_currency]) * @currency_multiplier[updated_currency]
       end
     end
+
+    def update_product_currency(products)
+      get_currency_multiplier
+      products.each do |id|
+        product = Spree::Product.find(id)
+        variants = product.variants
+        variants.each do |variant|
+          @multiplier = {}
+          @usd_price = variant.prices.where(currency: "USD").take.amount
+          if variant.sku.include?("SWT")
+            @multiplier = CURRENCY_MULTIPLIER_FOR_SWATCH
+          else
+            @multiplier = @currency_multiplier
+          end
+          @multiplier.keys.each do |key|
+            updated_price = variant.prices.where(currency: key).take
+            if @multiplier == @currency_multiplier
+              # Round off the amount to next 5 and substract .1 from it
+              amount = get_price(key)
+            else
+              amount = @usd_price * CURRENCY_MULTIPLIER_FOR_SWATCH[key]
+            end
+            updated_price.amount = amount
+            updated_price.save!
+          end
+        end
+      end
+    end
+
+    def create_product_currency(products)
+      get_currency_multiplier
+      products.each do |id|
+        product = Spree::Product.find(id)
+        variants = product.variants
+        variants.each do |variant|
+          @multiplier = {}
+          @usd_price = variant.prices.where(currency: "USD").take.amount
+          if variant.sku.include?("SWT")
+            @multiplier = CURRENCY_MULTIPLIER_FOR_SWATCH
+          else
+            @multiplier = @currency_multiplier
+          end
+          @multiplier.keys.each do |key|
+            price_exist = variant.prices.where(currency: key).take
+            unless price_exist
+              create_variant_price = Spree::Price.new
+              create_variant_price.variant = variant
+              create_variant_price.currency = key
+              if @multiplier == @currency_multiplier
+                # Round off the amount to next 5 and substract .1 from it
+                amount = get_price(key)
+              else
+                amount = @usd_price * CURRENCY_MULTIPLIER_FOR_SWATCH[key]
+              end
+              create_variant_price.amount = amount
+              create_variant_price.save!
+            end
+          end
+        end
+      end
+    end
+
 private
 # get_price method gets the price of a variant in a specific currency and also do a round off.
       def get_price(key)
@@ -148,6 +213,24 @@ private
           @currency_multiplier = currencies.value
         rescue Exception => e
           logger.error "Not able to fetch #{Date.today} currency record due to #{e.message} "
+        end
+      end
+
+      def create_swatch_variant_prices_for_all_currency
+        variants = Spree::Variant.joins(:product).where("spree_products.is_gift_card =? and spree_variants.sku like ?", false, "SWT%")
+        variants.each do |variant|
+          usd_price = variant.prices.where(currency: "USD").take.amount
+          CURRENCY_MULTIPLIER_FOR_SWATCH.keys.each do |key|
+            price_exist = variant.prices.where(currency: key).take
+            unless price_exist
+              create_variant_price = Spree::Price.new
+              create_variant_price.variant = variant
+              create_variant_price.currency = key
+              amount = usd_price * CURRENCY_MULTIPLIER_FOR_SWATCH[key]
+              create_variant_price.amount = amount
+              create_variant_price.save!
+            end
+          end
         end
       end
 end

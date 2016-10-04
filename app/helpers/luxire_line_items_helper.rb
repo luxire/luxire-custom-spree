@@ -1,0 +1,2 @@
+module LuxireLineItemsHelper
+end
