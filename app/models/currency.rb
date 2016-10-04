@@ -219,14 +219,14 @@ private
       def create_swatch_variant_prices_for_all_currency
         variants = Spree::Variant.joins(:product).where("spree_products.is_gift_card =? and spree_variants.sku like ?", false, "SWT%")
         variants.each do |variant|
-          @usd_price = variant.prices.where(currency: "USD").take.amount
+          usd_price = variant.prices.where(currency: "USD").take.amount
           CURRENCY_MULTIPLIER_FOR_SWATCH.keys.each do |key|
             price_exist = variant.prices.where(currency: key).take
             unless price_exist
               create_variant_price = Spree::Price.new
               create_variant_price.variant = variant
               create_variant_price.currency = key
-              amount = @usd_price * CURRENCY_MULTIPLIER_FOR_SWATCH[key]
+              amount = usd_price * CURRENCY_MULTIPLIER_FOR_SWATCH[key]
               create_variant_price.amount = amount
               create_variant_price.save!
             end
