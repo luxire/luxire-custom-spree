@@ -4,8 +4,11 @@ class LuxireLineItemsController < ApplicationController
 
   def update
     luxire_line_items = params[:order][:luxire_line_items]
-    luxire_line_items.each do |luxire_line_item|
-      luxire_line_item.update!
+    LuxireLineItem.transaction do
+      luxire_line_items.each do |params|
+        luxire_line_item = LuxireLineItem.find(params.delete("id"))
+        luxire_line_item.update!(params)
+      end
     end
     order.update!
     render "spree/api/orders/show.v1.rabl"
@@ -14,7 +17,7 @@ class LuxireLineItemsController < ApplicationController
   private
    def authorize
     @order = Spree::Order.find_by_number(params[:order][:number])
-    unless @order.token == params[:order][:token]
+    unless @order.guest_token == params[:order][:token]
       response = {msg: "You are not authorized to perform this action"}
       render json: response.to_json, status: "422"
     end
