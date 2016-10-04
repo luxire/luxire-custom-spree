@@ -1,32 +1,41 @@
-# MySQL.  Versions 5.0+ are recommended.
+# PostgreSQL. Versions 8.2 and up are supported.
 #
-# Install the MYSQL driver
-#   gem install mysql2
+# Install the pg driver:
+#   gem install pg
+# On OS X with Homebrew:
+#   gem install pg -- --with-pg-config=/usr/local/bin/pg_config
+# On OS X with MacPorts:
+#   gem install pg -- --with-pg-config=/opt/local/lib/postgresql84/bin/pg_config
+# On Windows:
+#   gem install pg
+#       Choose the win32 build.
+#       Install PostgreSQL and put its /bin directory on your path.
 #
-# Ensure the MySQL gem is defined in your Gemfile
-#   gem 'mysql2'
-#
-# And be sure to use new-style password hashing:
-#   http://dev.mysql.com/doc/refman/5.0/en/old-client.html
+# Configure Using Gemfile
+# gem 'pg'
 #
 default: &default
-  adapter: mysql2
-  encoding: utf8
+  adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see rails configuration guide
+  # http://guides.rubyonrails.org/configuring.html#database-pooling
   pool: 5
-  username: root
-  password: CloudHop.in!@#
-  host: 104.199.198.114
+  port: ENV['PORT']
 
 development:
   <<: *default
-  database: luxire_development
+  database: ENV['DEV_DATABASE']
+  host: ENV['HOST']
+  username: ENV['USERNAME']
+  password: ENV['PASSWORD']
 
-# Warning: The database defined as "test" will be erased and
-# re-generated from your development database when you run "rake".
-# Do not set this db to the same as development or production.
+
 test:
   <<: *default
-  database: luxire_test
+  database: ENV['TEST_DATABASE']
+  host: ENV['HOST']
+  username: ENV['USERNAME']
+  password: ENV['PASSWORD']
 
 # As with config/secrets.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -40,15 +49,13 @@ test:
 # On Heroku and other platform providers, you may have a full connection URL
 # available as an environment variable. For example:
 #
-#   DATABASE_URL="mysql2://myuser:mypass@localhost/somedatabase"
+#   DATABASE_URL="postgres://myuser:mypass@localhost/somedatabase"
 #
 # You can use this database configuration with:
 #
 #   production:
-#     url: <%= ENV['DATABASE_URL'] %>
+#
 #
 production:
   <<: *default
-  database: luxire_prod
-  username: root
-  password: CloudHop.in@123
+  url: <%= ENV['DATABASE_URL'] %>
