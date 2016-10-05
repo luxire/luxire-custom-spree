@@ -2,15 +2,18 @@ class LuxireProductDataImportsController < ApplicationController
 
 respond_to :html, :json
 NOT_AVAILABLE = "NA"
+NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
 
     def import
       file = params[:file]
       @count = 0
       @buggy_record = Hash.new
+      product_ids = []
       CSV.foreach(file.path, headers: true, encoding: 'ISO-8859-1') do |row|
           @count += 1
           assign_values(row) if (row["Gift Card"].blank? || (row["Gift Card"].to_s.casecmp("false") == 0))
           begin
+            check_for_images(row)
             Spree::Product.transaction do
 	     # byebug
               if row["Variant SKU"].blank? || row["Variant SKU"].casecmp(NOT_AVAILABLE) == 0
@@ -120,6 +123,7 @@ NOT_AVAILABLE = "NA"
                populate_image(image)
              end
 
+             product_ids << @product.id
             end
 
           rescue Exception => exception
@@ -127,6 +131,18 @@ NOT_AVAILABLE = "NA"
              @buggy_record[name] = exception.message
         end
       end
+      # Call the API to fetch data
+      # unless product_ids.empty?
+      #   url = URI.parse(NODE_URL)
+      #   params = {"ids[]" =>product_ids}
+      #   response = Net::HTTP.post_form(url,params)
+      # if response.code == "200"
+      #   logger.debug "Redis updated successfully"
+      # else
+      #   logger.error "Error while updating redis"
+      # end
+      # end
+      logger.debug "Product ids are #{product_ids}"
       logger.debug "Buggy record length is " + @buggy_record.length.to_s
       response = {count: @count, buggy_record: @buggy_record}
 
@@ -191,7 +207,7 @@ NOT_AVAILABLE = "NA"
       @luxire_product[:no_of_color] = row["No. of colors"]
       @luxire_product[:product_color] = row["Color name"]
       @luxire_product[:usage] = row["Usage"]
-      @luxire_product[:pattern] = row["Design: Stripes/Checks/ etc"]
+      @luxire_product[:pattern] = row["Design: Stripes/Checks etc"]
       @luxire_product[:country_of_origin] = row["Country of Origin"]
       if row["Mill"].blank? || row["Mill"].casecmp(NOT_AVAILABLE) == 0
         @luxire_product[:mill] = "Luxire"
@@ -379,5 +395,21 @@ NOT_AVAILABLE = "NA"
         @image.viewable = @variant
         @image.save!
       end
+    end
+
+    def check_for_images(row)
+      img_column = "Image Src"
+      img_url = row[img_column]
+      if (img_url.blank? || img_url.casecmp(NOT_AVAILABLE) == 0)
+        for i in 1...7
+          img_url = row["#{img_column}#{i}"]
+          unless (img_url.blank? || img_url.casecmp(NOT_AVAILABLE) == 0)
+            return
+          end
+        end
+      else
+        return
+      end
+      raise 'image can not be empty'
     end
 end
