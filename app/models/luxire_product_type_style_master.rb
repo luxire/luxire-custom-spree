@@ -9,8 +9,7 @@ class LuxireProductTypeStyleMaster < ActiveRecord::Base
       luxire_product_type = LuxireProductType.find(luxire_product_type_id)
       luxire_product_type_style_master = LuxireProductTypeStyleMaster.where(position: position,luxire_product_type_id: luxire_product_type_id).take
       unless luxire_product_type_style_master.nil?
-          errors.add(:position, "Duplicate position for #{luxire_product_type}")
-        end
+          errors.add(:position, "Duplicate position for #{luxire_product_type.product_type}")
       end
     end
   end
