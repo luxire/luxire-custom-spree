@@ -4,8 +4,8 @@ class CustomImage < ActiveRecord::Base
   has_attached_file :image,
   :styles => lambda { |a|  { :small => a.instance.size } },
                           default_style: :small,
-                          url: '/luxire/custom_images/:id/:style/:basename.:extension',
-                          path: ':rails_root/public/luxire/custom_images/:id/:style/:basename.:extension',
+                          url: '/luxire/images/custom_images/:id/:style/:basename.:extension',
+                          path: 'luxire/images/custom_images/:id/:style/:basename.:extension',
                           convert_options: { all: '-strip -auto-orient -colorspace sRGB' }
 
     validates_attachment :image,
