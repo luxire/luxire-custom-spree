@@ -207,7 +207,11 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
       @luxire_product[:no_of_color] = row["No. of colors"]
       @luxire_product[:product_color] = row["Color name"]
       @luxire_product[:usage] = row["Usage"]
-      @luxire_product[:pattern] = row["Design: Stripes/Checks etc"]
+      if !row["Design: Stripes/Checks etc"].nil? && row["Design: Stripes/Checks etc"].downcase == "plaid"
+        @luxire_product[:pattern] = "#{row["Design: Stripes/Checks etc"]},checks"
+      else
+        @luxire_product[:pattern] = row["Design: Stripes/Checks etc"]
+      end
       @luxire_product[:country_of_origin] = row["Country of Origin"]
       if row["Mill"].blank? || row["Mill"].casecmp(NOT_AVAILABLE) == 0
         @luxire_product[:mill] = "Luxire"
