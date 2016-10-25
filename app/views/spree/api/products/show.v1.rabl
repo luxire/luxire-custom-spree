@@ -1,3 +1,4 @@
+
 object @product
 cache [I18n.locale, @current_user_roles.include?('admin'), current_currency, root_object]
 
@@ -25,40 +26,74 @@ child :variants => :variants do
 end
 
 
-
-child @luxire_product_type_attributes_customize => :customization_attributes do
-  attributes :id, :name, :value, :description, :image, :help, :help_url
+measurement_url = "https://cloudhop-subscriber-luxire-cdn.storage.googleapis.com/luxire/images/measurement_type/"
+child @luxire_product_type_attributes_customize => :customization_attributes do |product_type_attributes|
+  attributes :id, :name, :value, :description, :help, :help_url
+  node(:image) do |i|
+    unless i.image_file_name.nil?
+      "#{measurement_url}#{i.id}/small/#{i.image_file_name}"
+    else
+      ""
+    end
+  end
   node(:category) do |attr|
    'c'
   end
  end
 
- child @luxire_product_type_attributes_personalize => :personalization_attributes do
-   attributes :id,  :name, :value, :description, :image, :help, :help_url
+ child @luxire_product_type_attributes_personalize => :personalization_attributes do |product_type_attributes|
+   attributes :id,  :name, :value, :description,:help, :help_url
+   node(:image) do |i|
+     unless i.image_file_name.nil?
+       "#{measurement_url}#{i.id}/small/#{i.image_file_name}"
+     else
+       ""
+     end
+   end
    node(:category) do |attr|
    'p'
   end
  end
 
 
-  child @luxire_product_type_attributes_measuement_std => :standard_measurement_attributes do
-    attributes :id, :name, :value, :description, :image, :help, :help_url
+  child @luxire_product_type_attributes_measuement_std => :standard_measurement_attributes do |product_type_attributes|
+    attributes :id, :name, :value, :description,:help, :help_url
+    node(:image) do |i|
+      unless i.image_file_name.nil?
+        "#{measurement_url}#{i.id}/small/#{i.image_file_name}"
+      else
+        ""
+      end
+    end
   end
 
-  child @luxire_product_type_attributes_measuement_body => :body_measurement_attributes do
-    attributes  :id, :name, :value, :description, :image, :help, :help_url
+  child @luxire_product_type_attributes_measuement_body => :body_measurement_attributes do |product_type_attributes|
+    attributes  :id, :name, :value, :description, :help, :help_url
+    node(:image) do |i|
+      unless i.image_file_name.nil?
+        "#{measurement_url}#{i.id}/small/#{i.image_file_name}"
+      else
+        ""
+      end
+    end
   end
 
   child :luxire_style_masters => :luxire_style_masters do
     attributes  :name, :default_values, :help, :description
-    child :image => :images do
-	urls = ["small","medium","large"]
-  	#Spree::Image.attachment_definitions[:attachment][:styles].each do |k,v|
-    	urls.each do |k|
-    		url_name = "#{k}_url"
-    		node(url_name) { |i| i.url(k) }
-  	  end
+    image_url = "https://cloudhop-subscriber-luxire-cdn.storage.googleapis.com/luxire/images/style_master/"
+    node(:images) do |i|
+    {small: "#{image_url}#{i.id}/small/#{i.image_file_name}", medium: "#{image_url}#{i.id}/medium/#{i.image_file_name}", large: "#{image_url}#{i.id}/large/#{i.image_file_name}"}
     end
+    # child :image => :images do
+	  #    urls = ["small","medium","large"]
+  	# #Spree::Image.attachment_definitions[:attachment][:styles].each do |k,v|
+    # 	urls.each do |k|
+    # 		url_name = "#{k}_url"
+    # 		node(url_name) do |i|
+    #       i.url(k)
+    #     end
+  	#   end
+    # end
     node(:real_images) { |i| real_images(i)}
     node(:sketch_images) { |i| sketch_images(i)}
   end
@@ -82,3 +117,4 @@ child :taxons => :taxons do
   child :luxire_product_type => :product_type do
     attributes :product_type
   end
+
