@@ -26,4 +26,12 @@ class LuxireUserMailer < ApplicationMailer
     mail :to =>user.email, :subject =>"Customer Account confirmation"
     @user = user
   end
+
+  def contact_us(name,email,order_number,message)
+    @name = name
+    @email = email
+    @order_number = order_number
+    @message = message
+    mail :to => "mail@luxire.com", :subject =>"Contact us"
+  end
 end
