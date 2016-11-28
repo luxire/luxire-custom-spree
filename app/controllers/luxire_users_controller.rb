@@ -225,6 +225,22 @@ class LuxireUsersController < ApplicationController
   # def account_confirm
   # end
 
+
+  def contact_us
+    name = params[:name]
+    email = params[:email]
+    order_number = params[order_number]
+    message = params[:message]
+    begin
+      LuxireUserMailer.contact_us(name,email,order_number,message).deliver_now
+      response = {msg: "Mail sent successfully"}
+      render json: response.to_json, status: "200"
+    rescue Exception => e
+      response = {msg: e.message}
+      render json: response.to_json, status: "500"
+    end
+  end
+
   private
 
   def luxire_auth(email, password)
