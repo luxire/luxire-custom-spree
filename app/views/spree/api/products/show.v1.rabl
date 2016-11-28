@@ -26,7 +26,7 @@ child :variants => :variants do
 end
 
 
-measurement_url = "https://cloudhop-subscriber-luxire-cdn.storage.googleapis.com/luxire/images/measurement_type/"
+measurement_url = ENV['CDN'] + "luxire/images/measurement_type/"
 child @luxire_product_type_attributes_customize => :customization_attributes do |product_type_attributes|
   attributes :id, :name, :value, :description, :help, :help_url
   node(:image) do |i|
@@ -80,7 +80,7 @@ child @luxire_product_type_attributes_customize => :customization_attributes do 
 
   child :luxire_style_masters => :luxire_style_masters do
     attributes  :name, :default_values, :help, :description
-    image_url = "https://cloudhop-subscriber-luxire-cdn.storage.googleapis.com/luxire/images/style_master/"
+    image_url = ENV['CDN'] + "luxire/images/style_master/"
     node(:images) do |i|
     {small: "#{image_url}#{i.id}/small/#{i.image_file_name}", medium: "#{image_url}#{i.id}/medium/#{i.image_file_name}", large: "#{image_url}#{i.id}/large/#{i.image_file_name}"}
     end
@@ -117,4 +117,3 @@ child :taxons => :taxons do
   child :luxire_product_type => :product_type do
     attributes :product_type
   end
-

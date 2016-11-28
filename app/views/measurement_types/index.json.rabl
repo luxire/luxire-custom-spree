@@ -1,5 +1,5 @@
 object false
-measurement_url = "https://cloudhop-subscriber-luxire-cdn.storage.googleapis.com/luxire/images/measurement_type/"
+measurement_url = ENV['CDN'] + "luxire/images/measurement_type/"
 child @measurement_type_customize => :customization_attributes do
   attributes :id, :name, :value, :description, :category , :sub_category, :help, :help_url
   node(:image) do |i|
