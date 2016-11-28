@@ -79,7 +79,7 @@ child @luxire_product_type_attributes_customize => :customization_attributes do 
   end
 
   child :luxire_style_masters => :luxire_style_masters do
-    attributes  :name, :default_values, :help, :description
+    attributes  :name, :default_values, :help, :description, :additional_cost
     image_url = ENV['CDN'] + "luxire/images/style_master/"
     node(:images) do |i|
     {small: "#{image_url}#{i.id}/small/#{i.image_file_name}", medium: "#{image_url}#{i.id}/medium/#{i.image_file_name}", large: "#{image_url}#{i.id}/large/#{i.image_file_name}"}
