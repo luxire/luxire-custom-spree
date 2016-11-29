@@ -17,7 +17,7 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
             Spree::Product.transaction do
 	     # byebug
               if row["Variant SKU"].blank? || row["Variant SKU"].casecmp(NOT_AVAILABLE) == 0
-                raise 'Inventory is not defined'
+                raise 'Variant SKU is not defined'
               else
                 luxire_stocks = LuxireStock.where('lower(parent_sku) = ?',row["Variant SKU"].downcase )
   		#byebug
