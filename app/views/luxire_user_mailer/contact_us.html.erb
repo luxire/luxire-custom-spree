@@ -1,0 +1,20 @@
+Hi Admin,
+
+You have received a new message from the enquiry form on the wesite. Below are the details.<br /> <br />
+
+<% unless @name.blank? %>
+  Name: <%= @name %> <br />
+<% end %>
+
+Email: <%= @email %> <br />
+
+<% unless @order_number.blank? %>
+  Order Number: <%= @order_number %> <br />
+<% end %>
+
+Message: <%= @message %><br />
+
+<br />Please contact the customer. <br /> <br />
+
+Thanks and regards, <br />
+Luxire Custom Clothing
