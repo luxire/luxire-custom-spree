@@ -47,6 +47,11 @@ Rails.application.configure do
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default :charset => "utf-8"
+  config.paperclip_defaults = {
+      storage: :fog,
+      :fog_credentials => "#{Rails.root}/config/gce.yml",
+      :fog_directory => ENV['FOG_DIR'],
+       }
 
   ActionMailer::Base.smtp_settings = {
      :address => "smtp.gmail.com",

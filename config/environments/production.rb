@@ -81,11 +81,12 @@ Rails.application.configure do
   # comented paperclip_defaults temporarily
   # Should be uncommented before going live
 
-  # config.paperclip_defaults = {
-  #     storage: :fog,
-  #     :fog_credentials => "#{Rails.root}/config/gce.yml",
-  #     :fog_directory => "cloudhop-subscriber-luxire-cdn",
-  #      }
+  config.paperclip_defaults = {
+        storage: :fog,
+        :fog_credentials => "#{Rails.root}/config/gce.yml",
+        :fog_directory => ENV['FOG_DIR'],
+         }
+
 
   # SMTP configuration
   ActionMailer::Base.smtp_settings = {
