@@ -51,16 +51,11 @@ module Luxire
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
     config.action_controller.perform_caching = true
-    config.paperclip_defaults = {
-      storage: :fog,
-      :fog_credential => (File.join Rails.root, 'config', 'gce.yml') ,
-      :fog_directory => "cloudhop-subscriber-luxire-cdn",
-       }
-    config.cache_store = :redis_store, { host: "luxire.redis.cache.windows.net",
+    config.cache_store = :redis_store, { host: ENV['REDIS_HOST'],
                                      port: 6379,
                                      db: 0,
-                                     password: "3XikIKiGcfuVJc17WBWOBwj3aXQv5uIkicjx3elIraA=",
                                      namespace: "cache",
+                                     password: ENV['REDIS_PASSWORD'],
                                      expires_in: 90.minutes }
     config.action_controller.default_url_options = {host: "test.store.luxire.com", port: "443", protocol: "https"}
 
