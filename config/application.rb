@@ -57,7 +57,7 @@ module Luxire
                                      namespace: "cache",
                                      password: ENV['REDIS_PASSWORD'],
                                      expires_in: 90.minutes }
-    config.action_controller.default_url_options = {host: "test.store.luxire.com", port: "443", protocol: "https"}
+    config.action_controller.default_url_options = {host: ENV['STORE_HOST'], port: "443", protocol: "https"}
 
   end
 end
