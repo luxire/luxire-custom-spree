@@ -102,8 +102,10 @@ Spree::PaypalController.class_eval do
      # flash[:notice] = Spree.t('flash.cancel', :scope => 'paypal')
      # order = @spree_order || raise(ActiveRecord::RecordNotFound)
      # redirect_to checkout_state_path(order.state, paypal_cancel_token: params[:token])
-     response = { msg: "Order is cancelled"}
-     render json: response.to_json, status: "200"
+    #  response = { msg: "Order is cancelled"}
+    #  render json: response.to_json, status: "200"
+     redirect_url = ENV['FRONTEND_HOST'] + "/#/checkout/payment"
+     redirect_to redirect_url
    end
 
    private
