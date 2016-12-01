@@ -84,7 +84,7 @@ Spree::PaypalController.class_eval do
      order.next
      if order.complete?
      # return_url = "http://test.luxire.com:9000/#/invoice/#{order[:number]}?token=#{order[:guest_token]}"
-     return_url = "http://104.215.252.45/#/invoice/#{order[:number]}?token=#{order[:guest_token]}"
+     return_url = ENV['FRONTEND_HOST'] + "/#/invoice/#{order[:number]}?token=#{order[:guest_token]}"
        # flash.notice = Spree.t(:order_processed_successfully)
        # flash[:order_completed] = true
        session[:order_id] = nil
