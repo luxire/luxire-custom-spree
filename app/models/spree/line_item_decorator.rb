@@ -10,4 +10,8 @@ def update_adjustments
     update_tax_charge # Called to ensure pre_tax_amount is updated.
 end
 
+def formatted_total
+  Spree::Money.new(total, { currency: currency })
+end
+
 end
