@@ -61,4 +61,36 @@ Spree::OrderContents.class_eval do
      line_item
    end
 
+
+   def update_cart(params)
+     update_personalization_cost(params)
+     if order.update_attributes(filter_order_items(params))
+       order.line_items = order.line_items.select { |li| li.quantity > 0 }
+       # Update totals, then check if the order is eligible for any cart promotions.
+       # If we do not update first, then the item total will be wrong and ItemTotal
+       # promotion rules would not be triggered.
+       persist_totals
+       Spree::PromotionHandler::Cart.new(order).activate
+       order.ensure_updated_shipments
+       persist_totals
+       true
+     else
+       false
+     end
+   end
+
+   def update_personalization_cost(params)
+     filtered_params = params.symbolize_keys
+     return if filtered_params[:line_items_attributes].nil? 
+     return unless filtered_params[:line_items_attributes][:id] && filtered_params[:line_items_attributes][:quantity]
+     line_item = Spree::LineItem.find(filtered_params[:line_items_attributes][:id])
+     quantity = (filtered_params[:line_items_attributes][:quantity].to_i - line_item.quantity).abs
+     return if quantity <= 0
+     personalization_adjustments = line_item.adjustments.where(source_type: "PersonalizationCost").take
+     unless personalization_adjustments.nil?
+       cost = personalization_adjustments.amount / line_item.quantity
+       personalization_adjustments.amount =  cost * filtered_params[:line_items_attributes][:quantity].to_i
+       personalization_adjustments.save!
+     end
+   end
 end
