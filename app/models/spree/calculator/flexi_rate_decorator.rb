@@ -2,7 +2,6 @@
 
    def compute(object)
      sum = 0
-     byebug
      max = self.preferred_max_items.to_i
      items_count = object.quantity
      items_count.times do |i|

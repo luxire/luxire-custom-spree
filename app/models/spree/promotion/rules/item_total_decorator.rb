@@ -3,7 +3,6 @@ Spree::Promotion::Rules::ItemTotal.class_eval do
 
     def eligible?(order, options = {})
       item_total = order.item_total
-      byebug
       if order.currency == preferred_currency
         min = preferred_amount_min
         max = preferred_amount_max
