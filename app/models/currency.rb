@@ -105,11 +105,11 @@ CURRENCY_MULTIPLIER_FOR_SWATCH = {"EUR"=>1, "AUD"=>2, "SGD"=>2, "NOK"=>10, "DKK"
 # order in the cart
     def update_order_currency(order, updated_currency)
       adjustments = Spree::Adjustment.where(order: order , source_type: "PersonalizationCost", adjustable_type: "Spree::LineItem")
+      order.currency = updated_currency
       adjustments.each do |adjustment|
         line_item = adjustment.adjustable
         update_personalization_cost(line_item, order)
       end
-        order.currency = updated_currency
         order
     end
 
@@ -198,6 +198,7 @@ private
       def update_personalization_cost(line_item, order)
           luxire_line_item = line_item.luxire_line_item
           personalization_cost = luxire_line_item.total_personalisation_cost_in_currencies[order.currency]
+          personalization_adjustment = line_item.adjustments.where(source_type: "PersonalizationCost").take
           personalization_adjustment.amount = personalization_cost
           personalization_adjustment.save!
           # Update personalization cost source
