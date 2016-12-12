@@ -94,7 +94,7 @@ Rails.application.configure do
      :port => 587,
      :authentication => :plain,
      :domain => 'gmail.com',
-      :user_name => 'mudassir@azureiken.com',
-      :password => 'mdtj23d12'
+      :user_name => 'support@luxire.com',
+      :password => 'Azureiken01'
   }
 end
