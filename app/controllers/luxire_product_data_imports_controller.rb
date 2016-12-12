@@ -1,5 +1,7 @@
 class LuxireProductDataImportsController < ApplicationController
 
+after_action :populate_product_price_in_multi_currency, only: [:import]
+
 respond_to :html, :json
 NOT_AVAILABLE = "NA"
 NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
@@ -8,7 +10,7 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
       file = params[:file]
       @count = 0
       @buggy_record = Hash.new
-      product_ids = []
+      @product_ids = []
       CSV.foreach(file.path, headers: true, encoding: 'ISO-8859-1') do |row|
           @count += 1
           assign_values(row) if (row["Gift Card"].blank? || (row["Gift Card"].to_s.casecmp("false") == 0))
@@ -123,7 +125,7 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
                populate_image(image)
              end
 
-             product_ids << @product.id
+             @product_ids << @product.id
             end
 
           rescue Exception => exception
@@ -132,9 +134,9 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
         end
       end
       # Call the API to fetch data
-      # unless product_ids.empty?
+      # unless @product_ids.empty?
       #   url = URI.parse(NODE_URL)
-      #   params = {"ids[]" =>product_ids}
+      #   params = {"ids[]" =>@product_ids}
       #   response = Net::HTTP.post_form(url,params)
       # if response.code == "200"
       #   logger.debug "Redis updated successfully"
@@ -142,7 +144,7 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
       #   logger.error "Error while updating redis"
       # end
       # end
-      logger.debug "Product ids are #{product_ids}"
+      logger.debug "Product ids are #{@product_ids}"
       logger.debug "Buggy record length is " + @buggy_record.length.to_s
       response = {count: @count, buggy_record: @buggy_record}
 
@@ -415,5 +417,11 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
         return
       end
       raise 'image can not be empty'
+    end
+
+#create the prices of uploaded product in all supported currency
+    def populate_product_price_in_multi_currency
+      currency = Currency.new
+      currency.create_product_currency(@product_ids)
     end
 end

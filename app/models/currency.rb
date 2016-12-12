@@ -125,11 +125,15 @@ CURRENCY_MULTIPLIER_FOR_SWATCH = {"EUR"=>1, "AUD"=>2, "SGD"=>2, "NOK"=>10, "DKK"
       end
     end
 
+# update_product_currency will accept an array of product ids
+# and will update the prices for all supported currency
     def update_product_currency(products)
       get_currency_multiplier
       products.each do |id|
         product = Spree::Product.find(id)
         variants = product.variants
+        # Adding master product because product.variants does not contains master variant
+        variants << product.master
         variants.each do |variant|
           @multiplier = {}
           @usd_price = variant.prices.where(currency: "USD").take.amount
@@ -153,11 +157,15 @@ CURRENCY_MULTIPLIER_FOR_SWATCH = {"EUR"=>1, "AUD"=>2, "SGD"=>2, "NOK"=>10, "DKK"
       end
     end
 
+# create_product_currency will accept a array of product ids and it will create
+# the product prices for all supported currency
     def create_product_currency(products)
       get_currency_multiplier
       products.each do |id|
         product = Spree::Product.find(id)
         variants = product.variants
+        # Adding master product because product.variants does not contains master variant
+        variants << product.master
         variants.each do |variant|
           @multiplier = {}
           @usd_price = variant.prices.where(currency: "USD").take.amount
@@ -210,10 +218,12 @@ private
 # get_currency_multiplier() fetches the multiplier for different currency
       def get_currency_multiplier
         begin
-          currencies = Currency.last
-          @currency_multiplier = currencies.value
+          currency = Currency.last
+          @currency_multiplier = currency.value
         rescue Exception => e
           logger.error "Not able to fetch #{Date.today} currency record due to #{e.message} "
+          Currency.populate
+          @currency_multiplier = Currency.first.value
         end
       end
 
