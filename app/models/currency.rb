@@ -207,12 +207,16 @@ private
           luxire_line_item = line_item.luxire_line_item
           personalization_cost = luxire_line_item.total_personalisation_cost_in_currencies[order.currency]
           personalization_adjustment = line_item.adjustments.where(source_type: "PersonalizationCost").take
-          personalization_adjustment.amount = personalization_cost
-          personalization_adjustment.save!
-          # Update personalization cost source
-          source = personalization_adjustment.source
-          source.cost = personalization_cost
-          source.save!
+          unless personalization_adjustment.amount.to_f == personalization_cost.to_f
+            personalization_adjustment.amount = personalization_cost.to_f
+            personalization_adjustment.save!
+            # Update personalization cost source
+            source = personalization_adjustment.source
+            source.cost = personalization_cost
+            source.save!
+          else
+            personalization_adjustment.touch
+          end
       end
 
 # get_currency_multiplier() fetches the multiplier for different currency
