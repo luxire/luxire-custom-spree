@@ -45,7 +45,7 @@ def finalize!
   finalize_with_gift_card!
   reduce_inventory
   consider_risk
-
+  update_luxire_order_fullfilment_status
 end
 
   def reduce_inventory
@@ -102,5 +102,10 @@ end
   def confirmation_required?
     false
   end
-  
+
+  def update_luxire_order_fullfilment_status
+    luxire_order = self.luxire_order
+    luxire_order.fulfillment_status = "Order received"
+    luxire_order.save!
+  end
 end
