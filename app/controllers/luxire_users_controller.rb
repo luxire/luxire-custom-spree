@@ -215,7 +215,7 @@ class LuxireUsersController < ApplicationController
         when "back_office_personnel"
           @User = Spree::User.back_office_personnel
         end
-    elsif
+    else
       @User = false
     end
   end
