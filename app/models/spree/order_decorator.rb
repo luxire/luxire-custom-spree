@@ -1,6 +1,17 @@
 Spree::Order.class_eval do
 has_one :luxire_order, class_name: "LuxireOrder", dependent: :destroy
 has_many :luxire_line_items, class_name: 'LuxireLineItem', through: :line_items
+
+def display_item_total
+  sum = 0
+  line_items.each do |line_item|
+    sum += line_item.total
+  end
+  default_opts = respond_to?(:currency) ? { currency: currency } : {}
+  Spree::Money.new(sum, default_opts)
+end
+
+
 # accepts_nested_attributes_for :luxire_order
 
 # Finalizes an in progress order after checkout is complete.
@@ -107,5 +118,11 @@ end
     luxire_order = self.luxire_order
     luxire_order.fulfillment_status = "Order received"
     luxire_order.save!
+  end
+
+  def addresses
+    unless user.nil?
+      user.addresses
+    end
   end
 end
