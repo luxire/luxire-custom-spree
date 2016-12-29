@@ -12,3 +12,4 @@
 //= require spree/frontend/spree_paypal_express
 //= require spree/frontend/spree_gift_card
 //= require spree/frontend/spree_braintree_vzero
+//= require spree/frontend/spree_address_book
