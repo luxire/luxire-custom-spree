@@ -60,3 +60,4 @@ gem 'spree_braintree_vzero', github: 'spree-contrib/spree_braintree_vzero', bran
 # gem 'spree_reviews', github: 'spree-contrib/spree_reviews', branch: '3-0-stable'
 gem 'countries', '~> 1.2', '>= 1.2.5'
 gem 'fog'
+gem 'spree_address_book', github: 'spree-contrib/spree_address_book', branch: '3-0-stable'
