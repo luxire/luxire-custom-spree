@@ -14,6 +14,10 @@ child :shipping_address => :ship_address do
   extends "spree/api/addresses/show"
 end
 
+child :addresses => :addresses do
+   extends "spree/api/addresses/show"
+ end
+
 child :luxire_order => :luxire_order do
   attributes *luxire_order_attributes
 end
