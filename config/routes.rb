@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  post '/api/create_dynamic_taxon', to: 'spree/api/taxons#dynamic_collection_create', defaults: {format: :json}
+  put '/api/change_line_item_status', to: 'luxire_line_items#change_line_item_status', defaults: {format: :json}
   post '/api/contact_us', to: 'luxire_users#contact_us', defaults: {format: :json}
   put '/api/luxire_line_items/update', to: 'luxire_line_items#update',defaults: {format: :json}
 
