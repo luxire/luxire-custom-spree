@@ -13,8 +13,8 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
       @product_ids = []
       CSV.foreach(file.path, headers: true, encoding: 'ISO-8859-1') do |row|
           @count += 1
-          assign_values(row) if (row["Gift Card"].blank? || (row["Gift Card"].to_s.casecmp("false") == 0))
           begin
+            assign_values(row) if (row["Gift Card"].blank? || (row["Gift Card"].to_s.casecmp("false") == 0))
             check_for_images(row)
             Spree::Product.transaction do
 	     # byebug
@@ -147,7 +147,8 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
       logger.debug "Product ids are #{@product_ids}"
       logger.debug "Buggy record length is " + @buggy_record.length.to_s
       response = {count: @count, buggy_record: @buggy_record}
-
+      # Send an email to admin with product upload status
+      ProductUploadMailer.product_upload_status(@count, @buggy_record).deliver_now
       respond_with do |format|
         format.html { render 'luxire_product_data_imports/show.html.erb'}
         format.json { render json: response.to_json, status: "200" }
@@ -165,8 +166,6 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
       if ( !row["Published Date"].blank? && !(row["Published Date"].casecmp(NOT_AVAILABLE) == 0))
         published_date = row["Published Date"]
         available_date = Date.strptime(published_date, "%d/%m/%Y")
-      else
-        available_date = Time.now
       end
 
       product_hash = {name: row["Title"], available_on: available_date, price: row["Variant Price"], description: row["Body (HTML) Leave Blank"], shipping_category_id: 1}
