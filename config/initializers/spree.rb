@@ -14,9 +14,11 @@ Spree.config do |config|
   # Uncomment to stop tracking inventory levels in the application
   # config.track_inventory_levels = false
 end
-
 Spree.user_class = "Spree::User"
 Rails.application.config.spree.payment_methods << Spree::Gateway::Ebsin
-
 Spree::Api::Config[:requires_authentication] = false
 Spree::PermittedAttributes.product_attributes << :is_gift_card
+
+def Spree.admin_email
+   ENV['ADMIN_EMAIL']
+ end
