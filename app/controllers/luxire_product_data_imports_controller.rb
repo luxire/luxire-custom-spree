@@ -100,8 +100,8 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
               begin
                 if ( !row[image_source].blank? && !(row[image_source].casecmp(NOT_AVAILABLE) == 0))
                   image = row[image_source]
-                  image.sub!("_grande") if row[image_source].include? ("_grande.")
-                  image.sub!(/\d+X\d+\./, "")
+                  image.sub!("_grande.", ".")
+                  image.sub!(/_\d+[Xx]\d+\./, ".")
                   populate_image(image)
                 end
                 image_count += 1
@@ -140,6 +140,16 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
 
       # render json: response.to_json, status: "200"
       # render 'luxire_product_data_imports/show.html.erb'
+    end
+
+    def destroy_all_product
+          Spree::Product.destroy_all
+        rescue Exception => e
+          response = {msg: "Destroy operation can not be completed due to #{e.message}"}
+          render json: response.to_json, status: "500" and return
+        end
+          response = {msg: "all product are deleted successfully"}
+          render json: response.to_json, status: "200"
     end
 
     private
