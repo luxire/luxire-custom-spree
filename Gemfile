@@ -61,3 +61,6 @@ gem 'spree_braintree_vzero', github: 'spree-contrib/spree_braintree_vzero', bran
 gem 'countries', '~> 1.2', '>= 1.2.5'
 gem 'fog'
 gem 'spree_address_book', github: 'spree-contrib/spree_address_book', branch: '3-0-stable'
+gem 'rubyzip', '~> 1.1.0'
+gem 'axlsx', '2.1.0.pre'
+gem 'axlsx_rails'
