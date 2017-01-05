@@ -1,10 +1,13 @@
 class LuxireProductDataImportsController < ApplicationController
 
+before_action :validate_csv_format, only: [:import]
 after_action :populate_product_price_in_multi_currency, only: [:import]
+after_action :send_error_list_to_admin, only: [:import], if: :buggy_record_length
 
 respond_to :html, :json
 NOT_AVAILABLE = "NA"
 NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
+EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURRENT LUXIRE SITE HANDLE", "Image Src", "Image Src 1", "Image Src 2", "Image Src 3", "Image Src 4", "Image Src 5", "Image Src 6", "Title", "Types of weave", "No. of colors", "Color name", "Tag", "Material Composition with %", "Usage", "Design: Stripes/Checks etc", "Country of Origin", "Mill", "Seasons (Summer, Autumn, Winter, Spring)", "Construction ", "Count ", "Thickness", "Stiffness", "GSM", "Ounces", "GLM", "Wash Care", "Shrinkage", "Technical Description", "Sales Pitch", "Related/Similar Fabric", "Vendor", "Primary Usage", "Type", "Variant SKU", "Parent SKU", "Variant Grams", "Variant Inventory Tracker", "Inventory in meters if Inhouse", "Stock Storage", "If Mill Sourced, Current Luxire Stock", "Variant Inventory Qty LEAVE BLANK", "Variant Inventory Policy", "Variant Fulfillment Service", "Swatch price", "Variant Price", "Variant compare at price", "Variant Requires Shipping", "Variant Taxable", "Length Required", "Threshold", "Inventory Measuring Unit", "Fabric Width", "Swatch Image", "Published Date", "Variant Barcode", "Gift Card", "Transparency", "Wrinkle Resistance"]
 
     def import
       file = params[:file]
@@ -14,6 +17,7 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
       CSV.foreach(file.path, headers: true, encoding: 'ISO-8859-1') do |row|
           @count += 1
           begin
+            validate_record(row)
             assign_values(row) if (row["Gift Card"].blank? || (row["Gift Card"].to_s.casecmp("false") == 0))
             check_for_images(row)
             Spree::Product.transaction do
@@ -89,45 +93,26 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
 
                  associate_collection(row)
 		# byebug
-
-             if ( !row["Image Src"].blank? && !(row["Image Src"].casecmp(NOT_AVAILABLE) == 0))
-               image = row["Image Src"]
-               populate_image(image)
-             end
-
-             if ( !row["Image Src1"].blank? && !(row["Image Src1"].casecmp(NOT_AVAILABLE) == 0))
-               image = row["Image Src1"]
-               populate_image(image)
-             end
-
-             if ( !row["Image Src2"].blank? && !(row["Image Src2"].casecmp(NOT_AVAILABLE) == 0))
-               image = row["Image Src2"]
-               populate_image(image)
-             end
-
-             if ( !row["Image Src3"].blank? && !(row["Image Src3"].casecmp(NOT_AVAILABLE) == 0))
-               image = row["Image Src3"]
-               populate_image(image)
-             end
-
-             if ( !row["Image Src4"].blank? && !(row["Image Src4"].casecmp(NOT_AVAILABLE) == 0))
-               image = row["Image Src4"]
-               populate_image(image)
-             end
-
-             if ( !row["Image Src5"].blank? && !(row["Image Src5"].casecmp(NOT_AVAILABLE) == 0))
-               image = row["Image Src5"]
-               populate_image(image)
-             end
-
-             if ( !row["Image Src6"].blank? && !(row["Image Src6"].casecmp(NOT_AVAILABLE) == 0))
-               image = row["Image Src6"]
-               populate_image(image)
-             end
-
+            image_count = 0
+            image_source = "Image Src"
+            while(image_count < 7)
+              image_source ="Image Src{image_count}" unless image_count == 0
+              begin
+                if ( !row[image_source].blank? && !(row[image_source].casecmp(NOT_AVAILABLE) == 0))
+                  image = row[image_source]
+                  image.sub!("_grande") if row[image_source].include? ("_grande.")
+                  image.sub!(/\d+X\d+\./, "")
+                  populate_image(image)
+                end
+                image_count += 1
+              rescue TypeError
+                raise "Image url not correct #{row[image_source]}"
+              rescue OpenURI::HTTPError
+                raise "No image found for #{row[image_source]}"
+              end
+            end
              @product_ids << @product.id
             end
-
           rescue Exception => exception
              name = "#{@count}  #{row['Handle']}"
              @buggy_record[name] = exception.message
@@ -147,8 +132,7 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
       logger.debug "Product ids are #{@product_ids}"
       logger.debug "Buggy record length is " + @buggy_record.length.to_s
       response = {count: @count, buggy_record: @buggy_record}
-      # Send an email to admin with product upload status
-      ProductUploadMailer.product_upload_status(@count, @buggy_record).deliver_now
+
       respond_with do |format|
         format.html { render 'luxire_product_data_imports/show.html.erb'}
         format.json { render json: response.to_json, status: "200" }
@@ -422,5 +406,48 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
     def populate_product_price_in_multi_currency
       currency = Currency.new
       currency.create_product_currency(@product_ids)
+    end
+
+    def send_error_list_to_admin
+      p = Axlsx::Package.new
+      sheet_path = "upload_reports/error_report_#{Time.now.to_i}.xlsx"
+      p.workbook do |wb|
+        wb.add_worksheet(:name => "Error report") do |sheet|
+          sheet.add_row(["Index", "Record", "Exception"])
+          count = 1
+          @buggy_record.keys.each do |key|
+            sheet.add_row([count, key, @buggy_record[key]])
+            count += 1
+          end
+        end
+      end
+      p.serialize(sheet_path)
+      # Send an email to admin with product upload status
+      ProductUploadMailer.product_upload_status(@buggy_record, @count,sheet_path).deliver_now
+    end
+
+    def validate_record(row)
+      EXPECTED_HEADER.each do |name|
+        if row[name].nil? || row[name].blank?
+          raise "Column #{name} can not be empty. Please insert a default value."
+        end
+      end
+    end
+
+    def validate_csv_format
+      file = params[:file]
+      headers = CSV.open(file.path, 'r') { |csv| csv.first }
+      unless (headers - EXPECTED_HEADER).empty?
+        removed_columns = EXPECTED_HEADER - headers
+        added_columns = headers - EXPECTED_HEADER
+        response = {msg: "You have added or removed columns"}
+        response[:added_column] = added_columns unless added_columns.nil?
+        response[:removed_columns] = removed_columns unless removed_columns.nil?
+        render json: response.to_json, status: "422"
+      end
+    end
+
+    def buggy_record_length
+      @buggy_record.length > 0
     end
 end
