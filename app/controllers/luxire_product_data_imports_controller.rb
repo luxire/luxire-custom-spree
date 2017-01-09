@@ -1,8 +1,8 @@
 class LuxireProductDataImportsController < ApplicationController
 
-before_action :validate_csv_format, only: [:import]
+# before_action :validate_csv_format, only: [:import]
 after_action :populate_product_price_in_multi_currency, only: [:import]
-after_action :send_error_list_to_admin, only: [:import], if: :buggy_record_length
+# after_action :send_error_list_to_admin, only: [:import], if: :buggy_record_length
 
 respond_to :html, :json
 NOT_AVAILABLE = "NA"
@@ -105,7 +105,7 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
                   populate_image(image)
                 end
                 image_count += 1
-              rescue TypeError
+              rescue TypeError, Errno::ECONNREFUSED
                 raise "Image url not correct #{row[image_source]}"
               rescue OpenURI::HTTPError
                 raise "No image found for #{row[image_source]}"
@@ -143,6 +143,7 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
     end
 
     def destroy_all_product
+      begin
           Spree::Product.destroy_all
         rescue Exception => e
           response = {msg: "Destroy operation can not be completed due to #{e.message}"}
