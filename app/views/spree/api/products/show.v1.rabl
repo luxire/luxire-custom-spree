@@ -116,4 +116,9 @@ child :taxons => :taxons do
 
   child :luxire_product_type => :product_type do
     attributes :product_type
+    product_type = self.instance_variable_get(:@luxire_product_type).product_type
+    if product_type == "Jackets"
+      node(:pant_id) { get_pants_product_id }
+      node(:vest_id) { get_vests_product_id } 
+    end
   end
