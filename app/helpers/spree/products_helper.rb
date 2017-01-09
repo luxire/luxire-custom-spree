@@ -1,5 +1,14 @@
 module Spree
   module ProductsHelper
+    def get_vests_product_id
+      product = self.instance_variable_get(:@product)
+      Spree::Product.joins(:luxire_product_type).where("spree_products.name=? and luxire_product_types.product_type=?",product.name, "Vests").take.id
+    end
+
+    def get_pants_product_id
+      product = self.instance_variable_get(:@product)
+      Spree::Product.joins(:luxire_product_type).where("spree_products.name=? and luxire_product_types.product_type=?",product.name, "Pants").take.id
+    end
 # Arrange the price in required json structure
     def arrange_price(variant)
       prices = {}
