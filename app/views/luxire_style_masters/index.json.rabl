@@ -1,5 +1,5 @@
 object @luxire_style_masters
-attributes :id, :name, :default_values, :help, :description
+attributes :id, :name, :default_values, :help, :description, :additional_cost
 
 image_url = ENV['CDN'] + "luxire/images/style_master/"
     node(:images) do |i|

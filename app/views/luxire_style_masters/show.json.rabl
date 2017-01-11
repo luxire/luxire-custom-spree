@@ -1,5 +1,5 @@
 object @luxire_style_master
-attributes :id, :name, :default_values, :image, :help, :description
+attributes :id, :name, :default_values, :image, :help, :description, :additional_cost
 
 child :luxire_product_type => :luxire_product_type do
 attributes :id, :product_type, :description, :measurement_types
