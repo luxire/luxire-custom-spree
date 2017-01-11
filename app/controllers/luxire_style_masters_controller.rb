@@ -1,6 +1,6 @@
 class LuxireStyleMastersController < Spree::Api::BaseController
   wrap_parameters format: [:json, :xml, :url_encoded_form, :multipart_form]
-  wrap_parameters :luxire_style_master, include: [ :id, :name, :default_values, :luxire_product_type_id, :image, :description]
+  wrap_parameters :luxire_style_master, include: [ :id, :name, :default_values, :luxire_product_type_id, :image, :description, :additional_cost]
 
   before_action :set_luxire_style_master, only: [:show, :edit, :update, :destroy]
 
@@ -43,7 +43,7 @@ class LuxireStyleMastersController < Spree::Api::BaseController
     respond_to do |format|
       if @luxire_style_master.save
         format.html { redirect_to @luxire_style_master, notice: 'Luxire style master was successfully created.' }
-        format.json { render :show, status: :created, location: @luxire_style_master }
+        format.json { render "show.json.rabl", status: :created, location: @luxire_style_master }
       else
         format.html { render :new }
         format.json { render json: @luxire_style_master.errors, status: :unprocessable_entity }
