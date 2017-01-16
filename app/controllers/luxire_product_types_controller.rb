@@ -1,6 +1,6 @@
 class LuxireProductTypesController < Spree::Api::BaseController
   wrap_parameters format: [:json, :xml, :url_encoded_form, :multipart_form]
-  wrap_parameters :luxire_product_type, include: [:id, :product_type, :description, :measurement_type_ids, :image, :length_required]
+  wrap_parameters :luxire_product_type, include: [:id, :product_type, :description, :measurement_type_ids, :image]
 
   before_action :set_luxire_product_type, only: [:show, :edit, :update, :destroy, :update_with_position]
   require 'ostruct'
@@ -181,7 +181,7 @@ class LuxireProductTypesController < Spree::Api::BaseController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def luxire_product_type_params
-      params.require(:luxire_product_type).permit(:product_type, :description, :measurement_type_ids, :image, :length_required)
+      params.require(:luxire_product_type).permit(:product_type, :description, :measurement_type_ids, :image)
     end
 
     def populate_product_measurement_type(measurement_type)
