@@ -6,7 +6,7 @@ node(:display_total) { |li| li.formatted_total.to_s }
 node(:total) { |li| li.total }
 child :variant do
   extends "spree/api/variants/small"
-  attributes :product_id, :sku  
+  attributes :product_id, :sku
   if root_object.images.empty?
     child( root_object.product.master.images => :images) { extends "spree/api/images/show" }
   else
@@ -22,3 +22,5 @@ end
 child :luxire_line_item do
   attributes *LuxireLineItem.column_names
 end
+
+node(:product_type){|li| li.product.luxire_product_type.product_type unless li.product.luxire_product_type.nil? }
