@@ -63,9 +63,9 @@ end
     if luxire_order.is_inventory_deducted
          line_items.each do |line_item|
             product = line_item.product
-            luxire_product_type = product.luxire_product_type
+            luxire_product = product.luxire_product
             stock = product.luxire_stock
-            stock.virtual_count_on_hands -= luxire_product_type.length_required
+            stock.virtual_count_on_hands -= luxire_product.length_required
             if(stock.threshold >= stock.virtual_count_on_hands)
               # send an email
               Spree::OrderMailer.send_mail_for_backorder(product).deliver_later
