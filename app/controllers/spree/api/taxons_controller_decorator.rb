@@ -30,11 +30,14 @@ Spree::Api::TaxonsController.class_eval do
     match_policy = {all: "and", any: "or"}
     # Time being removing tag from attributes hash.
     # Should add Tag in attributes hash once tag implementation is done
-    attributes = { title: "spree_products.name", type: "luxire_product_types.product_type", vendor: "luxire_vendor_masters.name", variant_price: "spree_prices.amount", variant_compare_at_price: "luxire_products.product_compare_at_price", variant_weight: "spree_variants.weight", variant_inventory: "luxire_stocks.virtual_count_on_hands", Mill: "luxire_products.mill", composition: "luxire_products.composition", technical_description: "luxire_products.technical_description", suitable_climate: "luxire_products.suitable_climates", GSM: "luxire_products.gsm", thickness: "luxire_products.thickness", stiffness: "luxire_products.stiffness", wash_care: "luxire_products.wash_care", sales_pitch: "luxire_products.sales_pitch"}
+    attributes = { title: "spree_products.name", type: "luxire_product_types.product_type", vendor: "luxire_vendor_masters.name", variant_price: "spree_prices.amount", variant_compare_at_price: "luxire_products.product_compare_at_price", variant_weight: "spree_variants.weight", variant_inventory: "luxire_stocks.virtual_count_on_hands", Mill: "luxire_products.mill", composition: "luxire_products.composition", technical_description: "luxire_products.technical_description", suitable_climate: "luxire_products.suitable_climates", GSM: "luxire_products.gsm",
+                   thickness: "luxire_products.thickness", stiffness: "luxire_products.stiffness", wash_care: "luxire_products.wash_care", sales_pitch: "luxire_products.sales_pitch",
+                   weave_type: "luxire_products.product_weave_type", design: "luxire_products.pattern"
+                 }
     operator = { equals: "= ", not_equals: "!= ", greater_than_equals_to: ">= ", less_than_equals_to: "<= ", greater_than: "> ", less_than: "< ", starts_with: "LIKE", ends_with: "LIKE", contains: "LIKE", not_contains: "NOT LIKE"}
     decimal_parameters = [:variant_price, :variant_compare_at_price, :variant_weight, :variant_inventory, :stiffness]
     integer_parametes = [:GSM]
-    case_in_sensitive_parameters = [:starts_with , :ends_with, :contains, :not_contains, :title]
+    case_in_sensitive_parameters = [:title, :type, :vendor, :Mill, :composition, :technical_description, :suitable_climate, :thickness, :wash_care, :sales_pitch, :weave_type, :design]
     attributes_keys = attributes.keys
     operator_keys = operator.keys
     #convert the keys of params to symbol
@@ -67,7 +70,7 @@ Spree::Api::TaxonsController.class_eval do
             when "contains", "not_contains"
               query_parameters = "'%#{value.downcase}%'"
             else
-              query_parameters = "'#{value}'"
+              query_parameters = "'#{value.downcase}'"
             end
         end
         if case_in_sensitive_parameters.include? property
@@ -81,7 +84,7 @@ Spree::Api::TaxonsController.class_eval do
     end
     query_string[0..match.length] = "And ("
     query_string[query_string.length] = ")"
-    products_sql = "SELECT spree_products.* FROM spree_products INNER JOIN luxire_products ON luxire_products.product_id = spree_products.id INNER JOIN luxire_products luxire_products_spree_products_join ON luxire_products_spree_products_join.product_id = spree_products.id INNER JOIN luxire_product_types ON luxire_product_types.id = luxire_products_spree_products_join.luxire_product_type_id INNER JOIN luxire_products luxire_products_spree_products_join_2 ON luxire_products_spree_products_join_2.product_id = spree_products.id INNER JOIN luxire_vendor_masters ON luxire_vendor_masters.id = luxire_products_spree_products_join_2.luxire_vendor_master_id INNER JOIN spree_variants ON spree_variants.product_id = spree_products.id AND spree_variants.is_master = 'f' AND spree_variants.deleted_at IS NULL INNER JOIN spree_variants variants_spree_products_join ON variants_spree_products_join.product_id = spree_products.id AND variants_spree_products_join.is_master = 'f' AND variants_spree_products_join.deleted_at IS NULL INNER JOIN spree_prices ON spree_prices.variant_id = variants_spree_products_join.id AND spree_prices.deleted_at IS NULL WHERE spree_products.deleted_at IS NULL AND spree_prices.currency = 'USD' "
+    products_sql = "SELECT spree_products.* FROM spree_products INNER JOIN luxire_products ON luxire_products.product_id = spree_products.id INNER JOIN luxire_products luxire_products_spree_products_join ON luxire_products_spree_products_join.product_id = spree_products.id INNER JOIN luxire_product_types ON luxire_product_types.id = luxire_products_spree_products_join.luxire_product_type_id INNER JOIN luxire_products luxire_products_spree_products_join_2 ON luxire_products_spree_products_join_2.product_id = spree_products.id INNER JOIN luxire_vendor_masters ON luxire_vendor_masters.id = luxire_products_spree_products_join_2.luxire_vendor_master_id INNER JOIN spree_variants ON spree_variants.product_id = spree_products.id AND spree_variants.is_master = 't' AND spree_variants.deleted_at IS NULL INNER JOIN spree_variants variants_spree_products_join ON variants_spree_products_join.product_id = spree_products.id AND variants_spree_products_join.is_master = 't' AND variants_spree_products_join.deleted_at IS NULL INNER JOIN spree_prices ON spree_prices.variant_id = variants_spree_products_join.id AND spree_prices.deleted_at IS NULL WHERE spree_products.deleted_at IS NULL AND spree_prices.currency = 'USD' "
     products =  Spree::Product.find_by_sql( products_sql + query_string )
     product_ids = products.collect {|p| p.id}
     params[:taxon][:product_ids] = product_ids
