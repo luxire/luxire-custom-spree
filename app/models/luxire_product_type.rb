@@ -19,6 +19,6 @@ class LuxireProductType < ActiveRecord::Base
                      content_type: { content_type: ["image/jpeg", "image/gif", "image/png"] }
 
   validates :product_type, presence: true, uniqueness: true
-  validates_presence_of :length_required
+  
 
 end
