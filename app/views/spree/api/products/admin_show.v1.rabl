@@ -18,7 +18,7 @@ node(:taxon_ids) { |p| p.taxon_ids }
 
 
 child :master => :master do
-  attributes :weight, :sku
+  attributes :id, :weight, :sku
   extends "spree/api/variants/small.v1_admin.rabl"
 
 end
