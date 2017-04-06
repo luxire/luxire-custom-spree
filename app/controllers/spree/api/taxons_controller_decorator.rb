@@ -32,12 +32,13 @@ Spree::Api::TaxonsController.class_eval do
     # Should add Tag in attributes hash once tag implementation is done
     attributes = { "Product title": "spree_products.name", "Product type": "luxire_product_types.product_type", "Product vendor": "luxire_vendor_masters.name", "Product price": "spree_prices.amount", "Compare at price": "luxire_products.product_compare_at_price", Weight: "spree_variants.weight", "Inventory stock": "luxire_stocks.virtual_count_on_hands", Mill: "luxire_products.mill", Composition: "luxire_products.composition", "Technical description": "luxire_products.technical_description", "Suitable climate": "luxire_products.suitable_climates", GSM: "luxire_products.gsm",
                Thickness: "luxire_products.thickness", Stiffness: "luxire_products.stiffness", "Wash care": "luxire_products.wash_care", "Sales pitch ": "luxire_products.sales_pitch",
-               "Weave type": "luxire_products.product_weave_type", Design: "luxire_products.pattern", Color: "luxire_products.product_color" 
+               "Weave type": "luxire_products.product_weave_type", Design: "luxire_products.pattern", Color: "luxire_products.product_color",
+            "no. of color": "luxire_products.no_of_color" 
              }
 operator = { "is equal to": "= ", "is not equal to": "!= ", "greater than equals to": ">= ", "lesser than equals to": "<= ", "is greater than": "> ", "is less than": "< ", "starts with": "LIKE", "ends with": "LIKE", contains: "LIKE", "does not contain": "NOT LIKE"}
 
     decimal_parameters = [:"Product price", :"Compare at price", :Weight, :"Inventory stock", :Stiffness]
-integer_parametes = [:GSM]
+integer_parametes = [:GSM, :"no. of color"]
 case_in_sensitive_parameters = [:"Product title", :"Product type", :"Product vendor", :Mill, :Composition, :"Technical description", :"Suitable climate", :Thickness, :"Wash care", :"Sales pitch ", :"Weave type", :Design, :Color]
     attributes_keys = attributes.keys
     operator_keys = operator.keys
