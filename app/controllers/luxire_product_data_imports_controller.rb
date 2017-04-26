@@ -1,19 +1,21 @@
 class LuxireProductDataImportsController < ApplicationController
 
-# before_action :validate_csv_format, only: [:import]
+before_action :validate_csv_format, only: [:import]
+after_action :send_error_list_to_admin, only: [:import], if: :buggy_record_length
 after_action :populate_product_price_in_multi_currency, only: [:import]
-# after_action :send_error_list_to_admin, only: [:import], if: :buggy_record_length
 
 respond_to :html, :json
 NOT_AVAILABLE = "NA"
 NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
-EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURRENT LUXIRE SITE HANDLE", "Image Src", "Image Src 1", "Image Src 2", "Image Src 3", "Image Src 4", "Image Src 5", "Image Src 6", "Title", "Types of weave", "No. of colors", "Color name", "Tag", "Material Composition with %", "Usage", "Design: Stripes/Checks etc", "Country of Origin", "Mill", "Seasons (Summer, Autumn, Winter, Spring)", "Construction ", "Count ", "Thickness", "Stiffness", "GSM", "Ounces", "GLM", "Wash Care", "Shrinkage", "Technical Description", "Sales Pitch", "Related/Similar Fabric", "Vendor", "Primary Usage", "Type", "Variant SKU", "Parent SKU", "Variant Grams", "Variant Inventory Tracker", "Inventory in meters if Inhouse", "Stock Storage", "If Mill Sourced, Current Luxire Stock", "Variant Inventory Qty LEAVE BLANK", "Variant Inventory Policy", "Variant Fulfillment Service", "Swatch price", "Variant Price", "Variant compare at price", "Variant Requires Shipping", "Variant Taxable", "Length Required", "Threshold", "Inventory Measuring Unit", "Fabric Width", "Swatch Image", "Published Date", "Variant Barcode", "Gift Card", "Transparency", "Wrinkle Resistance"]
+EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURRENT LUXIRE SITE HANDLE", "Image Src", "Image Src 1", "Image Src 2", "Image Src 3", "Image Src 4", "Image Src 5", "Image Src 6", "Title", "Types of weave", "No. of colors", "Color name", "Tag", "Material Composition with %", "Usage", "Design: Stripes/Checks etc", "Country of Origin", "Mill", "Seasons (Summer, Autumn, Winter, Spring)", "Construction ", "Count ", "Thickness", "Stiffness", "GSM", "Ounces", "GLM", "Wash Care", "Shrinkage", "Technical Description", "Sales Pitch", "Related/Similar Fabric", "Vendor", "Primary Usage", "Type", "Variant SKU", "Parent SKU", "Variant Grams", "Variant Inventory Tracker", "Inventory in meters if Inhouse", "Stock Storage", "If Mill Sourced, Current Luxire Stock", "Variant Inventory Qty LEAVE BLANK", "Variant Inventory Policy", "Variant Fulfillment Service", "Swatch price", "Variant Price", "Variant compare at price", "Variant Requires Shipping", "Variant Taxable", "Length Required", "Threshold", "Inventory Measuring Unit", "Fabric Width", "Swatch Image", "Published Date", "Variant Barcode", "Gift Card", "Transparency", "Wrinkle Resistance", "Image"]
 
     def import
       file = params[:file]
-      @count = 0
+      @count = 1
       @buggy_record = Hash.new
       @product_ids = []
+      @file_location = ENV['IMG_DIR']
+      @files = Dir.entries(@file_location)
       CSV.foreach(file.path, headers: true, encoding: 'ISO-8859-1') do |row|
           @count += 1
           begin
@@ -21,12 +23,10 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
             assign_values(row) if (row["Gift Card"].blank? || (row["Gift Card"].to_s.casecmp("false") == 0))
             check_for_images(row)
             Spree::Product.transaction do
-	     # byebug
               if row["Variant SKU"].blank? || row["Variant SKU"].casecmp(NOT_AVAILABLE) == 0
                 raise 'Variant SKU is not defined'
               else
                 luxire_stocks = LuxireStock.where('lower(parent_sku) = ?',row["Variant SKU"].downcase )
-  		#byebug
                 if luxire_stocks.empty?
                   @luxire_stock = LuxireStock.new
                   set_inventory(row)
@@ -92,7 +92,6 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
                end
 
                  associate_collection(row)
-		# byebug
             image_count = 0
             image_source = "Image Src"
             while(image_count < 7)
@@ -111,6 +110,10 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
                 raise "No image found for #{row[image_source]}"
               end
             end
+            unless row["Image"].blank? || row["Image"].casecmp(NOT_AVAILABLE) == 0
+              populate_image_from_file_system(get_image_name_from_file_system(row["Variant SKU"].strip))
+              populate_image_from_file_system(get_image_name_from_file_system(row["Image"].strip)) unless row["Image"] == row["Variant SKU"]
+            end
              @product_ids << @product.id
             end
           rescue Exception => exception
@@ -121,7 +124,7 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
       # Call the API to fetch data
       # unless @product_ids.empty?
       #   url = URI.parse(NODE_URL)
-      #   params = {"ids[]" =>@product_ids}
+      #   params = {"ids[]" =>@product_ids, token: "c75c98a6976bfc6c94edbfaf2bd189d646ef075122c3fd4f"}
       #   response = Net::HTTP.post_form(url,params)
       # if response.code == "200"
       #   logger.debug "Redis updated successfully"
@@ -313,7 +316,6 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
     end
 
     def associate_collection(row)
-      # byebug
 	    if ( !(row["Primary Usage"].casecmp(NOT_AVAILABLE) == 0) && !row["Primary Usage"].empty? )
           collections = row["Primary Usage"].split(",").map(&:strip)
           ids = []
@@ -354,10 +356,8 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
     end
 
     def set_variant_sku(row)
-     # byebug
       sku = row["Variant SKU"]
       variants = Spree::Variant.where("sku like ?","#{sku}%")
-      # byebug
       if variants.empty?
         @variant[:sku] = sku
       else
@@ -390,11 +390,37 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
     def populate_image(image)
       image_sources = image.split(",").map(&:strip)
       image_sources.each do |image_source|
+        begin
+          @image = Spree::Image.new
+          @image.attachment= URI.parse(image_source)
+          @image.viewable = @variant
+          @image.save!
+        rescue Exception
+          raise "Incorrect URL: #{image_source}"
+        end
+      end
+    end
+
+    def populate_image_from_file_system(image)
         @image = Spree::Image.new
-        @image.attachment= URI.parse(image_source)
+        @image.attachment= File.open("#{@file_location}/#{image}")
         @image.viewable = @variant
         @image.save!
+    end
+
+    def get_image_name_from_file_system(image)
+      image_name = @files.select{|f| f[/#{image}\./]}.first
+      if image_name.nil?
+        return "#{image}" if  File.file?("#{@file_location}/#{image}")
+        img_ext = ["jpg", "jpeg", "png"]
+        img_ext.each do |ext|
+	  return "#{image}.#{ext}" if  File.file?("#{@file_location}/#{image}.#{ext}")
       end
+      end
+      if image_name.nil?
+        raise "Unable to find the image. Please provide an image with name: #{image}"
+      end
+      image_name
     end
 
     def check_for_images(row)
@@ -410,6 +436,7 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
       else
         return
       end
+      return unless(row["Image"].blank? || row["Image"].casecmp(NOT_AVAILABLE) == 0)
       raise 'image can not be empty'
     end
 
@@ -421,7 +448,8 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
 
     def send_error_list_to_admin
       p = Axlsx::Package.new
-      sheet_path = "upload_reports/error_report_#{Time.now.to_i}.xlsx"
+      sheet_path = File.join Rails.root, "upload_reports", "error_report_#{Time.now.to_i}.xlsx"
+     # sheet_path = "upload_reports/error_report_#{Time.now.to_i}.xlsx"
       p.workbook do |wb|
         wb.add_worksheet(:name => "Error report") do |sheet|
           sheet.add_row(["Index", "Record", "Exception"])
@@ -445,15 +473,19 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
       end
     end
 
+# Validate the headers of the CSV file. If any of the headers is changed or removed
+# Don't allow the admin to upload CSV
     def validate_csv_format
       file = params[:file]
       headers = CSV.open(file.path, 'r') { |csv| csv.first }
-      unless (headers - EXPECTED_HEADER).empty?
+      unless (EXPECTED_HEADER - headers).empty?
         removed_columns = EXPECTED_HEADER - headers
         added_columns = headers - EXPECTED_HEADER
         response = {msg: "You have added or removed columns"}
+        # response = {msg: "You have removed some columns"}
         response[:added_column] = added_columns unless added_columns.nil?
-        response[:removed_columns] = removed_columns unless removed_columns.nil?
+        # response[:removed_columns] = removed_columns unless removed_columns.nil?
+        response[:removed_columns] = removed_columns
         render json: response.to_json, status: "422"
       end
     end
@@ -462,3 +494,4 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
       @buggy_record.length > 0
     end
 end
+

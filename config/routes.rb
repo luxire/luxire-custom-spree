@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+
+  post '/api/add_variant_image', to: 'spree/api/images#add_variant_image', defaults: {format: :json}
+  post '/api/add_variant_image_from_url', to: 'spree/api/images#add_variant_image_from_url', defaults: {format: :json}
+  delete '/api/delete_variant_image/:id', to: 'spree/api/images#delete_variant_image', defaults: {format: :json}
+  post '/api/add_multiple_lineitems', to: 'spree/api/checkouts#add_multiple_lineitems', defaults: {format: :json}
+
   post '/api/create_dynamic_taxon', to: 'spree/api/taxons#dynamic_collection_create', defaults: {format: :json}
   put '/api/change_line_item_status', to: 'luxire_line_items#change_line_item_status', defaults: {format: :json}
   post '/api/contact_us', to: 'luxire_users#contact_us', defaults: {format: :json}

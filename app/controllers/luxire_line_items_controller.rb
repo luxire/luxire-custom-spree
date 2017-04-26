@@ -1,5 +1,5 @@
 class LuxireLineItemsController < Spree::Api::BaseController
-  # before_action :authorize
+  before_action :authorize
   rescue_from Exception, with: :exception_handler
   helper Spree::Api::OrdersHelper
 

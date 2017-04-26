@@ -3,8 +3,8 @@ Spree::Api::TaxonsController.class_eval do
   def create
     authorize! :create, Spree::Taxon
     @taxon = Spree::Taxon.new(taxon_params)
-    @taxon.taxonomy_id = params[:taxonomy_id]
-    taxonomy = Spree::Taxonomy.find_by(id: params[:taxonomy_id])
+    @taxon.taxonomy_id = params[:taxon][:taxonomy_id]
+    taxonomy = Spree::Taxonomy.find_by(id: params[:taxon][:taxonomy_id])
 
     if taxonomy.nil?
       @taxon.errors[:taxonomy_id] = I18n.t(:invalid_taxonomy_id, scope: 'spree.api')
@@ -12,9 +12,9 @@ Spree::Api::TaxonsController.class_eval do
     end
 
     @taxon.parent_id = taxonomy.root.id unless params[:taxon][:parent_id]
-    product_ids = params[:taxon][:product_ids]
-    unless product_ids.nil?
-      @taxon.product_ids= product_ids
+    @product_ids = params[:taxon][:product_ids]
+    unless @product_ids.nil?
+      @taxon.product_ids= @product_ids
     end
     if @taxon.save
       respond_with(@taxon, status: 201, default_template: :show)
@@ -30,23 +30,25 @@ Spree::Api::TaxonsController.class_eval do
     match_policy = {all: "and", any: "or"}
     # Time being removing tag from attributes hash.
     # Should add Tag in attributes hash once tag implementation is done
-    attributes = { title: "spree_products.name", type: "luxire_product_types.product_type", vendor: "luxire_vendor_masters.name", variant_price: "spree_prices.amount", variant_compare_at_price: "luxire_products.product_compare_at_price", variant_weight: "spree_variants.weight", variant_inventory: "luxire_stocks.virtual_count_on_hands", Mill: "luxire_products.mill", composition: "luxire_products.composition", technical_description: "luxire_products.technical_description", suitable_climate: "luxire_products.suitable_climates", GSM: "luxire_products.gsm",
-                   thickness: "luxire_products.thickness", stiffness: "luxire_products.stiffness", wash_care: "luxire_products.wash_care", sales_pitch: "luxire_products.sales_pitch",
-                   weave_type: "luxire_products.product_weave_type", design: "luxire_products.pattern"
-                 }
-    operator = { equals: "= ", not_equals: "!= ", greater_than_equals_to: ">= ", less_than_equals_to: "<= ", greater_than: "> ", less_than: "< ", starts_with: "LIKE", ends_with: "LIKE", contains: "LIKE", not_contains: "NOT LIKE"}
-    decimal_parameters = [:variant_price, :variant_compare_at_price, :variant_weight, :variant_inventory, :stiffness]
-    integer_parametes = [:GSM]
-    case_in_sensitive_parameters = [:title, :type, :vendor, :Mill, :composition, :technical_description, :suitable_climate, :thickness, :wash_care, :sales_pitch, :weave_type, :design]
+    attributes = { "Product title": "spree_products.name", "Product type": "luxire_product_types.product_type", "Product vendor": "luxire_vendor_masters.name", "Product price": "spree_prices.amount", "Compare at price": "luxire_products.product_compare_at_price", Weight: "spree_variants.weight", "Inventory stock": "luxire_stocks.virtual_count_on_hands", Mill: "luxire_products.mill", Composition: "luxire_products.composition", "Technical description": "luxire_products.technical_description", "Suitable climate": "luxire_products.suitable_climates", GSM: "luxire_products.gsm",
+               Thickness: "luxire_products.thickness", Stiffness: "luxire_products.stiffness", "Wash care": "luxire_products.wash_care", "Sales pitch ": "luxire_products.sales_pitch",
+               "Weave type": "luxire_products.product_weave_type", Design: "luxire_products.pattern", Color: "luxire_products.product_color",
+            "no. of color": "luxire_products.no_of_color" 
+             }
+operator = { "is equal to": "= ", "is not equal to": "!= ", "greater than equals to": ">= ", "lesser than equals to": "<= ", "is greater than": "> ", "is less than": "< ", "starts with": "LIKE", "ends with": "LIKE", contains: "LIKE", "does not contain": "NOT LIKE"}
+
+    decimal_parameters = [:"Product price", :"Compare at price", :Weight, :"Inventory stock", :Stiffness]
+integer_parametes = [:GSM, :"no. of color"]
+case_in_sensitive_parameters = [:"Product title", :"Product type", :"Product vendor", :Mill, :Composition, :"Technical description", :"Suitable climate", :Thickness, :"Wash care", :"Sales pitch ", :"Weave type", :Design, :Color]
     attributes_keys = attributes.keys
     operator_keys = operator.keys
     #convert the keys of params to symbol
     # params.symbolize_keys!
-    match = params[:match]
+    match = params[:taxon][:match]
     render_response("Match policy is not specified") and return if match.nil?
-    match = params[:match].to_sym
+    match = params[:taxon][:match].to_sym
     render_response("Unknown match policy") and return if match_policy[match].nil?
-    rules = params[:rules]
+    rules = params[:taxon][:rules]
     query_string = ""
     query_parameters = ""
     begin

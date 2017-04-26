@@ -3,7 +3,7 @@ class ProductUploadMailer < ApplicationMailer
     attachments['error.xlsx'] = File.read(attachment_path)
     @uploaded_product = count - buggy_record.length
     mail(:to => Spree.admin_email,
-         :subject =>"Product upload status"
+         :subject =>"Product upload status #{Time.current}"
         )
   end
 
