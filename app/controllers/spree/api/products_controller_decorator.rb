@@ -43,22 +43,24 @@ helper LuxireStyleMastersHelper
       headers['Surrogate-Key'] = "product_id=1"
       respond_with(@product)
     end
+
     def index
      if params[:ids]
         @products = product_scope.where(id: params[:ids].split(",").flatten)
      else
-        @products = product_scope.ransack(params[:q]).result
+        # @products = product_scope.ransack(params[:q]).result
+        @products = product_scope.ransack(params[:q]).result.includes(:luxire_stock)
      end
 
      @products = @products.distinct.page(params[:page]).per(params[:per_page])
      expires_in 15.minutes, :public => true
      headers['Surrogate-Control'] = "max-age=#{15.minutes}"
 
-     unless params[:q].nil? || params[:q].empty?
-        render 'search.v1.rabl'
-     else
+#     unless params[:q].nil? || params[:q].empty?
+ #       render 'search.v1.rabl'
+  #   else
         render 'index.v1.rabl'
-     end
+#     end
     end
 private
   def product_params
