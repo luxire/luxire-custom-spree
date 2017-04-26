@@ -11,7 +11,7 @@ image_url = ENV['CDN'] + "luxire/images/taxons/"
 
     child :children => :taxons do |taxon|
       attributes *taxon_attributes
-      node(:icon) {|i| "#{image_url}#{i.id}/normal/#{i.icon_file_name}" }
+      node(:icon) {|i| "#{image_url}#{i.id}/normal/#{i.icon_file_name}" unless i.icon_file_name.nil? }
     end
   end
 end
