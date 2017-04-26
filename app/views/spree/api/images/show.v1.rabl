@@ -1,4 +1,5 @@
 object @image
+node(:id) {|image| image.id}
 image_url = ENV['CDN'] + "luxire/images/products/"
 Spree::Image.attachment_definitions[:attachment][:styles].each do |k,v|
   url_name = "#{k}_url"
