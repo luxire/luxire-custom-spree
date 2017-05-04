@@ -7,4 +7,4 @@ node do |t|
     attributes *taxon_attributes
   end
 end
-node(:product_ids){ @product_ids }
+node(:product_ids){ |t| t.products.ids }
