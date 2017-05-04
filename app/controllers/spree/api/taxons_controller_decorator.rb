@@ -1,5 +1,8 @@
 Spree::Api::TaxonsController.class_eval do
 
+  wrap_parameters format: [:json, :xml, :url_encoded_form, :multipart_form]
+  wrap_parameters :taxon, include: [:name, :pretty_name, :description, :taxonomy_id, :rules, :match, :icon, :product_ids]
+
   def create
     authorize! :create, Spree::Taxon
     @taxon = Spree::Taxon.new(taxon_params)
@@ -16,6 +19,9 @@ Spree::Api::TaxonsController.class_eval do
     unless @product_ids.nil?
       @taxon.product_ids= @product_ids
     end
+
+#    @taxon.icon = params[:taxon][:icon] if params[:taxon][:icon]
+
     if @taxon.save
       respond_with(@taxon, status: 201, default_template: :show)
     else
@@ -51,6 +57,7 @@ case_in_sensitive_parameters = [:"Product title", :"Product type", :"Product ven
     rules = params[:taxon][:rules]
     query_string = ""
     query_parameters = ""
+    rules = JSON.parse(rules)
     begin
       rules.each do |rule|
         rule = rule.symbolize_keys
@@ -65,11 +72,11 @@ case_in_sensitive_parameters = [:"Product title", :"Product type", :"Product ven
           query_parameters = "#{Integer(value)}"
         else
           case criteria.to_s
-            when "starts_with"
+            when "starts with"
               query_parameters = "'#{value.downcase}%'"
-            when "ends_with"
+            when "ends with"
               query_parameters = "'%#{value.downcase}'"
-            when "contains", "not_contains"
+            when "contains", "does not contain"
               query_parameters = "'%#{value.downcase}%'"
             else
               query_parameters = "'#{value.downcase}'"
