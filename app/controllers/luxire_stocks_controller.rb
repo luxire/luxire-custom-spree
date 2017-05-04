@@ -1,10 +1,14 @@
 class LuxireStocksController < Spree::Api::BaseController
+  before_action :authorize
   before_action :set_luxire_stock, only: [:show, :edit, :update, :destroy]
+  
 
   # GET /luxire_stocks
   # GET /luxire_stocks.json
   def index
-    @luxire_stocks = LuxireStock.all
+     per_page = params[:per_page] || 25
+     page_count =  params[:page_count] || 1
+    @luxire_stocks = LuxireStock.page(page_count).per(per_page)
   end
 
   # GET /luxire_stocks/1
@@ -23,7 +27,7 @@ class LuxireStocksController < Spree::Api::BaseController
 
   # POST /luxire_stocks
   # POST /luxire_stocks.json
-  def create
+  def create 
     @luxire_stock = LuxireStock.new(luxire_stock_params)
 
     respond_to do |format|
@@ -114,4 +118,7 @@ end
      @luxire_stock = LuxireStock.where(parent_sku: sku).first
    end
 
+   def authorize
+     authorize! params[:action].to_sym, LuxireStock
+   end
 end
