@@ -2,7 +2,14 @@ class CustomOrdersController < Spree::Api::BaseController
 
   helper Spree::Api::OrdersHelper
 
-  def get_order
+    def recent_completed_orders
+      authorize! :index, Spree::Order
+      @orders = Spree::Order.where("spree_orders.completed_at IS NOT NULL").order("completed_at desc").page(params[:page]).per(params[:per_page])
+      render 'spree/api/orders/index.v1.rabl'
+    end
+  
+
+   def get_order
       spree_api_token = request.headers["X-Spree-Token"] || params[:token]
        if spree_api_token.nil? || spree_api_token.empty?
          guest_token = cookies.signed[:guest_token]
@@ -42,7 +49,7 @@ class CustomOrdersController < Spree::Api::BaseController
 
 
   def change_order_status
-    states = ["Order sheet generated", "Processing", "Shipped", "Delivered"]
+    states = ["Order received" ,"Order sheet generated", "Processing", "Shipped", "Delivered"]
     @order = Spree::Order.find(params[:order][:id])
     @luxire_order = @order.luxire_order
     unless(states.include? params[:order][:status])
@@ -64,7 +71,7 @@ class CustomOrdersController < Spree::Api::BaseController
     else
       if(states.find_index(requested_status) == (states.find_index(current_status) + 1))
         @luxire_order.fulfillment_status = requested_status
-	@luxire_order.status_changed_time = Time.current
+	#@luxire_order.status_changed_time = Time.current
       elsif(states.find_index(requested_status) == states.find_index(current_status))
         response= {msg: "Current and requested status is same"}
         render json: response.to_json, status: "422"
