@@ -3,6 +3,7 @@ class LuxireProductTypesController < Spree::Api::BaseController
   wrap_parameters :luxire_product_type, include: [:id, :product_type, :description, :measurement_type_ids, :image]
 
   before_action :set_luxire_product_type, only: [:show, :edit, :update, :destroy, :update_with_position]
+  before_action :auth
   require 'ostruct'
 
   # GET /luxire_product_types
@@ -195,4 +196,7 @@ class LuxireProductTypesController < Spree::Api::BaseController
         end
       end
     end
+ def auth
+   authorize! :LuxireProductType, params[:action]
+ end
 end
