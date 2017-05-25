@@ -74,12 +74,13 @@ Spree::PaypalController.class_eval do
      # order = @spree_order || raise(ActiveRecord::RecordNotFound)
      order = @spree_order
      order.payments.create!({
-       :source => Spree::PaypalExpressCheckout.create({
+       :source => Spree::PaypalExpressCheckout.create!({
          :token => params[:token],
          :payer_id => params[:PayerID]
        }),
        :amount => order.total,
-       :payment_method => payment_method
+       :payment_method => payment_method,
+       :response_code =>  params[:token]
      })
      order.next
      if order.complete?
