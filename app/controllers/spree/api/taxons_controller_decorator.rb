@@ -15,7 +15,12 @@ Spree::Api::TaxonsController.class_eval do
     end
 
     @taxon.parent_id = taxonomy.root.id unless params[:taxon][:parent_id]
-    @product_ids = params[:taxon][:product_ids]
+
+    if params[:taxon][:product_ids].class.to_s == "String"
+      @product_ids = JSON.parse(params[:taxon][:product_ids])
+    else
+      @product_ids = params[:taxon][:product_ids]
+    end
     unless @product_ids.nil?
       @taxon.product_ids= @product_ids
     end
