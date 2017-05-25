@@ -95,7 +95,7 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
             image_count = 0
             image_source = "Image Src"
             while(image_count < 7)
-              image_source ="Image Src{image_count}" unless image_count == 0
+              image_source ="Image Src #{image_count}" unless image_count == 0
               begin
                 if ( !row[image_source].blank? && !(row[image_source].casecmp(NOT_AVAILABLE) == 0))
                   image = row[image_source]
