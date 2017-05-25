@@ -4,6 +4,13 @@ attr_accessor :disable_flag
 validates :expiry_date, presence: true
 validates :disable_enable_notes, presence: true, if: :disable_true
 
+
+   def generate_code
+      until self.code.present? && self.class.where(code: self.code).count == 0
+        self.code = Digest::SHA1.hexdigest([Time.now, rand].join)[0...8]
+      end
+    end
+
   def disable_true
     disable_flag
   end
