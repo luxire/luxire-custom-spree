@@ -1,4 +1,4 @@
-class LuxireProductDataImportsController < ApplicationController
+class LuxireProductDataImportsController < Spree::Api::BaseController
 
 before_action :validate_csv_format, only: [:import]
 after_action :send_error_list_to_admin, only: [:import], if: :buggy_record_length
@@ -10,6 +10,7 @@ NODE_URL = "http://luxire.cloudhop.in:9090/api/redis/product_sync"
 EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURRENT LUXIRE SITE HANDLE", "Image Src", "Image Src 1", "Image Src 2", "Image Src 3", "Image Src 4", "Image Src 5", "Image Src 6", "Title", "Types of weave", "No. of colors", "Color name", "Tag", "Material Composition with %", "Usage", "Design: Stripes/Checks etc", "Country of Origin", "Mill", "Seasons (Summer, Autumn, Winter, Spring)", "Construction ", "Count ", "Thickness", "Stiffness", "GSM", "Ounces", "GLM", "Wash Care", "Shrinkage", "Technical Description", "Sales Pitch", "Related/Similar Fabric", "Vendor", "Primary Usage", "Type", "Variant SKU", "Parent SKU", "Variant Grams", "Variant Inventory Tracker", "Inventory in meters if Inhouse", "Stock Storage", "If Mill Sourced, Current Luxire Stock", "Variant Inventory Qty LEAVE BLANK", "Variant Inventory Policy", "Variant Fulfillment Service", "Swatch price", "Variant Price", "Variant compare at price", "Variant Requires Shipping", "Variant Taxable", "Length Required", "Threshold", "Inventory Measuring Unit", "Fabric Width", "Swatch Image", "Published Date", "Variant Barcode", "Gift Card", "Transparency", "Wrinkle Resistance", "Image"]
 
     def import
+      authorize! :create, Spree::Product
       file = params[:file]
       @count = 1
       @buggy_record = Hash.new
@@ -146,6 +147,7 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
     end
 
     def destroy_all_product
+      authorize! :destroy, Spree::Product.first
       begin
           Spree::Product.destroy_all
         rescue Exception => e
