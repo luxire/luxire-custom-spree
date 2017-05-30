@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+ 
+  put '/api/changedPositionBasedOnCondition', to: 'spree/api/classifications#updatePositionBasedOnCondition', defaults: {format: :json} 
+  get '/api/recent_completed_orders', to: 'custom_orders#recent_completed_orders', defaults: {format: :json}
+  put 'api/custom_refund/refund', to: 'custom_refund#refund', defaults: {format: :json}
+
+  get '/destroy_all_product', to: 'luxire_product_data_imports#destroy_all_product'
 
   post '/api/add_variant_image', to: 'spree/api/images#add_variant_image', defaults: {format: :json}
   post '/api/add_variant_image_from_url', to: 'spree/api/images#add_variant_image_from_url', defaults: {format: :json}
@@ -50,8 +56,8 @@ Rails.application.routes.draw do
 
   get 'template_field_finder/shipping_update', defaults: {format: :json}
 
-   put 'api/checkouts/apply_gift_code', to: 'spree/api/orders#apply_gift_code',  defaults: {format: :json}
-   get 'api/admin/products',to: 'spree/api/products#admin_index'
+  put 'api/checkouts/apply_gift_code', to: 'spree/api/orders#apply_gift_code',  defaults: {format: :json}
+  get 'api/admin/products',to: 'spree/api/products#admin_index'
    get 'api/admin/products/:id',to: 'spree/api/products#admin_show'
 
   resources :standard_sizes, defaults: {format: :json}
