@@ -16,8 +16,10 @@ class CustomOrdersController < Spree::Api::BaseController
          @order = Spree::Order.where(guest_token: guest_token,completed_at: nil,user_id: nil).last
        else
         user = Spree::User.find_by_spree_api_key(spree_api_token)
-	      @previous_order = Spree::Order.where(user_id: user.id,completed_at: nil).offset(1).last
-        @order = Spree::Order.where(user_id: user.id,completed_at: nil).last
+
+	@previous_order = Spree::Order.where("user_id = ? and completed_at is ? and state != ?",user.id, nil, "complete").offset(1).last
+	@order = Spree::Order.where("user_id = ? and completed_at is ? and state != ?",user.id, nil, "complete").last
+
 
           unless(@previous_order.nil? || @order.nil? || @order.state != "cart")
             if @previous_order.currency != @order.currency
