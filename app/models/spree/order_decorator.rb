@@ -37,7 +37,12 @@ def finalize!
   updater.update_payment_state
   shipments.each do |shipment|
     shipment.update!(self)
-    shipment.finalize!
+    begin
+     shipment.finalize!
+    rescue Exception => e
+     logger.error "error while finalizing shipments and the reason is #{e.message}"
+     logger.error "complete backtrace is  #{e.backtrace}"
+    end
   end
 
   updater.update_shipment_state
