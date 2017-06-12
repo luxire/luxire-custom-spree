@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
  
+  get 'health_check/status'
+
   put '/api/changedPositionBasedOnCondition', to: 'spree/api/classifications#updatePositionBasedOnCondition', defaults: {format: :json} 
   get '/api/recent_completed_orders', to: 'custom_orders#recent_completed_orders', defaults: {format: :json}
   put 'api/custom_refund/refund', to: 'custom_refund#refund', defaults: {format: :json}
