@@ -26,14 +26,17 @@ class CustomOrdersController < Spree::Api::BaseController
                @previous_order = Currency.new.update_order_currency(@previous_order, @order.currency)
                @previous_order.save!
             end
-  	        @previous_order.line_items.each do |line_item|
+
+            @previous_order.line_items.each do |line_item|
               line_item.order_id = @order.id
               line_item.save!
             end
+=begin
             @previous_order.adjustments.each do |adjustment|
               adjustment.order_id = @order.id
               adjustment.save!
             end
+=end
             @previous_order.completed_at = Time.now
             @previous_order.user_id = nil
             @previous_order.save!
