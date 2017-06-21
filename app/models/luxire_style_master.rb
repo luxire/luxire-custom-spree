@@ -6,6 +6,9 @@ class LuxireStyleMaster < ActiveRecord::Base
   has_many :products, class_name: 'Spree::Product', through: :luxire_products
   has_many :luxire_style_master_images , class_name: "LuxireStyleMasterImage"
   validate :uniqueness_of_position
+  
+  after_save :touch_products
+  after_destroy :touch_products
 
   has_attached_file :image,  styles: { small: "64X64", medium: "128X128", large: "256X256" },
                              default_style: :small,
@@ -24,5 +27,9 @@ class LuxireStyleMaster < ActiveRecord::Base
       end
     end
   end
+
+ def touch_products
+    products.update_all updated_at: Time.now
+ end
 
 end

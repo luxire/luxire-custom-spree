@@ -7,9 +7,11 @@ class LuxireProductType < ActiveRecord::Base
   has_many :product_measurement_types, class_name: "ProductMeasurementType"
   has_many :measurement_types, through: :product_measurement_types
   has_many :standard_sizes, class_name: "StandardSize", :dependent => :destroy
+  after_save :touch_products
+  after_destroy :touch_products
 
-
-   has_attached_file :image,  styles: { small: "128x128" },
+     
+  has_attached_file :image,  styles: { small: "128x128" },
                           default_style: :small,
                           url: '/luxire/images/product_type/:id/:style/:basename.:extension',
                           path: 'luxire/images/product_type/:id/:style/:basename.:extension',
@@ -20,5 +22,7 @@ class LuxireProductType < ActiveRecord::Base
 
   validates :product_type, presence: true, uniqueness: true
   
-
+  def touch_products
+    products.update_all updated_at: Time.now
+  end
 end
