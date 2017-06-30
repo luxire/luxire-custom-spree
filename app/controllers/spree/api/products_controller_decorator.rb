@@ -38,6 +38,7 @@ helper LuxireStyleMastersHelper
 
     def admin_show
       @product = find_product(params[:id])
+      @shipping_methods = Spree::ShippingCategory.all
       expires_in 15.minutes, :public => true
       headers['Surrogate-Control'] = "max-age=#{15.minutes}"
       headers['Surrogate-Key'] = "product_id=1"
@@ -62,6 +63,32 @@ helper LuxireStyleMastersHelper
         render 'index.v1.rabl'
 #     end
     end
+
+
+    def update
+      @product = find_product(params[:id])
+      authorize! :update, @product
+      priceFlag = false;
+      if params[:product][:price] && @product.price != params[:product][:price].to_f
+        priceFlag = true;
+      end
+
+      options = { variants_attrs: variants_params, options_attrs: option_types_params }
+      @product = Spree::Core::Importer::Product.new(@product, product_params, options).update
+
+      if @product.errors.empty?
+        if priceFlag
+          product_ids = []
+          product_ids << @product.id
+          Currency.new.update_product_currency(product_ids)
+        end
+        respond_with(@product.reload, :status => 200, :default_template => :show)
+      else
+        invalid_resource!(@product)
+      end
+    end
+
+
 private
   def product_params
     # Get all the column names from luxire_product model. Model.column return an array
