@@ -7,7 +7,9 @@ class LuxireStock < ActiveRecord::Base
   after_destroy :touch_products
 
   validates :parent_sku, presence: true, uniqueness: {case_sensitive: true}
-  
+  validates :threshold, presence: true
+  validates :threshold, numericality: true, :if => lambda {|object| object.threshold.present?}
+
   def touch_products
     products.update_all updated_at: Time.now
   end
