@@ -29,7 +29,7 @@ child :variants => :variants do
 end
 
   child :luxire_stock => :luxire_stock do
-    attributes  :parent_sku, :virtual_count_on_hands, :physical_count_on_hands, :rack, :thresold, :measuring_unit, :backorderable, :in_house, :fabric_width
+    attributes  :parent_sku, :virtual_count_on_hands, :physical_count_on_hands, :rack, :threshold, :measuring_unit, :backorderable, :in_house, :fabric_width
   end
 
   child :luxire_product => :luxire_product do
@@ -45,4 +45,8 @@ end
 
   child :luxire_product_type => :product_type do
     attributes :id, :product_type
+  end
+
+  child @shipping_methods => :shipping_methods do
+    attributes :id, :name
   end
