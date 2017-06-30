@@ -1,5 +1,6 @@
 Spree::Api::ImagesController.class_eval do
   before_action :authorize_for_create, only: [:add_variant_image, :add_variant_image_from_url]
+  before_action :check_image_count, only: :delete_variant_image
 
          def add_variant_image
            raw_image = params[:image]
@@ -33,7 +34,6 @@ Spree::Api::ImagesController.class_eval do
 
          def delete_variant_image
            authorize! :destroy, Spree::Image
-           @image = Spree::Image.find(params[:id])
            if @image.destroy
              response = {msg: "Image successfully Deleted"}
              render json: response.to_json, status: 200
@@ -51,5 +51,15 @@ Spree::Api::ImagesController.class_eval do
 
     def authorize_for_create
       authorize! :create, Spree::Image
+    end
+
+#  Do not allow to delete the image if the variant has only one image
+    def check_image_count
+      @image = Spree::Image.find(params[:id])
+      variant = @image.viewable
+      unless variant.is_master? && variant.images.count > 1
+        response = {msg: "#{variant.name} has only one image and atleast one image is mandatory."}
+        render json: response.to_json, status: 422
+      end
     end
 end
