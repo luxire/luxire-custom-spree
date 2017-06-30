@@ -1,5 +1,6 @@
 Spree::PaypalController.class_eval do
   respond_to :html, :json
+  before_action :check_luxire_inventory, only: :express
 
    def express
      @spree_order = Spree::Order.find(params[:order_id])
@@ -224,4 +225,19 @@ Spree::PaypalController.class_eval do
    #  @decrypted_back = crypt.decrypt_and_verify(encrypted_data)
    # end
 
+     def check_luxire_inventory
+       line_item = params[:line_item]
+       variant = Spree::Variant.find(line_item["variant_id"])
+       product = variant.product
+       length_required_per_product = product.luxire_product.length_required
+       quantity = line_item["quantity"]
+       stock = product.luxire_stock
+       unless stock.backorderable
+         total_length_required = length_required_per_product * quantity
+         if(stock.virtual_count_on_hands - total_length_required < 0)
+           response = {msg: "#{product.name} is out of stock"}
+           render json: response.to_json, status: 422
+         end
+       end
+     end
  end

@@ -1,4 +1,5 @@
 Spree::Api::LineItemsController.class_eval do
+  before_action :check_luxire_inventory, only: [ :create, :update ]
 
   def create
     variant = Spree::Variant.find(params[:line_item][:variant_id])
@@ -21,6 +22,22 @@ Spree::Api::LineItemsController.class_eval do
 private
   def line_item_params
     params.require(:line_item).permit!
+  end
+
+  def check_luxire_inventory
+    line_item = params[:line_item]
+    variant = Spree::Variant.find(line_item["variant_id"])
+    product = variant.product
+    length_required_per_product = product.luxire_product.length_required
+    quantity = line_item["quantity"]
+    stock = product.luxire_stock
+    unless stock.backorderable
+      total_length_required = length_required_per_product * quantity
+      if(stock.virtual_count_on_hands - total_length_required < 0)
+        response = {msg: "#{product.name} is out of stock"}
+        render json: response.to_json, status: 422
+      end
+    end
   end
 
 end
