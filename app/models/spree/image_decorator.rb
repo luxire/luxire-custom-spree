@@ -6,4 +6,13 @@ Spree::Image.class_eval do
                      path: 'luxire/images/products/:id/:style/:basename.:extension',
                      convert_options: { all: '-strip -auto-orient -colorspace sRGB -depth 300'}
 # large: " -gravity center -resize '346.906x346.906+0+0'", product: " -gravity southeast" }
+
+after_save :touch_products
+after_destroy :touch_products
+
+  def touch_products
+    if self.viewable.class == Spree::Variant
+      self.viewable.product.touch
+    end
+  end
 end
