@@ -34,23 +34,43 @@ module Spree
     end
 
     def show_personalize_data(luxire_line_item)
-      response_string = ""
-      personalize_data  = luxire_line_item.personalize_data
-      personalize_data.keys.each do |personalize_key|
-          response_string +=  " <tr>  <td>  #{personalize_key}: </td>"
-          personalize_obj = personalize_data[personalize_key]
-          @res = ""
-          print_nested_value(personalize_obj)
-          @res = @res[0...@res.length-1]
-          response_string +=  " <td>" + @res + " </td>"
-          (0...td_count(response_string)).each do
-            response_string +="<td> &nbsp; </td>"
-          end
-          response_string += "</tr>"
-       end
-      response_string = "<tr><td colspan=3> Your Personalization details  </td></tr>" + response_string
-      response_string.html_safe
+        response_string = ""
+        personalize_data  = luxire_line_item.personalize_data
+        order = luxire_line_item.line_item.order
+        personalize_data.keys.each do |personalize_key|
+            response_string +=  " <tr>  <td>  #{personalize_key}: </td>"
+            if personalize_key == 'Monogram'
+              personalize_obj = personalize_data[personalize_key]
+              @res = ""
+              print_nested_value(personalize_obj)
+              @res = @res[0...@res.length-1]
+              response_string +=  " <td>" + @res + " </td>"
+              (0...td_count(response_string)).each do
+                response_string +="<td> &nbsp; </td>"
+              end
+              response_string += "</tr>"
+            else
+              counter = personalize_data[personalize_key].keys.length
+              personalize_data[personalize_key].keys.each do |personalization_attributes|
+                response_string +=  " <td>" + personalization_attributes + " </td>"
+                if personalization_attributes["cost"] && personalization_attributes["cost"][order.currency]
+                  cost = Money.new(personalization_attributes["cost"][order.currency], currency: order.currency).to_html
+                else
+                  cost = Money.new(0, currency: order.currency).to_html
+                end
+                response_string +=  " <td>" + cost + " </td>"
+                response_string += "</tr>"
+                counter -= 1
+                if counter > 0
+                  response_string += "<tr> <td> &nbsp; </td>"
+                end
+              end
+            end
+        end
+        response_string = "<tr><td colspan=3> Your Personalization details  </td></tr>" + response_string
+        response_string.html_safe
     end
+
 
     def show_body_measurements(luxire_line_item)
       response_string = ""
