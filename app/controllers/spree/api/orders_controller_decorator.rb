@@ -1,5 +1,6 @@
 Spree::Api::OrdersController.class_eval do
   skip_before_action :find_order, only: :apply_gift_code
+  before_action :check_luxire_inventory, only: :create
 
   def create
     # byebug
@@ -87,4 +88,22 @@ private
     end
   end
 
+    def check_luxire_inventory
+      line_items = params[:order][:line_items]
+      return unless line_items
+      line_items.each do |line_item|
+        variant = Spree::Variant.find(line_item["variant_id"])
+        product = variant.product
+        length_required_per_product = product.luxire_product.length_required
+        quantity = line_item["quantity"]
+        stock = product.luxire_stock
+        unless stock.backorderable
+          total_length_required = length_required_per_product * quantity
+          if(stock.virtual_count_on_hands - total_length_required < 0)
+            response = {msg: "#{product.name} is out of stock"}
+            render json: response.to_json, status: 422
+          end
+        end
+      end
+    end
 end
