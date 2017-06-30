@@ -6,5 +6,7 @@ Spree::Product.class_eval do
       has_one :luxire_stock, class_name: "LuxireStock", through: :luxire_product
       has_many :standard_sizes, class_name: "StandardSize", through: :luxire_product_type
 
+      validates :available_on, presence: true
+
       accepts_nested_attributes_for :luxire_product
 end
