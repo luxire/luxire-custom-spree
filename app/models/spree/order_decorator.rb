@@ -25,6 +25,8 @@ def finalize_with_gift_card!
     unless gift_card.line_item.currency == self.currency
       amount = Currency.new.get_price_for_other_currency(amount, self.currency, gift_card.line_item.currency)
     end
+    # Truncate amount to two digits after decimal
+    amount = Integer(amount * 100) / Float(100)
     adjustment.source.debit(amount, self)
   end
 end
