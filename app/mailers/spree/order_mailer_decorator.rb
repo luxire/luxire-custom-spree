@@ -4,7 +4,15 @@ Spree::OrderMailer.class_eval do
     filter
     subject = (resend ? "[#{Spree.t(:resend).upcase}] " : '')
     subject += "#{Spree::Store.current.name} #{Spree.t('order_mailer.confirm_email.subject')} ##{@order.number}"
-    mail(to: @order.email, bcc: "suman@luxire.com",from: from_address, subject: subject)
+    if !ENV['BCC'].blank? && !ENV['CC'].blank?
+      mail(to: @order.email, bcc: ENV['BCC'], cc: ['CC'],from: from_address, subject: subject, reply_to: ENV['REPLY_TO'])
+    elsif ENV['BCC'].blank? && !ENV['CC'].blank?
+      mail(to: @order.email, cc: ['CC'],from: from_address, subject: subject, reply_to: ENV['REPLY_TO'])
+    elsif ENV['CC'].blank? && !ENV['BCC'].blank?
+      mail(to: @order.email, bcc: ENV['BCC'] ,from: from_address, subject: subject, reply_to: ENV['REPLY_TO'])
+    else
+      mail(to: @order.email ,from: from_address, subject: subject, reply_to: ENV['REPLY_TO'])
+    end
   end
 
   def check_gift_card(order, gift_card_details, line_item)
