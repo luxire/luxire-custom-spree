@@ -8,7 +8,12 @@
   <tr>
     <td>
       <p class="lede">
-        <%= Spree.t('order_mailer.confirm_email.dear_customer') %>
+        <%= if @order.user && @order.user.luxire_customer && @order.user.luxire_customer.first_name
+               "Dear " + @order.user.luxire_customer.first_name + " " + @order.user.luxire_customer.last_name + ","
+            else
+               "Dear " + @order.billing_address.firstname + " " +   @order.billing_address.lastname + ","
+            end
+          %>
       </p>
       <p>
         <%= Spree.t('order_mailer.confirm_email.instructions') %>
