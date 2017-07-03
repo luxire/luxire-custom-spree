@@ -24,3 +24,6 @@ en:
   spree:
     personalization_cost: "Personalization Cost"
     personalization_cost_calculator: 'Personalization Cost Calculator'
+    order_mailer:
+      confirm_email:
+        instructions: 'Please review and retain the following order information for your records. Please do let us know if any order details has not been captured.'
