@@ -226,18 +226,21 @@ Spree::PaypalController.class_eval do
    # end
 
      def check_luxire_inventory
-       line_item = params[:line_item]
-       variant = Spree::Variant.find(line_item["variant_id"])
-       product = variant.product
-       length_required_per_product = product.luxire_product.length_required
-       quantity = line_item["quantity"]
-       stock = product.luxire_stock
-       unless stock.backorderable
-         total_length_required = length_required_per_product * quantity
-         if(stock.virtual_count_on_hands - total_length_required < 0)
-           response = {msg: "#{product.name} is out of stock"}
-           render json: response.to_json, status: 422
-         end
-       end
+       order = Spree::Order.find(params[:order_id])
+       line_items = order.line_items
+       line_items.each do |line_item|
+         variant = Spree::Variant.find(line_item.variant_id)
+         product = variant.product
+         length_required_per_product = product.luxire_product.length_required
+         quantity = line_item.quantity
+         stock = product.luxire_stock
+         unless stock.backorderable
+          total_length_required = length_required_per_product * quantity
+          if(stock.virtual_count_on_hands - total_length_required < 0)
+            response = {msg: "#{product.name} is out of stock"}
+            render json: response.to_json, status: 422 and return
+          end
+        end
+      end
      end
  end
