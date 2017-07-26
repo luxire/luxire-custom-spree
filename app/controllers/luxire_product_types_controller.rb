@@ -33,7 +33,7 @@ class LuxireProductTypesController < Spree::Api::BaseController
     @luxire_product_type_attributes_measuement_std = @luxire_product_type_attributes.where(sub_category: "std")
     @luxire_product_type_attributes_measuement_body = @luxire_product_type_attributes.where(sub_category: "body")
 
-    @luxire_custom = { id: @luxire_product_type.id,product_type: @luxire_product_type.product_type, description: @luxire_product_type.description, image: @luxire_product_type.image, measurement_types: @luxire_product_type_attributes, luxire_product_attributes_ids: @luxire_product_type_attributes_ids,luxire_product_attributes: {customization_attributes: @luxire_product_type_attributes_customize, personalization_attributes:  @luxire_product_type_attributes_personalize,standard_measurement_attributes: @luxire_product_type_attributes_measuement_std, body_measurement_attributes: @luxire_product_type_attributes_measuement_body}}
+    @luxire_custom = { id: @luxire_product_type.id,product_type: @luxire_product_type.product_type, description: @luxire_product_type.description, image: get_image, measurement_types: @luxire_product_type_attributes, luxire_product_attributes_ids: @luxire_product_type_attributes_ids,luxire_product_attributes: {customization_attributes: @luxire_product_type_attributes_customize, personalization_attributes:  @luxire_product_type_attributes_personalize,standard_measurement_attributes: @luxire_product_type_attributes_measuement_std, body_measurement_attributes: @luxire_product_type_attributes_measuement_body}}
 
     render json: @luxire_custom.to_json
   end
@@ -198,5 +198,14 @@ class LuxireProductTypesController < Spree::Api::BaseController
     end
  def auth
    authorize! :LuxireProductType, params[:action]
+ end
+
+ def get_image
+   unless @luxire_product_type.image_file_name.nil? || @luxire_product_type.image_file_name.blank?
+     image_url = ENV['CDN'] + "luxire/images/product_type/"
+     "#{image_url}#{@luxire_product_type.id}/small/#{@luxire_product_type.image_file_name}"
+   else
+      nil
+   end
  end
 end
