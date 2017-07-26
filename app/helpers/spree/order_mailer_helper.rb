@@ -53,8 +53,8 @@ module Spree
               counter = personalize_data[personalize_key].keys.length
               personalize_data[personalize_key].keys.each do |personalization_attributes|
                 response_string +=  " <td>" + personalization_attributes + " </td>"
-                if personalization_attributes["cost"] && personalization_attributes["cost"][order.currency]
-                  cost = Money.new(personalization_attributes["cost"][order.currency], currency: order.currency).to_html
+                if personalize_data[personalize_key][personalization_attributes]["cost"] && personalize_data[personalize_key][personalization_attributes]["cost"][order.currency]
+                  cost = Money.new(personalize_data[personalize_key][personalization_attributes]["cost"][order.currency], currency: order.currency).to_html
                 else
                   cost = Money.new(0, currency: order.currency).to_html
                 end
