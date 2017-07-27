@@ -28,7 +28,7 @@ Spree::OrderMailer.class_eval do
   def send_mail_for_backorder(product)
     @product = product
     subject = "Please order fabric"
-    mail(to: from_address, from: from_address,subject: subject)
+    mail(to: ENV['ADMIN_EMAIL'], from: from_address,subject: subject)
   end
 
 
