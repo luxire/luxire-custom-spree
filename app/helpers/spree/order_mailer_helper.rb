@@ -42,9 +42,15 @@ module Spree
             if personalize_key == 'Monogram'
               personalize_obj = personalize_data[personalize_key]
               @res = ""
+              # Delete monogram_cost from hash and stores it in a variable
+              monogram_cost = personalize_obj.delete("cost")
               print_nested_value(personalize_obj)
               @res = @res[0...@res.length-1]
               response_string +=  " <td>" + @res + " </td>"
+              # Get monogram cost in order currency and put it in the table
+              monogram_cost = monogram_cost[order.currency.to_s]
+              cost = Money.new(monogram_cost, currency: order.currency).to_html
+              response_string +=  " <td>" + cost + " </td>"
               (0...td_count(response_string)).each do
                 response_string +="<td> &nbsp; </td>"
               end
