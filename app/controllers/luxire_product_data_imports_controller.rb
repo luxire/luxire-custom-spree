@@ -1,6 +1,7 @@
 class LuxireProductDataImportsController < Spree::Api::BaseController
 
-before_action :validate_csv_format, only: [:import]
+before_action :validate_csv_format, only: [:importi]
+after_action :update_collections, only: [:import]
 after_action :send_error_list_to_admin, only: [:import], if: :buggy_record_length
 after_action :populate_product_price_in_multi_currency, only: [:import]
 after_action :update_redis, only: [:import]
@@ -517,4 +518,112 @@ EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURREN
     def buggy_record_length
       @buggy_record.length > 0
     end
+
+   def update_collections
+
+        shirts = Spree::Taxonomy.find_by(name: "Shirts")
+
+        # Dress shirts
+
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and luxire_products.no_of_color = ?","Shirts", 1)
+        x = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and (lower(luxire_products.pattern) = ? or lower(luxire_products.pattern) = ?)","Shirts", "stripes", "checks")
+        product_ids = []
+        products.each do |y|
+        product_ids << y.id
+        end
+        x.each do |y|
+        product_ids << y.id
+        end
+        product_ids.uniq!
+        t = shirts.taxons.find_by( name: "Dress shirts")
+        t.product_ids = product_ids
+
+        # Oxfords
+
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.product_weave_type) like ?","Shirts", "%oxford%")
+        t = shirts.taxons.find_by( name: "Oxfords")
+        t.product_ids = products.ids
+        ox = products.ids
+
+        # Polo, knits
+
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(luxire_products.product_weave_type) like ? or lower(luxire_products.product_weave_type) like ? or lower(luxire_products.product_weave_type) like ?)","Shirts", "%pique%", "%jersey%", "%knit%")
+        t = shirts.taxons.find_by( name: "Polo, knits")
+        t.product_ids = products.ids
+        polo = products.ids
+
+        # Prints
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(luxire_products.pattern) = ? or lower(luxire_products.pattern) = ? )","Shirts", "print", "printed")
+        t = shirts.taxons.find_by( name: "Prints")
+        t.product_ids = products.ids
+        print = products.ids
+
+
+        # Linen
+
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.composition) like ? ","Shirts", "%linen%")
+        t = shirts.taxons.find_by( name: "Linen")
+        t.product_ids = products.ids
+        linen = products.ids
+
+        # Flannel
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(spree_products.name) like ? ","Shirts", "%flannel%")
+        t = shirts.taxons.find_by( name: "Flannel")
+        t.product_ids = products.ids
+
+        # Casuals
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(spree_products.name) like ? or lower(spree_products.name) like ? or lower(spree_products.name) like ? or lower(spree_products.name) like ? or lower(luxire_products.pattern) like ? )","Shirts", "%madras%", "%plaid%", "%shepherds%", "%denim%", "%checks%")
+        final = [ox, polo, print, linen]
+        final.each do |f|
+        f.each do |p|
+            products << p
+        end
+        end
+        t = shirts.taxons.find_by( name: "Casuals")
+        t.product_ids = products.ids
+
+
+        pants = Spree::Taxonomy.find_by(name: "Pants")
+
+        # Flannel
+
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(spree_products.name) like ? ","Pants", "%flannel%")
+        t = pants.taxons.find_by( name: "Flannel")
+        t.product_ids = products.ids
+
+        # Dress pants
+
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(spree_products.name) not like ? )","Pants", "%denim%")
+        t = pants.taxons.find_by( name: "Dress pants")
+        t.product_ids = products.ids
+
+        # Chinos
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.composition)  like ? ","Pants", "%cotton%")
+        t = pants.taxons.find_by( name: "Chinos")
+        t.product_ids = products.ids
+
+        # Moleskin
+
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.product_weave_type)  like ? ","Pants", "%moleskin%")
+        t = pants.taxons.find_by( name: "Moleskin")
+        t.product_ids = products.ids
+
+
+        # Corduroy
+
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.product_weave_type)  like ? ","Pants", "%corduroy%")
+        t = pants.taxons.find_by( name: "Corduroy")
+        t.product_ids = products.ids
+
+        # Formals
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(luxire_products.product_color) =? or lower(luxire_products.product_color) =? )","Pants", "black", "navy")
+        t = pants.taxons.find_by( name: "Formals")
+        t.product_ids = products.ids
+
+        # Linen
+
+        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.composition)  like ? ","Pants", "%linen%")
+        t = pants.taxons.find_by( name: "Linen")
+        t.product_ids = products.ids
+   end
 end
