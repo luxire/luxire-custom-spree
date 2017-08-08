@@ -139,7 +139,6 @@ end
   def update_order_number
     OrderNumberLookup.transaction do
       OrderNumberLookup.find_by_sql("lock table order_number_lookups")
-      byebug
       order_lookup = OrderNumberLookup.last
       new_order_number = order_lookup.order_number + 1
       OrderNumberLookup.create!({order_number: new_order_number, spree_order_number: self.number})
