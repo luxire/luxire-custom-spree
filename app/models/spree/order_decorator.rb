@@ -53,6 +53,9 @@ def finalize!
 
   touch :completed_at
 
+# Generate the sequential order number and change spree order number with sequence order number
+  update_order_number
+
 # rescue from Exception in case internet is down and will not be able to send email
   begin
       deliver_gift_card_email unless confirmation_delivered?
@@ -130,6 +133,18 @@ end
   def addresses
     unless user.nil?
       user.addresses
+    end
+  end
+
+  def update_order_number
+    OrderNumberLookup.transaction do
+      OrderNumberLookup.find_by_sql("lock table order_number_lookups")
+      byebug
+      order_lookup = OrderNumberLookup.last
+      new_order_number = order_lookup.order_number + 1
+      OrderNumberLookup.create!({order_number: new_order_number, spree_order_number: self.number})
+      self.number = new_order_number
+      self.save!
     end
   end
 end
