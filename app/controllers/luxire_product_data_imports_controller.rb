@@ -1,629 +1,632 @@
 class LuxireProductDataImportsController < Spree::Api::BaseController
 
-before_action :validate_csv_format, only: [:importi]
-after_action :update_collections, only: [:import]
-after_action :send_error_list_to_admin, only: [:import], if: :buggy_record_length
-after_action :populate_product_price_in_multi_currency, only: [:import]
-after_action :update_redis, only: [:import]
+	before_action :validate_csv_format, only: [:importi]
+	after_action :update_collections, only: [:import]
+	after_action :send_error_list_to_admin, only: [:import]
+	after_action :populate_product_price_in_multi_currency, only: [:import]
+	after_action :update_redis, only: [:import]
 
-respond_to :html, :json
-NOT_AVAILABLE = "NA"
-# NODE_URL = "http://localhost:9090/api/redis/product_sync"
-NODE_URL = "http://localhost:9090/api/redis/v1/products/sync"
-EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURRENT LUXIRE SITE HANDLE", "Image Src", "Image Src 1", "Image Src 2", "Image Src 3", "Image Src 4", "Image Src 5", "Image Src 6", "Title", "Types of weave", "No. of colors", "Color name", "Tag", "Material Composition with %", "Usage", "Design: Stripes/Checks etc", "Country of Origin", "Mill", "Seasons (Summer, Autumn, Winter, Spring)", "Construction ", "Count ", "Thickness", "Stiffness", "GSM", "Ounces", "GLM", "Wash Care", "Shrinkage", "Technical Description", "Sales Pitch", "Related/Similar Fabric", "Vendor", "Primary Usage", "Type", "Variant SKU", "Parent SKU", "Variant Grams", "Variant Inventory Tracker", "Inventory in meters if Inhouse", "Stock Storage", "If Mill Sourced, Current Luxire Stock", "Variant Inventory Qty LEAVE BLANK", "Variant Inventory Policy", "Variant Fulfillment Service", "Swatch price", "Variant Price", "Variant compare at price", "Variant Requires Shipping", "Variant Taxable", "Length Required", "Threshold", "Inventory Measuring Unit", "Fabric Width", "Swatch Image", "Published Date", "Variant Barcode", "Gift Card", "Transparency", "Wrinkle Resistance", "Image"]
+	respond_to :html, :json
+	NOT_AVAILABLE = "NA"
+	# NODE_URL = "http://localhost:9090/api/redis/product_sync"
+	NODE_URL = "http://localhost:9090/api/redis/v1/products/sync"
+	EXPECTED_HEADER = ["Handle", "Inventory Rack", "Inventory Backoderable", "CURRENT LUXIRE SITE HANDLE", "Image Src", "Image Src 1", "Image Src 2", "Image Src 3", "Image Src 4", "Image Src 5", "Image Src 6", "Title", "Types of weave", "No. of colors", "Color name", "Tag", "Material Composition with %", "Usage", "Design: Stripes/Checks etc", "Country of Origin", "Mill", "Seasons (Summer, Autumn, Winter, Spring)", "Construction ", "Count ", "Thickness", "Stiffness", "GSM", "Ounces", "GLM", "Wash Care", "Shrinkage", "Technical Description", "Sales Pitch", "Related/Similar Fabric", "Vendor", "Primary Usage", "Type", "Variant SKU", "Parent SKU", "Variant Grams", "Variant Inventory Tracker", "Inventory in meters if Inhouse", "Stock Storage", "If Mill Sourced, Current Luxire Stock", "Variant Inventory Qty LEAVE BLANK", "Variant Inventory Policy", "Variant Fulfillment Service", "Swatch price", "Variant Price", "Variant compare at price", "Variant Requires Shipping", "Variant Taxable", "Length Required", "Threshold", "Inventory Measuring Unit", "Fabric Width", "Swatch Image", "Published Date", "Variant Barcode", "Gift Card", "Transparency", "Wrinkle Resistance", "Image"]
 
-    def import
-      authorize! :create, Spree::Product
-      file = params[:file]
-      @count = 1
-      @buggy_record = Hash.new
-      @product_ids = []
-      @file_location = ENV['IMG_DIR']
-      @files = Dir.entries(@file_location)
-      CSV.foreach(file.path, headers: true, encoding: 'ISO-8859-1') do |row|
-          @count += 1
-          begin
-            validate_record(row)
-            assign_values(row) if (row["Gift Card"].blank? || (row["Gift Card"].to_s.casecmp("false") == 0))
-            check_for_images(row)
-            Spree::Product.transaction do
-              if row["Variant SKU"].blank? || row["Variant SKU"].casecmp(NOT_AVAILABLE) == 0
-                raise 'Variant SKU is not defined'
-              else
-                luxire_stocks = LuxireStock.where('lower(parent_sku) = ?',row["Variant SKU"].downcase )
-                if luxire_stocks.empty?
-                  @luxire_stock = LuxireStock.new
-                  set_inventory(row)
-                 else
-                   @luxire_stock = luxire_stocks.first
-                   set_inventory(row)
-                   end
-                end
+	def import
+		authorize! :create, Spree::Product
+		file = params[:file]
+		@count = 1
+		@buggy_record = Hash.new
+		@product_ids = []
+		@file_location = ENV['IMG_DIR']
+		@files = Dir.entries(@file_location)
+		CSV.foreach(file.path, headers: true, encoding: 'ISO-8859-1') do |row|
+			@count += 1
+			begin
+				validate_record(row)
+				assign_values(row) if (row["Gift Card"].blank? || (row["Gift Card"].to_s.casecmp("false") == 0))
+				check_for_images(row)
+				Spree::Product.transaction do
+					if row["Variant SKU"].blank? || row["Variant SKU"].casecmp(NOT_AVAILABLE) == 0
+						raise 'Variant SKU is not defined'
+					else
+						luxire_stocks = LuxireStock.where('lower(parent_sku) = ?',row["Variant SKU"].downcase )
+						if luxire_stocks.empty?
+							@luxire_stock = LuxireStock.new
+							set_inventory(row)
+						else
+							@luxire_stock = luxire_stocks.first
+							set_inventory(row)
+						end
+					end
 
-              if(!row["Type"].blank? && !(row["Type"].casecmp(NOT_AVAILABLE) == 0))
-                  product_types = LuxireProductType.where('lower(product_type) = ?', row["Type"].downcase)
-                  if product_types.empty?
-                    raise "#{row['Type']} product_type does not exist"
-                  else
-                     @product_type = product_types.first
-                     @luxire_product[:luxire_product_type_id] = @product_type.id
-                  end
-                else
-                  raise 'No product type mentioned'
-              end
+					if(!row["Type"].blank? && !(row["Type"].casecmp(NOT_AVAILABLE) == 0))
+						product_types = LuxireProductType.where('lower(product_type) = ?', row["Type"].downcase)
+						if product_types.empty?
+							raise "#{row['Type']} product_type does not exist"
+						else
+							@product_type = product_types.first
+							@luxire_product[:luxire_product_type_id] = @product_type.id
+						end
+					else
+						raise 'No product type mentioned'
+					end
 
 
-             @product.save!
+					@product.save!
 
-             @variant = @product.master
-             @variant[:track_inventory] = false
-             @variant[:weight] = row["Variant Grams"]
-             set_variant_sku(row)
-             @variant.save!
+					@variant = @product.master
+					@variant[:track_inventory] = false
+					@variant[:weight] = row["Variant Grams"]
+					set_variant_sku(row)
+					@variant.save!
 
-             if (row["Gift Card"].blank? || (row["Gift Card"].to_s.casecmp("false") == 0))
-                 @luxire_product[:product_id] = @product.id
+					if (row["Gift Card"].blank? || (row["Gift Card"].to_s.casecmp("false") == 0))
+						@luxire_product[:product_id] = @product.id
 
-                 if( !row["Vendor"].blank? && !(row["Vendor"].casecmp(NOT_AVAILABLE) == 0) )
-                   vendor_masters = LuxireVendorMaster.where('lower(name) = ?', row["Vendor"].downcase)
-                   if vendor_masters.empty?
-                     @vendor_master = LuxireVendorMaster.new
-                     @vendor_master[:name] = row["Vendor"]
-                     @vendor_master.save!
-                   else
-                     @vendor_master = vendor_masters.first
-                 end
-                 @luxire_product[:luxire_vendor_master_id] = @vendor_master.id
-                end
-                #
-                # if !row["Current Luxire Site collections"].casecmp(NOT_AVAILABLE) == 0 && !row["Current Luxire Site collections"].blank?
-                #     taxons = row["Current Luxire Site collections"].split(",")
-                #     ids = []
-                #     taxons.each do |taxon|
-                #       spree_taxon = Spree::Taxon.where('lower(name) = ?', taxon.downcase)
-                #       if spree_taxon.empty?
-                #         raise '#{taxon} not found'
-                #       else
-                #         ids << spree_taxon.first.id
-                #       end
-                #     end
-                #     @product.taxon_ids= ids
-                #     @product.save!
-                #   end
-                 @luxire_product.save!
-                 set_up_options
-                 create_swatch_variant(row)
-               end
+						if( !row["Vendor"].blank? && !(row["Vendor"].casecmp(NOT_AVAILABLE) == 0) )
+							vendor_masters = LuxireVendorMaster.where('lower(name) = ?', row["Vendor"].downcase)
+							if vendor_masters.empty?
+								@vendor_master = LuxireVendorMaster.new
+								@vendor_master[:name] = row["Vendor"]
+								@vendor_master.save!
+							else
+								@vendor_master = vendor_masters.first
+							end
+							@luxire_product[:luxire_vendor_master_id] = @vendor_master.id
+						end
+						#
+						# if !row["Current Luxire Site collections"].casecmp(NOT_AVAILABLE) == 0 && !row["Current Luxire Site collections"].blank?
+						#     taxons = row["Current Luxire Site collections"].split(",")
+						#     ids = []
+						#     taxons.each do |taxon|
+						#       spree_taxon = Spree::Taxon.where('lower(name) = ?', taxon.downcase)
+						#       if spree_taxon.empty?
+						#         raise '#{taxon} not found'
+						#       else
+						#         ids << spree_taxon.first.id
+						#       end
+						#     end
+						#     @product.taxon_ids= ids
+						#     @product.save!
+						#   end
+						@luxire_product.save!
+						set_up_options
+						create_swatch_variant(row)
+					end
 
-                 associate_collection(row)
-            image_count = 0
-            image_source = "Image Src"
-            while(image_count < 7)
-              image_source ="Image Src #{image_count}" unless image_count == 0
-              begin
-                if ( !row[image_source].blank? && !(row[image_source].casecmp(NOT_AVAILABLE) == 0))
-                  image = row[image_source]
-                  image.sub!("_grande.", ".")
-                  image.sub!(/_\d+[Xx]\d+\./, ".")
-                  populate_image(image)
-                end
-                image_count += 1
-              rescue TypeError, Errno::ECONNREFUSED
-                raise "Image url not correct #{row[image_source]}"
-              rescue OpenURI::HTTPError
-                raise "No image found for #{row[image_source]}"
-              end
-            end
-            unless row["Image"].blank? || row["Image"].casecmp(NOT_AVAILABLE) == 0
-              populate_image_from_file_system(get_image_name_from_file_system(row["Variant SKU"].strip))
-              populate_image_from_file_system(get_image_name_from_file_system(row["Image"].strip)) unless row["Image"] == row["Variant SKU"]
-            end
-             @product_ids << @product.id
-            end
-          rescue Exception => exception
-             name = "#{@count}  #{row['Handle']}"
-             @buggy_record[name] = exception.message
-        end
-      end
-      # Call the API to fetch data
-      # unless @product_ids.empty?
-      #   url = URI.parse(NODE_URL)
-      #   params = {"ids[]" =>@product_ids, token: "c75c98a6976bfc6c94edbfaf2bd189d646ef075122c3fd4f"}
-      #   response = Net::HTTP.post_form(url,params)
-      # if response.code == "200"
-      #   logger.debug "Redis updated successfully"
-      # else
-      #   logger.error "Error while updating redis"
-      # end
-      # end
-      logger.debug "Product ids are #{@product_ids}"
-      logger.debug "Buggy record length is " + @buggy_record.length.to_s
-      response = {count: @count, buggy_record: @buggy_record}
+					associate_collection(row)
+					image_count = 0
+					image_source = "Image Src"
+					while(image_count < 7)
+						image_source ="Image Src #{image_count}" unless image_count == 0
+						begin
+							if ( !row[image_source].blank? && !(row[image_source].casecmp(NOT_AVAILABLE) == 0))
+								image = row[image_source]
+								image.sub!("_grande.", ".")
+								image.sub!(/_\d+[Xx]\d+\./, ".")
+								populate_image(image)
+							end
+							image_count += 1
+						rescue TypeError, Errno::ECONNREFUSED
+							raise "Image url not correct #{row[image_source]}"
+						rescue OpenURI::HTTPError
+							raise "No image found for #{row[image_source]}"
+						end
+					end
+					unless row["Image"].blank? || row["Image"].casecmp(NOT_AVAILABLE) == 0
+						populate_image_from_file_system(get_image_name_from_file_system(row["Variant SKU"].strip))
+						populate_image_from_file_system(get_image_name_from_file_system(row["Image"].strip)) unless row["Image"] == row["Variant SKU"]
+					end
+					@product_ids << @product.id
+				end
+			rescue Exception => exception
+				name = "#{@count}  #{row['Handle']}"
+				@buggy_record[name] = exception.message
+			end
+		end
+		# Call the API to fetch data
+		# unless @product_ids.empty?
+		#   url = URI.parse(NODE_URL)
+		#   params = {"ids[]" =>@product_ids, token: "c75c98a6976bfc6c94edbfaf2bd189d646ef075122c3fd4f"}
+		#   response = Net::HTTP.post_form(url,params)
+		# if response.code == "200"
+		#   logger.debug "Redis updated successfully"
+		# else
+		#   logger.error "Error while updating redis"
+		# end
+		# end
+		logger.debug "Product ids are #{@product_ids}"
+		logger.debug "Buggy record length is " + @buggy_record.length.to_s
+		response = {count: @count, buggy_record: @buggy_record}
 
-      respond_with do |format|
-        format.html { render 'luxire_product_data_imports/show.html.erb'}
-        format.json { render json: response.to_json, status: "200" }
-      end
+		respond_with do |format|
+			format.html { render 'luxire_product_data_imports/show.html.erb'}
+			format.json { render json: response.to_json, status: "200" }
+		end
 
-      # render json: response.to_json, status: "200"
-      # render 'luxire_product_data_imports/show.html.erb'
-    end
+		# render json: response.to_json, status: "200"
+		# render 'luxire_product_data_imports/show.html.erb'
+	end
 
-    def destroy_all_product
-      authorize! :destroy, Spree::Product.first
-      begin
-          Spree::Product.destroy_all
-        rescue Exception => e
-          response = {msg: "Destroy operation can not be completed due to #{e.message}"}
-          render json: response.to_json, status: "500" and return
-        end
-          response = {msg: "all product are deleted successfully"}
-          render json: response.to_json, status: "200"
-    end
+	def destroy_all_product
+		authorize! :destroy, Spree::Product.first
+		begin
+			Spree::Product.destroy_all
+		rescue Exception => e
+			response = {msg: "Destroy operation can not be completed due to #{e.message}"}
+			render json: response.to_json, status: "500" and return
+		end
+		response = {msg: "all product are deleted successfully"}
+		render json: response.to_json, status: "200"
+	end
 
-    private
-    def assign_values(row)
+	private
+	def assign_values(row)
 
-      available_date = Time.now
+		available_date = Time.now
 
-      if ( !row["Published Date"].blank? && !(row["Published Date"].casecmp(NOT_AVAILABLE) == 0))
-        published_date = row["Published Date"]
-        available_date = Date.strptime(published_date, "%d/%m/%Y")
-      end
+		if ( !row["Published Date"].blank? && !(row["Published Date"].casecmp(NOT_AVAILABLE) == 0))
+			published_date = row["Published Date"]
+			available_date = Date.strptime(published_date, "%d/%m/%Y")
+		end
 
-      product_hash = {name: row["Title"], available_on: available_date, price: row["Variant Price"], description: row["Body (HTML) Leave Blank"], shipping_category_id: 1}
-      @product = Spree::Product.new(product_hash)
-      @luxire_product = LuxireProduct.new
-      # Set the req_validation to true to set the validation
-      @luxire_product.req_validation = true
-      @option_arr = []
+		product_hash = {name: row["Title"], available_on: available_date, price: row["Variant Price"], description: row["Body (HTML) Leave Blank"], shipping_category_id: 1}
+		@product = Spree::Product.new(product_hash)
+		@luxire_product = LuxireProduct.new
+		# Set the req_validation to true to set the validation
+		@luxire_product.req_validation = true
+		@option_arr = []
 
-=begin
+		=begin
       @product[:name] = row["Title"]
       @product[:description] = row["Body (HTML)"]
       @product[:price] = row["Variant Price"]
       @product[:shipping_category_id] = 1
 =end
-      option1  = row["Option1 Name"]
-      value1 = row["Option1 Value"]
-      option2 = row["Option2 Name"]
-      value2  = row["Option2 Value"]
-      option3  = row["Option3 Name"]
-      value3  = row["Option3 Value"]
+		option1  = row["Option1 Name"]
+		value1 = row["Option1 Value"]
+		option2 = row["Option2 Name"]
+		value2  = row["Option2 Value"]
+		option3  = row["Option3 Name"]
+		value3  = row["Option3 Value"]
 
-      @options_attrs = Hash.new(0)
+		@options_attrs = Hash.new(0)
 
-      @options_attrs [option1.to_s] = value1  unless option1.blank? || option1.casecmp(NOT_AVAILABLE) == 0
-      @options_attrs [option2.to_s] = value2  unless option2.blank? || option1.casecmp(NOT_AVAILABLE) == 0
-      @options_attrs [option3.to_s] = value3  unless option3.blank? || option1.casecmp(NOT_AVAILABLE) == 0
+		@options_attrs [option1.to_s] = value1  unless option1.blank? || option1.casecmp(NOT_AVAILABLE) == 0
+		@options_attrs [option2.to_s] = value2  unless option2.blank? || option1.casecmp(NOT_AVAILABLE) == 0
+		@options_attrs [option3.to_s] = value3  unless option3.blank? || option1.casecmp(NOT_AVAILABLE) == 0
 
-      unless @options_attrs.empty?
-        @option_arr << @options_attrs
-      end
+		unless @options_attrs.empty?
+			@option_arr << @options_attrs
+		end
 
-      @luxire_product[:handle] = row["Handle"]
+		@luxire_product[:handle] = row["Handle"]
 
-      @luxire_product[:product_tags] = row["Tag"]
-      @luxire_product[:product_compare_at_price] = row["Variant Compare At Price"]
-      @luxire_product[:barcode] = row["Variant Barcode"]
-      # @luxire_product[:gift_card_flag] = row["Gift Card"]
-      @luxire_product[:product_weave_type] = row["Types of weave"]
-      @luxire_product[:no_of_color] = row["No. of colors"]
-      @luxire_product[:product_color] = row["Color name"]
-      @luxire_product[:usage] = row["Usage"]
-      if !row["Design: Stripes/Checks etc"].nil? && row["Design: Stripes/Checks etc"].downcase == "plaid"
-        @luxire_product[:pattern] = "#{row["Design: Stripes/Checks etc"]},checks"
-      else
-        @luxire_product[:pattern] = row["Design: Stripes/Checks etc"]
-      end
-      @luxire_product[:country_of_origin] = row["Country of Origin"]
-      if row["Mill"].blank? || row["Mill"].casecmp(NOT_AVAILABLE) == 0
-        @luxire_product[:mill] = "Luxire"
-      else
-        @luxire_product[:mill] = row["Mill"]
-      end
-      @luxire_product[:mill] = row["Mill"] || "Luxire"
-      @luxire_product[:suitable_climates]  = row["Seasons (Summer, Autumn, Winter, Spring)"]
-      @luxire_product[:construction] = row["construction (Number of threads in warp and weft)"]
-      @luxire_product[:thread_count] = row["Count (Thickness of thread used like 40s, 120/2 etc)"]
-      @luxire_product[:thickness] = row["Thickness"]
-      @luxire_product[:stiffness] = row["Stiffness"].to_f
-      @luxire_product[:gsm] = row["GSM"]
-      @luxire_product[:glm] = row["GLM"]
-      @luxire_product[:wash_care] = row["Wash Care"]
-      @luxire_product[:shrinkage] = row["Shrinkage"].to_i
-      @luxire_product[:composition] = row["Material Composition with %"]
-      @luxire_product[:technical_description] = row["Technical Description"]
-      @luxire_product[:sales_pitch] = row["Sales Pitch"]
-      @luxire_product[:related_fabric] = row["Related/Similar Fabric"]
-      @luxire_product[:length_required] = row["Length Required"]
-      @luxire_product[:transparency] = row["Transparency"]
-      @luxire_product[:wrinkle_resistance] = row["Wrinkle Resistance"]
-      @luxire_product[:wash_care]  = row["Wash Care"]
-      @luxire_product[:stiffness]  = row["Stiffness"]
-      unless row["Stiffness"].blank? || row["Stiffness"].casecmp(NOT_AVAILABLE) == 0
-        @luxire_product[:stiffness_unit]  = row["Stiffness"].gsub(row["Stiffness"].to_f.to_s,"")
-      end
-      @luxire_product[:variant_taxable] = row["Variant Taxable"]
-      @luxire_product[:variant_require_shipping] = row["Variant Requires Shipping"]
-      @luxire_product[:variant_fulfillment_service] = row["Variant Fulfillment Service"]
-      # @luxire_product[:material] = row[""]
-      @luxire_product[:inventory_tracked_by] = row["Variant Inventory Tracker"]
+		@luxire_product[:product_tags] = row["Tag"]
+		@luxire_product[:product_compare_at_price] = row["Variant Compare At Price"]
+		@luxire_product[:barcode] = row["Variant Barcode"]
+		# @luxire_product[:gift_card_flag] = row["Gift Card"]
+		@luxire_product[:product_weave_type] = row["Types of weave"]
+		@luxire_product[:no_of_color] = row["No. of colors"]
+		@luxire_product[:product_color] = row["Color name"]
+		@luxire_product[:usage] = row["Usage"]
+		if !row["Design: Stripes/Checks etc"].nil? && row["Design: Stripes/Checks etc"].downcase == "plaid"
+			@luxire_product[:pattern] = "#{row["Design: Stripes/Checks etc"]},checks"
+		else
+			@luxire_product[:pattern] = row["Design: Stripes/Checks etc"]
+		end
+		@luxire_product[:country_of_origin] = row["Country of Origin"]
+		if row["Mill"].blank? || row["Mill"].casecmp(NOT_AVAILABLE) == 0
+			@luxire_product[:mill] = "Luxire"
+		else
+			@luxire_product[:mill] = row["Mill"]
+		end
+		@luxire_product[:mill] = row["Mill"] || "Luxire"
+		@luxire_product[:suitable_climates]  = row["Seasons (Summer, Autumn, Winter, Spring)"]
+		@luxire_product[:construction] = row["construction (Number of threads in warp and weft)"]
+		@luxire_product[:thread_count] = row["Count (Thickness of thread used like 40s, 120/2 etc)"]
+		@luxire_product[:thickness] = row["Thickness"]
+		@luxire_product[:stiffness] = row["Stiffness"].to_f
+		@luxire_product[:gsm] = row["GSM"]
+		@luxire_product[:glm] = row["GLM"]
+		@luxire_product[:wash_care] = row["Wash Care"]
+		@luxire_product[:shrinkage] = row["Shrinkage"].to_i
+		@luxire_product[:composition] = row["Material Composition with %"]
+		@luxire_product[:technical_description] = row["Technical Description"]
+		@luxire_product[:sales_pitch] = row["Sales Pitch"]
+		@luxire_product[:related_fabric] = row["Related/Similar Fabric"]
+		@luxire_product[:length_required] = row["Length Required"]
+		@luxire_product[:transparency] = row["Transparency"]
+		@luxire_product[:wrinkle_resistance] = row["Wrinkle Resistance"]
+		@luxire_product[:wash_care]  = row["Wash Care"]
+		@luxire_product[:stiffness]  = row["Stiffness"]
+		unless row["Stiffness"].blank? || row["Stiffness"].casecmp(NOT_AVAILABLE) == 0
+			@luxire_product[:stiffness_unit]  = row["Stiffness"].gsub(row["Stiffness"].to_f.to_s,"")
+		end
+		@luxire_product[:variant_taxable] = row["Variant Taxable"]
+		@luxire_product[:variant_require_shipping] = row["Variant Requires Shipping"]
+		@luxire_product[:variant_fulfillment_service] = row["Variant Fulfillment Service"]
+		# @luxire_product[:material] = row[""]
+		@luxire_product[:inventory_tracked_by] = row["Variant Inventory Tracker"]
 
-      # Luxire_stock[:virtual_count_on_hands], Luxire_stock[:physical_count_on_hands] = row["Variant Inventory Qty"]
+		# Luxire_stock[:virtual_count_on_hands], Luxire_stock[:physical_count_on_hands] = row["Variant Inventory Qty"]
 
 
-    end
+	end
 
-    def set_up_options
-                @option_arr.each do |option|
-                      option.each do |name,value|
-                          option_type = Spree::OptionType.where('lower(name) = ?', name.downcase).first_or_initialize do |option_type|
-                            option_type.presentation = name
-                            option_type.save!
-                            end
+	def set_up_options
+		@option_arr.each do |option|
+			option.each do |name,value|
+				option_type = Spree::OptionType.where('lower(name) = ?', name.downcase).first_or_initialize do |option_type|
+					option_type.presentation = name
+					option_type.save!
+				end
 
-                       optionValue = Spree::OptionValue.where('lower(name) = ?', value.downcase).first_or_initialize do |optionValue|
-                            optionValue.name = value || optionValue.name
-                            optionValue.option_type_id = option_type.id || optionValue.option_type_id
-                            optionValue.presentation = optionValue || optionValue.presentation
-                            optionValue.save!
-                          end
+				optionValue = Spree::OptionValue.where('lower(name) = ?', value.downcase).first_or_initialize do |optionValue|
+					optionValue.name = value || optionValue.name
+					optionValue.option_type_id = option_type.id || optionValue.option_type_id
+					optionValue.presentation = optionValue || optionValue.presentation
+					optionValue.save!
+				end
 
-                      unless product.option_types.include?(option_type)
-                        product.option_types << option_type
-                      end
-                    end
-                end
-    end
+				unless product.option_types.include?(option_type)
+					product.option_types << option_type
+				end
+			end
+		end
+	end
 
-    def create_swatch_variant(row)
-      price = 1
-      sku = "SWT_#{@product.sku}"
-      @swatch_properties = Hash.new
-      @swatch_properties[:product_id] = @product.id
-      @swatch_properties[:sku] = sku
-      @swatch_properties[:price] = row["Swatch price"]
-      @swatch_properties[:track_inventory] = false
-      @swatch_variant = Spree::Variant.new(@swatch_properties)
-      @swatch_variant.save!
-      unless row["Swatch Image"].casecmp(NOT_AVAILABLE) == 0 || row["Swatch Image"].blank?
-        @image = Spree::Image.new
-        @image.attachment= URI.parse(row["Swatch Image"])
-        @image.viewable = @swatch_variant
-        @image.save!
-      end
-    end
+	def create_swatch_variant(row)
+		price = 1
+		sku = "SWT_#{@product.sku}"
+		@swatch_properties = Hash.new
+		@swatch_properties[:product_id] = @product.id
+		@swatch_properties[:sku] = sku
+		@swatch_properties[:price] = row["Swatch price"]
+		@swatch_properties[:track_inventory] = false
+		@swatch_variant = Spree::Variant.new(@swatch_properties)
+		@swatch_variant.save!
+		unless row["Swatch Image"].casecmp(NOT_AVAILABLE) == 0 || row["Swatch Image"].blank?
+			@image = Spree::Image.new
+			@image.attachment= URI.parse(row["Swatch Image"])
+			@image.viewable = @swatch_variant
+			@image.save!
+		end
+	end
 
-    def set_inventory(row)
-      if ((row["Inventory in meters if Inhouse"].casecmp(NOT_AVAILABLE) == 0 || row["Inventory in meters if Inhouse"].empty?)  && (row["If Mill Sourced, Current Luxire Stock"].casecmp(NOT_AVAILABLE) == 0 || row["If Mill Sourced, Current Luxire Stock"].empty?))
-        raise 'Inventory not defined'
-      elsif( !(row["Inventory in meters if Inhouse"].casecmp(NOT_AVAILABLE) == 0) && ( !row["Inventory in meters if Inhouse"].empty?))
-        @luxire_stock.virtual_count_on_hands = row["Inventory in meters if Inhouse"].to_f
-        @luxire_stock.physical_count_on_hands = row["Inventory in meters if Inhouse"].to_f
-        @luxire_stock.in_house = true
-      elsif( !(row["If Mill Sourced, Current Luxire Stock"].casecmp(NOT_AVAILABLE) == 0) && !row["If Mill Sourced, Current Luxire Stock"].empty?)
-        @luxire_stock.in_house = false
-        @luxire_stock.virtual_count_on_hands = row["If Mill Sourced, Current Luxire Stock"].to_f
-        @luxire_stock.physical_count_on_hands = row["If Mill Sourced, Current Luxire Stock"].to_f
-      end
-      @luxire_stock.threshold = row["Threshold"]
-      @luxire_stock.fabric_width = row["Fabric Width"]
-      @luxire_stock.backorderable = row["Variant Inventory Policy"]
-      @luxire_stock.measuring_unit = row["Inventory Measuring Unit"]
-      @luxire_stock.stock_location_id = 1
-      @luxire_stock.rack = row["Inventory Rack"]
-      @luxire_stock.backorderable = row["Inventory Backoderable"]
-     # @luxire_stock.parent_sku = row["Parent SKU"]
-       @luxire_stock.parent_sku = row["Variant SKU"]
-      @luxire_stock.save!
-      @luxire_product.luxire_stock_id = @luxire_stock.id
-    end
+	def set_inventory(row)
+		if ((row["Inventory in meters if Inhouse"].casecmp(NOT_AVAILABLE) == 0 || row["Inventory in meters if Inhouse"].empty?)  && (row["If Mill Sourced, Current Luxire Stock"].casecmp(NOT_AVAILABLE) == 0 || row["If Mill Sourced, Current Luxire Stock"].empty?))
+			raise 'Inventory not defined'
+		elsif( !(row["Inventory in meters if Inhouse"].casecmp(NOT_AVAILABLE) == 0) && ( !row["Inventory in meters if Inhouse"].empty?))
+			@luxire_stock.virtual_count_on_hands = row["Inventory in meters if Inhouse"].to_f
+			@luxire_stock.physical_count_on_hands = row["Inventory in meters if Inhouse"].to_f
+			@luxire_stock.in_house = true
+		elsif( !(row["If Mill Sourced, Current Luxire Stock"].casecmp(NOT_AVAILABLE) == 0) && !row["If Mill Sourced, Current Luxire Stock"].empty?)
+			@luxire_stock.in_house = false
+			@luxire_stock.virtual_count_on_hands = row["If Mill Sourced, Current Luxire Stock"].to_f
+			@luxire_stock.physical_count_on_hands = row["If Mill Sourced, Current Luxire Stock"].to_f
+		end
+		@luxire_stock.threshold = row["Threshold"]
+		@luxire_stock.fabric_width = row["Fabric Width"]
+		@luxire_stock.backorderable = row["Variant Inventory Policy"]
+		@luxire_stock.measuring_unit = row["Inventory Measuring Unit"]
+		@luxire_stock.stock_location_id = 1
+		@luxire_stock.rack = row["Inventory Rack"]
+		@luxire_stock.backorderable = row["Inventory Backoderable"]
+		# @luxire_stock.parent_sku = row["Parent SKU"]
+		@luxire_stock.parent_sku = row["Variant SKU"]
+		@luxire_stock.save!
+		@luxire_product.luxire_stock_id = @luxire_stock.id
+	end
 
-    def associate_collection(row)
-	    if ( !(row["Primary Usage"].casecmp(NOT_AVAILABLE) == 0) && !row["Primary Usage"].empty? )
-          collections = row["Primary Usage"].split(",").map(&:strip)
-          ids = []
-          collections.each do |collection|
-            collection_hierarchy = collection.split("->").map(&:strip)
-            taxonomy_name = collection_hierarchy.first
-            taxonomy = Spree::Taxonomy.where('lower(name) = ?', collection_hierarchy.first.downcase).first
-            if taxonomy
-               super_collection = false
-               collection_hierarchy.delete(collection_hierarchy[0])
-               collection_hierarchy.each_with_index do |hierarchy, count|
-                  @taxon = taxonomy.taxons.where('lower(name) = ?', hierarchy.downcase).where(depth: count+1).first
-                  unless @taxon
-                    # info = collection_hierarchy[0]
-                    # for i in 1..count
-                    #   info+= "->"  + collection_hierarchy[i]
-                    # end
-                    # raise "#{taxonomy_name} -> #{info} collection does not exist"
-                    super_collection = true
-                    break;
-                  end
-               end
-            else
-              raise "#{collection} collection does not exist"
-            end
-            if collection_hierarchy.length == 0 || super_collection
-              id = taxonomy.taxons.first.id
-            else
-              id = @taxon.id
-            end
-            ids << id
-          end
-          @product.taxon_ids = ids
-          @product.save!
-        else
-            raise  "collection can not be empty or NA"
-        end
-    end
+	def associate_collection(row)
+		if ( !(row["Primary Usage"].casecmp(NOT_AVAILABLE) == 0) && !row["Primary Usage"].empty? )
+			collections = row["Primary Usage"].split(",").map(&:strip)
+			ids = []
+			collections.each do |collection|
+				collection_hierarchy = collection.split("->").map(&:strip)
+				taxonomy_name = collection_hierarchy.first
+				taxonomy = Spree::Taxonomy.where('lower(name) = ?', collection_hierarchy.first.downcase).first
+				if taxonomy
+					super_collection = false
+					collection_hierarchy.delete(collection_hierarchy[0])
+					collection_hierarchy.each_with_index do |hierarchy, count|
+						@taxon = taxonomy.taxons.where('lower(name) = ?', hierarchy.downcase).where(depth: count+1).first
+						unless @taxon
+							# info = collection_hierarchy[0]
+							# for i in 1..count
+							#   info+= "->"  + collection_hierarchy[i]
+							# end
+							# raise "#{taxonomy_name} -> #{info} collection does not exist"
+							super_collection = true
+							break;
+						end
+					end
+				else
+					raise "#{collection} collection does not exist"
+				end
+				if collection_hierarchy.length == 0 || super_collection
+					id = taxonomy.taxons.first.id
+				else
+					id = @taxon.id
+				end
+				ids << id
+			end
+			@product.taxon_ids = ids
+			@product.save!
+		else
+			raise  "collection can not be empty or NA"
+		end
+	end
 
-    def set_variant_sku(row)
-      sku = row["Variant SKU"]
-      variants = Spree::Variant.where("sku like ?","#{sku}%")
-      if variants.empty?
-        @variant[:sku] = sku
-      else
-        variants.each do |variant|
-          product = variant.product
-          product_type = product.luxire_product_type
-          unless product_type.nil? || row["Type"].nil?
-             type = product_type.product_type
-             if type.casecmp(row["Type"]) == 0
-               raise " duplicate product"
-             end
-          end
-        end
-        count = 1
-        flag = true
-        sku = sku + "p"
-        while(flag)
-          temp_sku = sku + count.to_s
-          variant = Spree::Variant.where(sku: temp_sku).take
-          if variant.nil?
-            @variant[:sku] = temp_sku
-            flag = false
-          else
-            count += 1;
-          end
-        end
-      end
-    end
+	def set_variant_sku(row)
+		sku = row["Variant SKU"]
+		variants = Spree::Variant.where("sku like ?","#{sku}%")
+		if variants.empty?
+			@variant[:sku] = sku
+		else
+			variants.each do |variant|
+				product = variant.product
+				product_type = product.luxire_product_type
+				unless product_type.nil? || row["Type"].nil?
+					type = product_type.product_type
+					if type.casecmp(row["Type"]) == 0
+						raise " duplicate product"
+					end
+				end
+			end
+			count = 1
+			flag = true
+			sku = sku + "p"
+			while(flag)
+				temp_sku = sku + count.to_s
+				variant = Spree::Variant.where(sku: temp_sku).take
+				if variant.nil?
+					@variant[:sku] = temp_sku
+					flag = false
+				else
+					count += 1;
+				end
+			end
+		end
+	end
 
-    def populate_image(image)
-      image_sources = image.split(",").map(&:strip)
-      image_sources.each do |image_source|
-        begin
-          @image = Spree::Image.new
-          @image.attachment= URI.parse(image_source)
-          @image.viewable = @variant
-          @image.save!
-        rescue Exception
-          raise "Incorrect URL: #{image_source}"
-        end
-      end
-    end
+	def populate_image(image)
+		image_sources = image.split(",").map(&:strip)
+		image_sources.each do |image_source|
+			begin
+				@image = Spree::Image.new
+				@image.attachment= URI.parse(image_source)
+				@image.viewable = @variant
+				@image.save!
+			rescue Exception
+				raise "Incorrect URL: #{image_source}"
+			end
+		end
+	end
 
-    def populate_image_from_file_system(image)
-        @image = Spree::Image.new
-        @image.attachment= File.open("#{@file_location}/#{image}")
-        @image.viewable = @variant
-        @image.save!
-    end
+	def populate_image_from_file_system(image)
+		@image = Spree::Image.new
+		@image.attachment= File.open("#{@file_location}/#{image}")
+		@image.viewable = @variant
+		@image.save!
+	end
 
-    def get_image_name_from_file_system(image)
-      image_name = @files.select{|f| f[/#{image}\./]}.first
-      if image_name.nil?
-        return "#{image}" if  File.file?("#{@file_location}/#{image}")
-        img_ext = ["jpg", "jpeg", "png"]
-        img_ext.each do |ext|
-	  return "#{image}.#{ext}" if  File.file?("#{@file_location}/#{image}.#{ext}")
-      end
-      end
-      if image_name.nil?
-        raise "Unable to find the image. Please provide an image with name: #{image}"
-      end
-      image_name
-    end
+	def get_image_name_from_file_system(image)
+		image_name = @files.select{|f| f[/#{image}\./]}.first
+		if image_name.nil?
+			return "#{image}" if  File.file?("#{@file_location}/#{image}")
+			img_ext = ["jpg", "jpeg", "png"]
+			img_ext.each do |ext|
+				return "#{image}.#{ext}" if  File.file?("#{@file_location}/#{image}.#{ext}")
+			end
+		end
+		if image_name.nil?
+			raise "Unable to find the image. Please provide an image with name: #{image}"
+		end
+		image_name
+	end
 
-    def check_for_images(row)
-      img_column = "Image Src"
-      img_url = row[img_column]
-      if (img_url.blank? || img_url.casecmp(NOT_AVAILABLE) == 0)
-        for i in 1...7
-          img_url = row["#{img_column}#{i}"]
-          unless (img_url.blank? || img_url.casecmp(NOT_AVAILABLE) == 0)
-            return
-          end
-        end
-      else
-        return
-      end
-      return unless(row["Image"].blank? || row["Image"].casecmp(NOT_AVAILABLE) == 0)
-      raise 'image can not be empty'
-    end
+	def check_for_images(row)
+		img_column = "Image Src"
+		img_url = row[img_column]
+		if (img_url.blank? || img_url.casecmp(NOT_AVAILABLE) == 0)
+			for i in 1...7
+			img_url = row["#{img_column}#{i}"]
+			unless (img_url.blank? || img_url.casecmp(NOT_AVAILABLE) == 0)
+				return
+			end
+		end
+	else
+		return
+	end
+	return unless(row["Image"].blank? || row["Image"].casecmp(NOT_AVAILABLE) == 0)
+	raise 'image can not be empty'
+end
 
 # Ask Redis to get new data.
-    def update_redis
-      # Call the API to fetch data
-      unless @product_ids.empty?
-        uri = URI.parse(NODE_URL)
-        params = {"ids" =>@product_ids}
-        http = Net::HTTP.new(uri.host, uri.port)
-        request = Net::HTTP::Post.new(uri.path, {'Content-Type' => 'application/json'})
-        request.body = params.to_json
+def update_redis
+	# Call the API to fetch data
+	unless @product_ids.empty?
+		uri = URI.parse(NODE_URL)
+		params = {"ids" =>@product_ids}
+		http = Net::HTTP.new(uri.host, uri.port)
+		request = Net::HTTP::Post.new(uri.path, {'Content-Type' => 'application/json'})
+		request.body = params.to_json
 
-        response = http.request(request)
-        if response.code == "200"
-          logger.debug "Redis updated successfully"
-        else
-          logger.error "Error while updating redis"
-        end
-      end
-    end
+		response = http.request(request)
+		if response.code == "200"
+			logger.debug "Redis updated successfully"
+		else
+			logger.error "Error while updating redis"
+		end
+	end
+end
 
 
 #create the prices of uploaded product in all supported currency
-    def populate_product_price_in_multi_currency
-      currency = Currency.new
-      currency.create_product_currency(@product_ids)
-    end
+def populate_product_price_in_multi_currency
+	currency = Currency.new
+	currency.create_product_currency(@product_ids)
+end
 
-    def send_error_list_to_admin
-      p = Axlsx::Package.new
-      sheet_path = File.join Rails.root, "upload_reports", "error_report_#{Time.now.to_i}.xlsx"
-     # sheet_path = "upload_reports/error_report_#{Time.now.to_i}.xlsx"
-      p.workbook do |wb|
-        wb.add_worksheet(:name => "Error report") do |sheet|
-          sheet.add_row(["Index", "Record", "Exception"])
-          count = 1
-          @buggy_record.keys.each do |key|
-            sheet.add_row([count, key, @buggy_record[key]])
-            count += 1
-          end
-        end
-      end
-      p.serialize(sheet_path)
-      # Send an email to admin with product upload status
-      ProductUploadMailer.product_upload_status(@buggy_record, @count,sheet_path).deliver_now
-    end
+def send_error_list_to_admin
+	sheet_path = nil
+	if buggy_record_length
+		p = Axlsx::Package.new
+		sheet_path = File.join Rails.root, "upload_reports", "error_report_#{Time.now.to_i}.xlsx"
+		# sheet_path = "upload_reports/error_report_#{Time.now.to_i}.xlsx"
+		p.workbook do |wb|
+			wb.add_worksheet(:name => "Error report") do |sheet|
+				sheet.add_row(["Index", "Record", "Exception"])
+				count = 1
+				@buggy_record.keys.each do |key|
+					sheet.add_row([count, key, @buggy_record[key]])
+					count += 1
+				end
+			end
+		end
+		p.serialize(sheet_path)
+	end
+	# Send an email to admin with product upload status
+	ProductUploadMailer.product_upload_status(@buggy_record, @count,sheet_path).deliver_now
+end
 
-    def validate_record(row)
-      EXPECTED_HEADER.each do |name|
-        if row[name].nil? || row[name].blank?
-          raise "Column #{name} can not be empty. Please insert a default value."
-        end
-      end
-    end
+def validate_record(row)
+	EXPECTED_HEADER.each do |name|
+		if row[name].nil? || row[name].blank?
+			raise "Column #{name} can not be empty. Please insert a default value."
+		end
+	end
+end
 
 # Validate the headers of the CSV file. If any of the headers is changed or removed
 # Don't allow the admin to upload CSV
-    def validate_csv_format
-      file = params[:file]
-      headers = CSV.open(file.path, 'r') { |csv| csv.first }
-      unless (EXPECTED_HEADER - headers).empty?
-        removed_columns = EXPECTED_HEADER - headers
-        added_columns = headers - EXPECTED_HEADER
-        response = {msg: "You have added or removed columns"}
-        # response = {msg: "You have removed some columns"}
-        response[:added_column] = added_columns unless added_columns.nil?
-        # response[:removed_columns] = removed_columns unless removed_columns.nil?
-        response[:removed_columns] = removed_columns
-        render json: response.to_json, status: "422"
-      end
-    end
+def validate_csv_format
+	file = params[:file]
+	headers = CSV.open(file.path, 'r') { |csv| csv.first }
+	unless (EXPECTED_HEADER - headers).empty?
+		removed_columns = EXPECTED_HEADER - headers
+		added_columns = headers - EXPECTED_HEADER
+		response = {msg: "You have added or removed columns"}
+		# response = {msg: "You have removed some columns"}
+		response[:added_column] = added_columns unless added_columns.nil?
+		# response[:removed_columns] = removed_columns unless removed_columns.nil?
+		response[:removed_columns] = removed_columns
+		render json: response.to_json, status: "422"
+	end
+end
 
-    def buggy_record_length
-      @buggy_record.length > 0
-    end
+def buggy_record_length
+	@buggy_record.length > 0
+end
 
-   def update_collections
+def update_collections
 
-        shirts = Spree::Taxonomy.find_by(name: "Shirts")
+	shirts = Spree::Taxonomy.find_by(name: "Shirts")
 
-        # Dress shirts
+	# Dress shirts
 
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and luxire_products.no_of_color = ?","Shirts", 1)
-        x = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and (lower(luxire_products.pattern) = ? or lower(luxire_products.pattern) = ?)","Shirts", "stripes", "checks")
-        product_ids = []
-        products.each do |y|
-        product_ids << y.id
-        end
-        x.each do |y|
-        product_ids << y.id
-        end
-        product_ids.uniq!
-        t = shirts.taxons.find_by( name: "Dress shirts")
-        t.product_ids = product_ids
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and luxire_products.no_of_color = ?","Shirts", 1)
+	x = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and (lower(luxire_products.pattern) = ? or lower(luxire_products.pattern) = ?)","Shirts", "stripes", "checks")
+	product_ids = []
+	products.each do |y|
+		product_ids << y.id
+	end
+	x.each do |y|
+		product_ids << y.id
+	end
+	product_ids.uniq!
+	t = shirts.taxons.find_by( name: "Dress shirts")
+	t.product_ids = product_ids
 
-        # Oxfords
+	# Oxfords
 
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.product_weave_type) like ?","Shirts", "%oxford%")
-        t = shirts.taxons.find_by( name: "Oxfords")
-        t.product_ids = products.ids
-        ox = products.ids
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.product_weave_type) like ?","Shirts", "%oxford%")
+	t = shirts.taxons.find_by( name: "Oxfords")
+	t.product_ids = products.ids
+	ox = products.ids
 
-        # Polo, knits
+	# Polo, knits
 
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(luxire_products.product_weave_type) like ? or lower(luxire_products.product_weave_type) like ? or lower(luxire_products.product_weave_type) like ?)","Shirts", "%pique%", "%jersey%", "%knit%")
-        t = shirts.taxons.find_by( name: "Polo, knits")
-        t.product_ids = products.ids
-        polo = products.ids
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(luxire_products.product_weave_type) like ? or lower(luxire_products.product_weave_type) like ? or lower(luxire_products.product_weave_type) like ?)","Shirts", "%pique%", "%jersey%", "%knit%")
+	t = shirts.taxons.find_by( name: "Polo, knits")
+	t.product_ids = products.ids
+	polo = products.ids
 
-        # Prints
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(luxire_products.pattern) = ? or lower(luxire_products.pattern) = ? )","Shirts", "print", "printed")
-        t = shirts.taxons.find_by( name: "Prints")
-        t.product_ids = products.ids
-        print = products.ids
-
-
-        # Linen
-
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.composition) like ? ","Shirts", "%linen%")
-        t = shirts.taxons.find_by( name: "Linen")
-        t.product_ids = products.ids
-        linen = products.ids
-
-        # Flannel
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(spree_products.name) like ? ","Shirts", "%flannel%")
-        t = shirts.taxons.find_by( name: "Flannel")
-        t.product_ids = products.ids
-
-        # Casuals
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(spree_products.name) like ? or lower(spree_products.name) like ? or lower(spree_products.name) like ? or lower(spree_products.name) like ? or lower(luxire_products.pattern) like ? )","Shirts", "%madras%", "%plaid%", "%shepherds%", "%denim%", "%checks%")
-        final = [ox, polo, print, linen]
-        final.each do |f|
-        f.each do |p|
-            products << p
-        end
-        end
-        t = shirts.taxons.find_by( name: "Casuals")
-        t.product_ids = products.ids
+	# Prints
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(luxire_products.pattern) = ? or lower(luxire_products.pattern) = ? )","Shirts", "print", "printed")
+	t = shirts.taxons.find_by( name: "Prints")
+	t.product_ids = products.ids
+	print = products.ids
 
 
-        pants = Spree::Taxonomy.find_by(name: "Pants")
+	# Linen
 
-        # Flannel
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.composition) like ? ","Shirts", "%linen%")
+	t = shirts.taxons.find_by( name: "Linen")
+	t.product_ids = products.ids
+	linen = products.ids
 
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(spree_products.name) like ? ","Pants", "%flannel%")
-        t = pants.taxons.find_by( name: "Flannel")
-        t.product_ids = products.ids
+	# Flannel
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(spree_products.name) like ? ","Shirts", "%flannel%")
+	t = shirts.taxons.find_by( name: "Flannel")
+	t.product_ids = products.ids
 
-        # Dress pants
-
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(spree_products.name) not like ? )","Pants", "%denim%")
-        t = pants.taxons.find_by( name: "Dress pants")
-        t.product_ids = products.ids
-
-        # Chinos
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.composition)  like ? ","Pants", "%cotton%")
-        t = pants.taxons.find_by( name: "Chinos")
-        t.product_ids = products.ids
-
-        # Moleskin
-
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.product_weave_type)  like ? ","Pants", "%moleskin%")
-        t = pants.taxons.find_by( name: "Moleskin")
-        t.product_ids = products.ids
+	# Casuals
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(spree_products.name) like ? or lower(spree_products.name) like ? or lower(spree_products.name) like ? or lower(spree_products.name) like ? or lower(luxire_products.pattern) like ? )","Shirts", "%madras%", "%plaid%", "%shepherds%", "%denim%", "%checks%")
+	final = [ox, polo, print, linen]
+	final.each do |f|
+		f.each do |p|
+			products << p
+		end
+	end
+	t = shirts.taxons.find_by( name: "Casuals")
+	t.product_ids = products.ids
 
 
-        # Corduroy
+	pants = Spree::Taxonomy.find_by(name: "Pants")
 
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.product_weave_type)  like ? ","Pants", "%corduroy%")
-        t = pants.taxons.find_by( name: "Corduroy")
-        t.product_ids = products.ids
+	# Flannel
 
-        # Formals
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(luxire_products.product_color) =? or lower(luxire_products.product_color) =? )","Pants", "black", "navy")
-        t = pants.taxons.find_by( name: "Formals")
-        t.product_ids = products.ids
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(spree_products.name) like ? ","Pants", "%flannel%")
+	t = pants.taxons.find_by( name: "Flannel")
+	t.product_ids = products.ids
 
-        # Linen
+	# Dress pants
 
-        products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.composition)  like ? ","Pants", "%linen%")
-        t = pants.taxons.find_by( name: "Linen")
-        t.product_ids = products.ids
-   end
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(spree_products.name) not like ? )","Pants", "%denim%")
+	t = pants.taxons.find_by( name: "Dress pants")
+	t.product_ids = products.ids
+
+	# Chinos
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.composition)  like ? ","Pants", "%cotton%")
+	t = pants.taxons.find_by( name: "Chinos")
+	t.product_ids = products.ids
+
+	# Moleskin
+
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.product_weave_type)  like ? ","Pants", "%moleskin%")
+	t = pants.taxons.find_by( name: "Moleskin")
+	t.product_ids = products.ids
+
+
+	# Corduroy
+
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.product_weave_type)  like ? ","Pants", "%corduroy%")
+	t = pants.taxons.find_by( name: "Corduroy")
+	t.product_ids = products.ids
+
+	# Formals
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and ( lower(luxire_products.product_color) =? or lower(luxire_products.product_color) =? )","Pants", "black", "navy")
+	t = pants.taxons.find_by( name: "Formals")
+	t.product_ids = products.ids
+
+	# Linen
+
+	products = Spree::Product.joins(:luxire_product, :luxire_product_type).where("luxire_product_types.product_type =? and lower(luxire_products.composition)  like ? ","Pants", "%linen%")
+	t = pants.taxons.find_by( name: "Linen")
+	t.product_ids = products.ids
+end
 end
