@@ -3,18 +3,20 @@
 Below are the list of records which failed to upload along with reason.
 <br/>
 <br/>
-<table border = "1" style = "width: 100%">
-  <tr>
-  <th>Index</th>
-  <th>Record</th>
-  <th>Exception</th></tr>
-  <% count = 1 %>
-  <% @buggy_record.keys.each do |key| %>
-  <tr>
-     <td><%= count %></td>
-       <td><%= key %></td>
-         <td><%= @buggy_record[key] %></td>
-         <% count += 1 %>
-  </tr>
-  <% end %>
-</table>
+<% if @buggy_record.length > 0 %>
+  <table border = "1" style = "width: 100%">
+    <tr>
+    <th>Index</th>
+    <th>Record</th>
+    <th>Exception</th></tr>
+    <% count = 1 %>
+    <% @buggy_record.keys.each do |key| %>
+    <tr>
+       <td><%= count %></td>
+         <td><%= key %></td>
+           <td><%= @buggy_record[key] %></td>
+           <% count += 1 %>
+    </tr>
+    <% end %>
+  </table>
+<% end %>
