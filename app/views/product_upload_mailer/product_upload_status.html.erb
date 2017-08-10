@@ -1,6 +1,8 @@
 Hi Admin,
 <br/><br/>
  <%= @uploaded_product - 1 %> products are uploaded successfully.
-<br />Please find the attachment containing all the products which were not uploaded to the system with the reason.
+ <% if @buggy_record.length > 0 %>
+    <br />Please find the attachment containing all the products which were not uploaded to the system with the reason.
+ <% end %>
  <br/> <br/> Regards,
  <br/> Luxire.
