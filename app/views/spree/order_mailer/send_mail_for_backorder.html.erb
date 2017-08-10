@@ -1,6 +1,27 @@
-Hi Admin,
 
-Please reorder <%= @product.name %> fabric as the quantity has crosses the threshold.
+Hi Admin,
+<br/>
+<br/>
+Fabric <%= @product.name %> with SKU  <%= @product.sku %> needs to be reordered. Current remaining stock is <%= @stock.virtual_count_on_hands %> meters.
+
+<br/>
+Last <%= @order.count %> orders in the fabric are as below:
+
+<table style="  border-collapse: collapse; border: 1px solid black; margin: 25px 5px;" >
+  <tr>
+     <th style="border: 1px solid black;padding: 10px; text-align: center;">Order Number</th>
+     <th style="border: 1px solid black;padding: 10px; text-align: center;">Order Date</th>
+  </tr>
+  <% @order.each do |order| %>
+     <tr>
+        <td style="border: 1px solid black;padding: 10px; text-align: center;"> <%= order.completed_at.to_s%></td>
+        <td style="border: 1px solid black;padding: 10px; text-align: center;"><%= order.number %></td>
+     </tr>
+  <% end %>
+
+</table>
+<br />
+<br />
 
 Thanks and Regards,
 Luxire Admin.
