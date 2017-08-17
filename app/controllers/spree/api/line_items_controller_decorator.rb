@@ -29,7 +29,7 @@ private
     variant = Spree::Variant.find(line_item["variant_id"])
     product = variant.product
     length_required_per_product = product.luxire_product.length_required
-    quantity = line_item["quantity"]
+    quantity = line_item["quantity"].to_i
     stock = product.luxire_stock
     unless stock.backorderable
       total_length_required = length_required_per_product * quantity
