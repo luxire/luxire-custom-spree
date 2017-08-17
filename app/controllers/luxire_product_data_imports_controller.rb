@@ -178,7 +178,7 @@ class LuxireProductDataImportsController < Spree::Api::BaseController
 		@luxire_product.req_validation = true
 		@option_arr = []
 
-		=begin
+=begin
       @product[:name] = row["Title"]
       @product[:description] = row["Body (HTML)"]
       @product[:price] = row["Variant Price"]
@@ -433,7 +433,7 @@ class LuxireProductDataImportsController < Spree::Api::BaseController
 		img_url = row[img_column]
 		if (img_url.blank? || img_url.casecmp(NOT_AVAILABLE) == 0)
 			for i in 1...7
-			img_url = row["#{img_column}#{i}"]
+			img_url = row["#{img_column} #{i}"]
 			unless (img_url.blank? || img_url.casecmp(NOT_AVAILABLE) == 0)
 				return
 			end
