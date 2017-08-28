@@ -8,18 +8,18 @@ module Spree
         order.line_items.each do |line_item|
           if line_item.variant.sku.upcase.include?("SWT")
                if product_types["Swatch"].nil?
-                  product_types["Swatch"] = 1
+                  product_types["Swatch"] = line_item.quantity
                else
-                  product_types["Swatch"] = product_types["Swatch"] + 1
+                  product_types["Swatch"] = product_types["Swatch"] + line_item.quantity
                end
           else
               luxire_product_type = line_item.luxire_product_type
               if(luxire_product_type && luxire_product_type.product_type)
                  pt = luxire_product_type.product_type.to_sym
                  if product_types[pt].nil?
-                     product_types[pt] = 1
+                     product_types[pt] = line_item.quantity
                  else
-                     product_types[pt] = product_types[pt] + 1
+                     product_types[pt] = product_types[pt] + line_item.quantity
                  end
               end
           end
