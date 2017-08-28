@@ -88,6 +88,10 @@ helper LuxireStyleMastersHelper
       end
     end
 
+   def get_additional_service_product
+     @product = Spree::Product.where("lower(name) = ?", "additional service").take
+     render 'show'
+   end
 
 private
   def product_params

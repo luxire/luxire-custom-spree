@@ -173,7 +173,7 @@ module Spree
        ]
 
 	@@luxire_line_item_attributes = [
-            :id, :customized_data, :personalize_data, :measurement_data, :fulfillment_status, :line_item_id, :measurement_unit, :send_sample
+            :id, :customized_data, :personalize_data, :measurement_data, :fulfillment_status, :line_item_id, :measurement_unit, :send_sample, :notes
 ]
 
 	@@luxire_order_attributes = [
