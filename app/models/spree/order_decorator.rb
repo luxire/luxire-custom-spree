@@ -73,18 +73,20 @@ end
     if luxire_order.is_inventory_deducted
          line_items.each do |line_item|
             product = line_item.product
-            luxire_product = product.luxire_product
-            stock = product.luxire_stock
-            stock.virtual_count_on_hands -= luxire_product.length_required
-            if(stock.threshold >= stock.virtual_count_on_hands)
-              # send an email
-              Spree::OrderMailer.send_mail_for_backorder(product).deliver_later
-            end
-            begin
-              stock.save!
-            rescue Exception => e
-              logger.error "Exception while updating stock #{e.message}"
-              return
+            unless Spree::Product.non_depletable_product.include? product.name.downcase
+              luxire_product = product.luxire_product
+              stock = product.luxire_stock
+              stock.virtual_count_on_hands -= luxire_product.length_required
+              if(stock.threshold >= stock.virtual_count_on_hands)
+                # send an email
+                Spree::OrderMailer.send_mail_for_backorder(product).deliver_later
+              end
+              begin
+                stock.save!
+              rescue Exception => e
+                logger.error "Exception while updating stock #{e.message}"
+                return
+              end
             end
           end
           luxire_order.is_inventory_deducted = true;

@@ -9,4 +9,9 @@ Spree::Product.class_eval do
       validates :available_on, presence: true
 
       accepts_nested_attributes_for :luxire_product
+
+# non_depletable_product method returns the name of all Product in lowercase where we should not track inventory .
+      def self.non_depletable_product
+        ["additional service"]
+      end
 end
